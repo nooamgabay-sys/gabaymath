@@ -349,9 +349,32 @@ function nextStep(s) {
     });
 }
 
+document.getElementById('fgrade').addEventListener('change', function(e) {
+  const grade = e.target.value;
+  const topicChips = document.getElementById('topicChips');
+  topicChips.innerHTML = '';
+  
+  let topics = ['אלגברה', 'גיאומטריה', 'פונקציות', 'טריגונומטריה', 'סטטיסטיקה', 'הכנה לבגרות'];
+  
+  if (grade.includes("3 יח'")) {
+    topics = ['קיצון פולינומים', 'הסתברות', 'טריגונומטריה', 'אנליטית'];
+  } else if (grade.includes("4 יח'")) {
+    topics = ['חקירת פונקציות מעריכיות', 'סדרות', 'טריגונומטריה במרחב', 'הסתברות קלאסית'];
+  } else if (grade.includes("5 יח'")) {
+    topics = ['וקטורים', 'מספרים מרוכבים', 'חקירת פונקציות לוגריתמיות', 'גיאומטריה אוקלידית'];
+  }
+  
+  topics.forEach(t => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.onclick = function() { selectChip(this); };
+    chip.innerText = t;
+    topicChips.appendChild(chip);
+  });
+});
+
 function selectChip(el) {
-    document.querySelectorAll('.chip').forEach(e => e.classList.remove('selected'));
-    el.classList.add('selected');
+    el.classList.toggle('selected');
 }
 
 function selectTime(el) {
@@ -367,15 +390,15 @@ function submitForm() {
     const femail = document.getElementById('femail').value || '';
     const dateInput = document.getElementById('fdate').value;
     const timeSlot = document.querySelector('.time-slot.selected');
-    const chip = document.querySelector('.chip.selected');
-    const topic = chip ? chip.innerText : '';
+    const selectedChips = Array.from(document.querySelectorAll('.chip.selected'));
+    const topic = selectedChips.map(c => c.innerText).join(', ');
     const errorDiv = document.getElementById('formError');
     
     // TODO: Replace with Google Calendar API call to check free/busy
 
-    if (!fname || !femail || !dateInput || !timeSlot || !topic) {
+    if (!fname || !femail || !dateInput || !timeSlot || topic === '') {
         if(errorDiv) {
-            errorDiv.innerText = 'נא למלא שם, אימייל, נושא, תאריך ושעה.';
+            errorDiv.innerText = 'נא למלא שם, אימייל, לבחור נושא, תאריך ושעה.';
             errorDiv.style.display = 'block';
         }
         return;
@@ -398,7 +421,6 @@ function submitForm() {
 
     db.collection("bookings").add(newBooking).then(() => {
       console.log("Booking saved to Firebase!");
-      renderAdminBookings();
       sendNotification('new_booking', newBooking);
     });
 
@@ -451,10 +473,12 @@ function logoutAdmin() {
   document.querySelectorAll('.math-bg').forEach(b => b.style.display = 'block');
 }
 
+let unsubBookings = null;
 function renderAdminBookings() {
+  if (unsubBookings) unsubBookings();
   const list = document.getElementById('adminBookingsList');
   list.innerHTML = '<p style="color:rgba(255,255,255,0.5)">טוען שיעורים...</p>';
-  db.collection("bookings").orderBy("date").get().then(snapshot => {
+  unsubBookings = db.collection("bookings").orderBy("date").onSnapshot(snapshot => {
     list.innerHTML = '';
     snapshot.forEach(doc => {
       const b = { id: doc.id, ...doc.data() };
@@ -489,14 +513,12 @@ function renderAvailGrid() {
 
 function cancelBookingDB(id, btn) {
   db.collection("bookings").doc(id).update({ status: "בוטל" }).then(() => {
-    renderAdminBookings();
     showToast('השיעור בוטל');
   });
 }
 
 function approveBookingDB(id, btn) {
   db.collection("bookings").doc(id).update({ status: "מאושר" }).then(() => {
-    renderAdminBookings();
     showToast('השיעור אושר!');
   });
 }
