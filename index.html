@@ -399,10 +399,8 @@ function submitForm() {
     db.collection("bookings").add(newBooking).then(() => {
       console.log("Booking saved to Firebase!");
       renderAdminBookings();
+      sendNotification('new_booking', newBooking);
     });
-
-    // Send Notification
-    sendNotification('new_booking', newBooking);
 
     const selectedDate = dateInput;
     const studentName = fname;
@@ -514,7 +512,8 @@ function sendNotification(type, bookingData) {
     phone: bookingData.phone,
     email: bookingData.email,
     type: type
-  }).then(() => {
+  }, "JI7HdPnpg063aq0Pl").then((response) => {
+    console.log('EmailJS Success:', response.status, response.text);
     showToast('אימייל נשלח בהצלחה!');
   }).catch(err => {
     console.error('EmailJS Error:', err);
