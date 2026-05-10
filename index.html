@@ -117,6 +117,8 @@ select option { background: var(--bg); color: #fff; }
 #auth-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; }
 #auth-modal .glass { max-width: 400px; width: 90%; text-align: center; transition: none !important; backdrop-filter: none !important; background: #0f1f3d !important; }
 #auth-modal input { transition: none !important; box-shadow: none !important; backdrop-filter: none !important; }
+
+.bar-ilan-badge { background: rgba(201, 168, 76, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 6px 22px; border-radius: 50px; font-weight: 600; margin-top: 1.5rem; display: inline-block; box-shadow: 0 0 15px var(--glow); animation: slideDown 1s 0.2s ease forwards; opacity: 0; font-size: 1.2rem; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -141,6 +143,7 @@ select option { background: var(--bg); color: #fff; }
         <span class="sym" style="left: 90%; animation-duration: 30s; animation-delay: -8s; font-size: 4.5rem;">∞</span>
     </div>
     <h1>שיעורי מתמטיקה פרטיים</h1>
+    <div class="bar-ilan-badge">בוגר תוכנית בר-אילן</div>
     <p style="font-size: 1.8rem; margin-top: 2rem; text-align: center; color: rgba(255,255,255,0.8); opacity: 0; animation: slideDown 1s 0.3s ease forwards;">הדרך להצלחה בבגרות מתחילה כאן.</p>
     
     <div class="stats">
