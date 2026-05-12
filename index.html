@@ -394,13 +394,23 @@ function submitForm() {
     const femail = document.getElementById('femail').value || '';
     const dateInput = document.getElementById('fdate').value;
     const timeSlot = document.querySelector('.time-slot.selected');
+    const gradeSelect = document.getElementById('fgrade');
+    const gradeText = gradeSelect.selectedOptions[0] ? gradeSelect.selectedOptions[0].text : '';
+    const gradeValue = gradeSelect.value;
     const selectedChips = Array.from(document.querySelectorAll('.chip.selected'));
-    const topic = selectedChips.map(c => c.innerText).join(', ');
+    const subject = selectedChips.map(c => c.innerText).join(', ');
     const errorDiv = document.getElementById('formError');
     
-    if (!fname || !femail || !dateInput || !timeSlot || topic === '') {
+    if (!fname || !femail || !dateInput || !timeSlot || !gradeValue) {
         if(errorDiv) {
-            errorDiv.innerText = 'נא למלא שם, אימייל, לבחור נושא, תאריך ושעה.';
+            errorDiv.innerText = 'נא למלא שם, אימייל, לבחור רמה, תאריך ושעה.';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+    if (selectedChips.length === 0) {
+        if(errorDiv) {
+            errorDiv.innerText = 'נא לבחור לפחות נושא אחד.';
             errorDiv.style.display = 'block';
         }
         return;
@@ -421,8 +431,9 @@ function submitForm() {
         name: fname,
         phone: fphone,
         email: femail,
-        topic: topic,
-        grade: document.getElementById('fgrade').value,
+        topic: subject,
+        subject: subject,
+        grade: gradeText,
         date: dateInput,
         time: selectedTime,
         status: "ממתין"
@@ -496,7 +507,7 @@ function renderAdminBookings() {
       let statusBadge = b.status === 'מאושר' ? `<span class="badge ok">מאושר</span>` : b.status === 'בוטל' ? `<span class="badge cancel">בוטל</span>` : `<span class="badge wait">ממתין לאישור</span>`;
       let actionBtns = b.status !== 'בוטל' ? `<button class="btn btn-sm btn-danger" onclick="cancelBookingDB('${doc.id}', this)">בטל שיעור</button>` : `<button class="btn btn-sm btn-danger" onclick='deleteFromCalendar(${JSON.stringify(b).replace(/'/g, "&#39;")})'>מחק מגוגל קלנדר</button>`;
       if (b.status === 'ממתין') actionBtns = `<button class="btn btn-sm btn-outline" onclick="approveBookingDB('${doc.id}', this)">אשר שיעור</button>` + actionBtns;
-      div.innerHTML = `<div class="schedule-info"><strong>${b.name} - ${b.phone}</strong><span>${b.topic} | ${b.date}, ${b.time}</span></div><div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
+      div.innerHTML = `<div class="schedule-info"><strong>${b.name} - ${b.phone}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.date}, ${b.time}</span></div><div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
       list.appendChild(div);
     });
     if (snapshot.empty) list.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center">אין שיעורים עדיין</p>';
