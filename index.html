@@ -292,7 +292,7 @@ select option { background: var(--bg); color: #fff; }
     <div class="glass">
         <h3>כניסת מנהל</h3>
         <div style="position: relative; margin: 1.5rem 0;">
-            <input type="password" id="adminPass" placeholder="סיסמה" style="width:100%; padding-left: 3rem;">
+            <input type="password" id="adminPass" placeholder="סיסמה" style="width:100%; padding-left: 3rem;" onkeydown="if(event.key==='Enter') loginAdmin()">
             <span onclick="togglePass()" style="position:absolute; left:1rem; top:50%; transform:translateY(-50%); cursor:pointer; font-size:1.3rem;">👁</span>
         </div>
         <div style="display:flex; gap: 1rem; justify-content: center;">
@@ -406,6 +406,8 @@ function checkAvailability(date) {
         slot.style.opacity = '1';
         slot.style.cursor = 'pointer';
         slot.style.background = 'rgba(0,0,0,0.3)';
+        slot.style.border = '1px solid var(--border)';
+        slot.style.color = '#fff';
     });
 
     // Check persistent admin availability grid
@@ -755,7 +757,7 @@ let adminKeySequence = '';
 document.addEventListener('keydown', (e) => {
   if (!e.key) return;
   adminKeySequence += e.key.toLowerCase();
-  if (adminKeySequence.includes('gab')) {
+  if (adminKeySequence.includes('gab') || adminKeySequence.includes('עשנ')) {
     adminKeySequence = '';
     showAuth();
   }
