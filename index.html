@@ -321,6 +321,9 @@ const db = firebase.firestore();
 const CLIENT_ID = '214964095575-gyhepg783bst139k1kcrolrp7qjpam9f.apps.googleusercontent.com';
 const CLIENT_SECRET = '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';
 
+if (history.scrollRestoration) history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+
 let tokenClient;
 window.onload = function() {
     if (window.google) {
