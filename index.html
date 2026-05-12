@@ -59,8 +59,9 @@ input:focus, select:focus { outline: none; border-color: var(--gold); box-shadow
 select option { background: var(--bg); color: #fff; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 1rem; }
-.chip { padding: 0.8rem 1.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 30px; cursor: pointer; transition: 0.3s; font-size: 1.1rem; }
-.chip:hover, .chip.selected { background: var(--gold); color: #000; border-color: var(--gold); box-shadow: 0 0 15px var(--glow); font-weight: 600; }
+.chip { padding: 0.8rem 1.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 30px; cursor: pointer; transition: background-color 0s, color 0s, border-color 0s, box-shadow 0s; font-size: 1.1rem; }
+.chip:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+.chip.selected { background: var(--gold); color: #000; border-color: var(--gold); box-shadow: 0 0 15px var(--glow); font-weight: 600; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; }
 .time-slot { padding: 1.2rem; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
@@ -130,7 +131,6 @@ select option { background: var(--bg); color: #fff; }
     <div class="links">
         <a href="#hero" onclick="logoutAdmin()">ראשי</a>
         <a href="#book" onclick="logoutAdmin()">קביעת שיעור</a>
-        <a onclick="showAuth()">כניסת מנהל</a>
     </div>
 </nav>
 
@@ -193,24 +193,28 @@ select option { background: var(--bg); color: #fff; }
 
         <div id="step2" class="step">
             <div class="input-group">
-                <label>בחר נושא לימוד</label>
-                <div class="chips" id="topicChips">
-                    <div class="chip" onclick="selectChip(this)">אלגברה</div>
-                    <div class="chip" onclick="selectChip(this)">גיאומטריה</div>
-                    <div class="chip" onclick="selectChip(this)">פונקציות</div>
-                    <div class="chip" onclick="selectChip(this)">טריגונומטריה</div>
-                    <div class="chip" onclick="selectChip(this)">סטטיסטיקה</div>
-                    <div class="chip" onclick="selectChip(this)">הכנה לבגרות</div>
-                </div>
+                <label>כיתה / רמת לימוד</label>
+                <select id="fgrade" onchange="updateTopics(this.value)">
+                    <option value="">בחר רמה...</option>
+                    <option value="כיתה ז׳">כיתה ז׳</option>
+                    <option value="כיתה ח׳">כיתה ח׳</option>
+                    <option value="כיתה ט׳">כיתה ט׳</option>
+                    <option value="כיתה י׳ - 3 יח&quot;ל">כיתה י׳ - 3 יח&quot;ל</option>
+                    <option value="כיתה י׳ - 4 יח&quot;ל">כיתה י׳ - 4 יח&quot;ל</option>
+                    <option value="כיתה י׳ - 5 יח&quot;ל">כיתה י׳ - 5 יח&quot;ל</option>
+                    <option value="כיתה י&quot;א - 3 יח&quot;ל">כיתה י&quot;א - 3 יח&quot;ל</option>
+                    <option value="כיתה י&quot;א - 4 יח&quot;ל">כיתה י&quot;א - 4 יח&quot;ל</option>
+                    <option value="כיתה י&quot;א - 5 יח&quot;ל">כיתה י&quot;א - 5 יח&quot;ל</option>
+                    <option value="כיתה י&quot;ב - 3 יח&quot;ל">כיתה י&quot;ב - 3 יח&quot;ל</option>
+                    <option value="כיתה י&quot;ב - 4 יח&quot;ל">כיתה י&quot;ב - 4 יח&quot;ל</option>
+                    <option value="כיתה י&quot;ב - 5 יח&quot;ל">כיתה י&quot;ב - 5 יח&quot;ל</option>
+                </select>
             </div>
             <div class="input-group">
-                <label>כיתה / רמת לימוד</label>
-                <select id="fgrade">
-                    <option>בחר רמה...</option>
-                    <option>ז'</option><option>ח'</option><option>ט'</option><option>י'</option>
-                    <option>י"א (3 יח')</option><option>י"א (4 יח')</option><option>י"א (5 יח')</option>
-                    <option>י"ב (3 יח')</option><option>י"ב (4 יח')</option><option>י"ב (5 יח')</option>
-                </select>
+                <label>בחר נושא לימוד</label>
+                <div class="chips" id="topicChips">
+                    <p style="color:rgba(255,255,255,0.4); font-size:0.95rem">אנא בחר רמה כדי לראות נושאים...</p>
+                </div>
             </div>
             <div class="actions">
                 <button class="btn btn-sm btn-outline" onclick="nextStep(1)">חזור</button>
@@ -349,33 +353,29 @@ function nextStep(s) {
     });
 }
 
-document.getElementById('fgrade').addEventListener('change', function(e) {
-  const grade = e.target.value;
-  const topicChips = document.getElementById('topicChips');
-  topicChips.innerHTML = '';
-  
-  let topics = ['אלגברה', 'גיאומטריה', 'פונקציה קווית וריבועית', 'אחוזים'];
-  
-  if (grade.includes("3 יח'")) {
-    topics = ['הסתברות', 'גיאומטריה אנליטית', 'בעיות מילוליות', 'טריגונומטריה', 'חשבון דיפרנציאלי ואינטגרלי'];
-  } else if (grade.includes("י\"א (4 יח')")) {
-    topics = ['בעיות תנועה והספק', 'גיאומטריה אוקלידית', 'טריגונומטריה במישור', 'הסתברות', 'חקירת פונקציות (פולינום, שורש, רציונלית)'];
-  } else if (grade.includes("י\"ב (4 יח')")) {
-    topics = ['סדרות', 'טריגונומטריה במרחב', 'פונקציות מעריכיות ולוגריתמיות', 'בעיות קיצון'];
-  } else if (grade.includes("י\"א (5 יח')")) {
-    topics = ['בעיות מילוליות קשות', 'גיאומטריה אוקלידית (מעגל)', 'טריגונומטריה (זהויות)', 'הסתברות', 'חקירת פונקציות מתקדמת'];
-  } else if (grade.includes("י\"ב (5 יח')")) {
-    topics = ['וקטורים', 'מספרים מרוכבים', 'גיאומטריה אנליטית (מקום גיאומטרי)', 'פונקציות מעריכיות ולוגריתמיות'];
+function updateTopics(grade) {
+  const topicsMap = {
+    'כיתה ז׳': ['חשבון ושברים', 'אחוזים', 'אלגברה בסיסית', 'גיאומטריה בסיסית', 'סטטיסטיקה בסיסית'],
+    'כיתה ח׳': ['אלגברה', 'משוואות', 'פירוק לגורמים', 'גיאומטריה', 'חזקות ושורשים'],
+    'כיתה ט׳': ['אלגברה', 'משוואות ממעלה שנייה', 'גיאומטריה', 'פונקציות בסיסיות', 'סטטיסטיקה'],
+    'כיתה י׳ - 3 יח"ל': ['סטטיסטיקה והסתברות', 'מודל ליניארי', 'גיאומטריה במישור', 'בעיות מילוליות'],
+    'כיתה י׳ - 4 יח"ל': ['פונקציות', 'אלגברה', 'גיאומטריה אנליטית', 'טריגונומטריה בסיסית'],
+    'כיתה י׳ - 5 יח"ל': ['פונקציות', 'טריגונומטריה', 'גיאומטריה אנליטית', 'וקטורים', 'אלגברה מתקדמת'],
+    'כיתה י"א - 3 יח"ל': ['סטטיסטיקה והסתברות', 'פונקציות ליניאריות וריבועיות', 'בעיות מילוליות', 'הכנה לבגרות'],
+    'כיתה י"א - 4 יח"ל': ['פונקציות', 'טריגונומטריה', 'גיאומטריה אנליטית', 'סטטיסטיקה', 'הכנה לבגרות'],
+    'כיתה י"א - 5 יח"ל': ['פונקציות מתקדמות', 'טריגונומטריה', 'וקטורים', 'גיאומטריה אנליטית', 'קומבינטוריקה', 'הכנה לבגרות'],
+    'כיתה י"ב - 3 יח"ל': ['חזרה כללית', 'סטטיסטיקה והסתברות', 'פונקציות', 'הכנה לבגרות 3 יח"ל'],
+    'כיתה י"ב - 4 יח"ל': ['חשבון דיפרנציאלי', 'פונקציות מעריכיות ולוגריתמיות', 'וקטורים', 'הכנה לבגרות 4 יח"ל'],
+    'כיתה י"ב - 5 יח"ל': ['חשבון דיפרנציאלי', 'חשבון אינטגרלי', 'פונקציות מעריכיות ולוגריתמיות', 'וקטורים', 'קומפלקסים', 'הכנה לבגרות 5 יח"ל'],
+  };
+  const chips = document.getElementById('topicChips');
+  if (!grade) {
+    chips.innerHTML = '<p style="color:rgba(255,255,255,0.4); font-size:0.95rem">אנא בחר רמה כדי לראות נושאים...</p>';
+    return;
   }
-  
-  topics.forEach(t => {
-    const chip = document.createElement('div');
-    chip.className = 'chip';
-    chip.onclick = function() { selectChip(this); };
-    chip.innerText = t;
-    topicChips.appendChild(chip);
-  });
-});
+  const selected = topicsMap[grade] || [];
+  chips.innerHTML = selected.map(t => `<div class="chip" onclick="selectChip(this)">${t}</div>`).join('');
+}
 
 function selectChip(el) {
     el.classList.toggle('selected');
@@ -398,11 +398,16 @@ function submitForm() {
     const topic = selectedChips.map(c => c.innerText).join(', ');
     const errorDiv = document.getElementById('formError');
     
-    // TODO: Replace with Google Calendar API call to check free/busy
-
     if (!fname || !femail || !dateInput || !timeSlot || topic === '') {
         if(errorDiv) {
             errorDiv.innerText = 'נא למלא שם, אימייל, לבחור נושא, תאריך ושעה.';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+    if (!isSlotAvailable(dateInput, timeSlot.innerText)) {
+        if(errorDiv) {
+            errorDiv.innerText = 'שעה זו אינה פנויה, אנא בחר שעה אחרת.';
             errorDiv.style.display = 'block';
         }
         return;
@@ -515,9 +520,29 @@ function renderAvailGrid() {
   });
 }
 
-function cancelBookingDB(id, btn) {
-  db.collection("bookings").doc(id).update({ status: "בוטל" }).then(() => {
-    showToast('השיעור בוטל');
+function isSlotAvailable(date, time) {
+  const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  const dayIndex = new Date(date + 'T12:00:00').getDay();
+  const dayName = days[dayIndex];
+  const cols = document.querySelectorAll('.avail-col');
+  for (let col of cols) {
+    const header = col.querySelector('h3').innerText;
+    if (header.includes(dayName)) {
+      const slots = col.querySelectorAll('.avail-slot');
+      for (let slot of slots) {
+        if (slot.innerText.trim() === time && !slot.classList.contains('free')) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+function cancelBookingDB(id) {
+  if (!confirm('האם אתה בטוח שברצונך למחוק את השיעור?')) return;
+  db.collection("bookings").doc(id).delete().then(() => {
+    showToast('השיעור נמחק!');
   });
 }
 
@@ -578,6 +603,15 @@ function showToast(msg) {
     }, 4500);
 }
 
+let adminKeySequence = '';
+document.addEventListener('keydown', (e) => {
+  adminKeySequence += e.key.toLowerCase();
+  if (adminKeySequence.includes('gab')) {
+    adminKeySequence = '';
+    showAuth();
+  }
+  if (adminKeySequence.length > 10) adminKeySequence = '';
+});
 </script>
 </body>
 </html>
