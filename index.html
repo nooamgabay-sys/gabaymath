@@ -69,7 +69,8 @@ select option { background: var(--bg); color: #fff; }
 
 .progress { display: flex; justify-content: space-between; margin-bottom: 3rem; position: relative; }
 .progress::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 3px; background: var(--border); z-index: 0; }
-.dot { width: 45px; height: 45px; background: var(--bg); border: 3px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; transition: 0.4s; z-index: 1; }
+.dot { width: 45px; height: 45px; background: var(--bg); border: 3px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; transition: 0.4s; z-index: 1; cursor: pointer; }
+.dot:hover { border-color: var(--gold); transform: scale(1.1); }
 .dot.active { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 20px var(--glow); text-shadow: 0 0 10px var(--glow); }
 
 .actions { display: flex; justify-content: space-between; margin-top: 3rem; }
@@ -160,9 +161,9 @@ select option { background: var(--bg); color: #fff; }
     <h2>הזמנת שיעור חדש</h2>
     <div class="glass form-container">
         <div class="progress">
-            <div class="dot active">1</div>
-            <div class="dot">2</div>
-            <div class="dot">3</div>
+            <div class="dot active" onclick="goToStep(1)">1</div>
+            <div class="dot" onclick="goToStep(2)">2</div>
+            <div class="dot" onclick="goToStep(3)">3</div>
         </div>
 
         <div id="step1" class="step active">
@@ -348,12 +349,20 @@ window.addEventListener('scroll', () => {
     }
 });
 
+let maxReachedStep = 1;
 function nextStep(s) {
+    if (s > maxReachedStep) maxReachedStep = s;
     document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
     document.getElementById('step' + s).classList.add('active');
     document.querySelectorAll('.dot').forEach((e, i) => {
         if (i < s) e.classList.add('active'); else e.classList.remove('active');
     });
+}
+
+function goToStep(s) {
+    if (s <= maxReachedStep) {
+        nextStep(s);
+    }
 }
 
 function updateTopics(grade) {
@@ -741,6 +750,7 @@ function resetForm() {
   document.getElementById('fdate').value = '';
   document.querySelectorAll('.chip').forEach(e => e.classList.remove('selected'));
   document.querySelectorAll('.time-slot').forEach(e => e.classList.remove('selected'));
+  maxReachedStep = 1;
   nextStep(1);
 }
 
