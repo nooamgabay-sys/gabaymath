@@ -179,10 +179,10 @@ select option { background: var(--bg); color: #fff; }
                 <input type="email" id="femail" placeholder="example@email.com">
             </div>
             <div class="input-group">
-                <label>סוג פנייה</label>
-                <select id="ftype">
-                    <option>תלמיד/ה</option>
-                    <option>הורה</option>
+                <label>צורת שיעור</label>
+                <select id="flessontype">
+                    <option>זום</option>
+                    <option>פרונטלי</option>
                 </select>
             </div>
             <div class="actions">
@@ -509,6 +509,7 @@ function confirmBooking() {
         topic: subject,
         subject: subject,
         grade: gradeText,
+        lessonFormat: document.getElementById('flessontype').value,
         date: dateInput,
         time: selectedTime,
         status: "ממתין"
@@ -601,7 +602,7 @@ function renderAdminBookings() {
       let statusBadge = b.status === 'מאושר' ? `<span class="badge ok">מאושר</span>` : b.status === 'בוטל' ? `<span class="badge cancel">בוטל</span>` : `<span class="badge wait">ממתין לאישור</span>`;
       let actionBtns = b.status !== 'בוטל' ? `<button class="btn btn-sm btn-danger" onclick="cancelBookingDB('${doc.id}', this)">בטל שיעור</button>` : `<button class="btn btn-sm btn-danger" onclick='deleteFromCalendar(${JSON.stringify(b).replace(/'/g, "&#39;")})'>מחק מגוגל קלנדר</button>`;
       if (b.status === 'ממתין') actionBtns = `<button class="btn btn-sm btn-outline" onclick="approveBookingDB('${doc.id}', this)">אשר שיעור</button>` + actionBtns;
-      div.innerHTML = `<div class="schedule-info"><strong>${b.name || ''} - ${b.phone || ''}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.date || ''}, ${b.time || ''}</span></div><div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
+      div.innerHTML = `<div class="schedule-info"><strong>${b.name || ''} - ${b.phone || ''}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.lessonFormat || ''} | ${b.date || ''}, ${b.time || ''}</span></div><div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
       list.appendChild(div);
     });
     if (snapshot.empty) list.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center">אין שיעורים עדיין</p>';
@@ -701,6 +702,7 @@ function sendNotification(type, bookingData) {
     grade: bookingData.grade,
     phone: bookingData.phone,
     email: bookingData.email,
+    lesson_format: bookingData.lessonFormat,
     type: type
   }, "JI7HdPnpg063aq0Pl").then((response) => {
     console.log('EmailJS Success:', response.status, response.text);
