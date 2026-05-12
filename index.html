@@ -60,8 +60,8 @@ select option { background: var(--bg); color: #fff; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 1rem; }
 .chip { padding: 0.8rem 1.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 30px; cursor: pointer; transition: background-color 0s, color 0s, border-color 0s, box-shadow 0s; font-size: 1.1rem; }
-.chip:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
-.chip.selected { background: var(--gold); color: #000; border-color: var(--gold); box-shadow: 0 0 15px var(--glow); font-weight: 600; }
+.chip:hover, .chip.selected { background: var(--gold); color: #000; border-color: var(--gold); box-shadow: 0 0 15px var(--glow); font-weight: 600; }
+.chip.selected { background: var(--gold) !important; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; }
 .time-slot { padding: 1.2rem; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
@@ -408,6 +408,26 @@ function checkAvailability(date) {
         slot.style.background = 'rgba(0,0,0,0.3)';
     });
 
+    // Check persistent admin availability grid
+    const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+    const dayName = days[new Date(date + 'T12:00:00').getDay()];
+    
+    db.collection("availability").where("day", "==", dayName).where("isFree", "==", false).get().then(snap => {
+        snap.forEach(doc => {
+            const data = doc.data();
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                if (slot.innerText.trim() === data.time) {
+                    slot.classList.add('occupied');
+                    slot.style.opacity = '0.3';
+                    slot.style.cursor = 'not-allowed';
+                    slot.style.background = 'rgba(100, 100, 100, 0.2)';
+                    slot.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+                    slot.style.color = 'rgba(255, 255, 255, 0.3)';
+                }
+            });
+        });
+    });
+
     db.collection("bookings").where("date", "==", date).get().then(snapshot => {
         snapshot.forEach(doc => {
             const b = doc.data();
@@ -432,7 +452,10 @@ function approveAllBookings() {
     db.collection("bookings").get().then(snapshot => {
         const batch = db.batch();
         snapshot.forEach(doc => batch.update(doc.ref, { status: 'מאושר' }));
-        batch.commit().then(() => showToast('כל השיעורים אושרו בהצלחה'));
+        batch.commit().then(() => {
+            showToast('כל השיעורים אושרו בהצלחה');
+            // UI will update automatically via onSnapshot listener
+        });
     });
 }
 
@@ -598,6 +621,23 @@ function renderAvailGrid() {
     col.querySelector('h3').innerText = days[i] + '\n' + dateStr;
     col.querySelector('h3').style.whiteSpace = 'pre';
   });
+
+  // Load persistent availability
+  db.collection("availability").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      cols.forEach(col => {
+        if (col.querySelector('h3').innerText.includes(data.day)) {
+          col.querySelectorAll('.avail-slot').forEach(slot => {
+            if (slot.innerText === data.time) {
+              if (data.isFree) slot.classList.add('free');
+              else slot.classList.remove('free');
+            }
+          });
+        }
+      });
+    });
+  });
 }
 
 function isSlotAvailable(date, time) {
@@ -660,6 +700,17 @@ function deleteFromCalendar(booking) {
 
 function toggleAvail(el) {
   el.classList.toggle('free');
+  const dayName = el.parentElement.querySelector('h3').innerText.split('\n')[0];
+  const time = el.innerText;
+  const isFree = el.classList.contains('free');
+  
+  db.collection("availability").doc(`${dayName}_${time}`).set({
+    day: dayName,
+    time: time,
+    isFree: isFree
+  }).then(() => {
+    showToast(`זמינות יום ${dayName} בשעה ${time} עודכנה`);
+  });
 }
 
 function resetForm() {
