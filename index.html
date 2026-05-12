@@ -667,8 +667,25 @@ function cancelBookingDB(id) {
 }
 
 function approveBookingDB(id, btn) {
-  db.collection("bookings").doc(id).update({ status: "מאושר" }).then(() => {
-    showToast('השיעור אושר!');
+  db.collection("bookings").doc(id).get().then(doc => {
+    if (!doc.exists) return;
+    const b = doc.data();
+    db.collection("bookings").doc(id).update({ status: "מאושר" }).then(() => {
+      showToast('השיעור אושר!');
+      
+      // Auto-Sync Approval to Availability Grid
+      const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+      const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
+      
+      db.collection("availability").doc(`${dayName}_${b.time}`).set({
+        day: dayName,
+        time: b.time,
+        isFree: false
+      }).then(() => {
+        // Real-time visual update of the grid
+        renderAvailGrid();
+      });
+    });
   });
 }
 
