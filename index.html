@@ -241,7 +241,7 @@ select option { background: var(--bg); color: #fff; }
             </div>
             <div class="actions">
                 <button class="btn btn-sm btn-outline" onclick="nextStep(2)">חזור</button>
-                <button class="btn btn-sm" onclick="submitForm()">סיים וקבע שיעור</button>
+                <button class="btn btn-sm" id="submitBtn" onclick="confirmBooking()">סיים וקבע שיעור</button>
             </div>
             <div id="formError" style="color: #f87171; text-align: center; margin-top: 1rem; display: none; font-weight: bold;"></div>
         </div>
@@ -388,7 +388,7 @@ function selectTime(el) {
 
 let calData = {};
 
-function submitForm() {
+function confirmBooking() {
     const fname = document.getElementById('fname').value || '';
     const fphone = document.getElementById('fphone').value || '';
     const femail = document.getElementById('femail').value || '';
@@ -439,24 +439,43 @@ function submitForm() {
         status: "ממתין"
     };
 
+    // Prevent Duplicate Bookings: Disable and show 'Processing...'
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Processing...';
+        submitBtn.style.opacity = '0.6';
+        submitBtn.style.cursor = 'not-allowed';
+    }
+
     db.collection("bookings").add(newBooking).then(() => {
       console.log("Booking saved to Firebase!");
       sendNotification('new_booking', newBooking);
+
+      // Fix Google Calendar Redirect
+      const selectedDate = dateInput;
+      const studentName = fname;
+      const selectedTopic = subject;
+
+      const startDate = selectedDate.replace(/-/g, '') + 'T' + selectedTime.replace(':', '') + '00';
+      const endHour = (parseInt(selectedTime.split(':')[0]) + 1).toString().padStart(2, '0');
+      const endDate = selectedDate.replace(/-/g, '') + 'T' + endHour + selectedTime.split(':')[1] + '00';
+      const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('שיעור מתמטיקה עם גבאי')}&dates=${startDate}/${endDate}&details=${encodeURIComponent('נושא: ' + selectedTopic + '\nשם: ' + studentName)}&location=Online`;
+      
+      window.open(gcalUrl, '_blank');
+
+      document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
+      document.getElementById('success').classList.add('active');
+    }).catch(err => {
+      console.error('Firebase Error:', err);
+      showToast('שגיאה בשמירת השיעור, נסה שוב.');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'סיים וקבע שיעור';
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+      }
     });
-
-    const selectedDate = dateInput;
-    const studentName = fname;
-    const selectedTopic = topic;
-
-    const startDate = selectedDate.replace(/-/g, '') + 'T' + selectedTime.replace(':', '') + '00';
-    const endHour = (parseInt(selectedTime.split(':')[0]) + 1).toString().padStart(2, '0');
-    const endDate = selectedDate.replace(/-/g, '') + 'T' + endHour + selectedTime.split(':')[1] + '00';
-    const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('שיעור מתמטיקה עם גבאי')}&dates=${startDate}/${endDate}&details=${encodeURIComponent('נושא: ' + selectedTopic + '\nשם: ' + studentName)}&location=Online`;
-    
-    window.open(gcalUrl, '_blank');
-
-    document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
-    document.getElementById('success').classList.add('active');
 }
 
 function showAuth() {
@@ -507,7 +526,7 @@ function renderAdminBookings() {
       let statusBadge = b.status === 'מאושר' ? `<span class="badge ok">מאושר</span>` : b.status === 'בוטל' ? `<span class="badge cancel">בוטל</span>` : `<span class="badge wait">ממתין לאישור</span>`;
       let actionBtns = b.status !== 'בוטל' ? `<button class="btn btn-sm btn-danger" onclick="cancelBookingDB('${doc.id}', this)">בטל שיעור</button>` : `<button class="btn btn-sm btn-danger" onclick='deleteFromCalendar(${JSON.stringify(b).replace(/'/g, "&#39;")})'>מחק מגוגל קלנדר</button>`;
       if (b.status === 'ממתין') actionBtns = `<button class="btn btn-sm btn-outline" onclick="approveBookingDB('${doc.id}', this)">אשר שיעור</button>` + actionBtns;
-      div.innerHTML = `<div class="schedule-info"><strong>${b.name} - ${b.phone}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.date}, ${b.time}</span></div><div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
+      div.innerHTML = `<div class="schedule-info"><strong>${b.name || ''} - ${b.phone || ''}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.date || ''}, ${b.time || ''}</span></div><div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
       list.appendChild(div);
     });
     if (snapshot.empty) list.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center">אין שיעורים עדיין</p>';
@@ -616,6 +635,7 @@ function showToast(msg) {
 
 let adminKeySequence = '';
 document.addEventListener('keydown', (e) => {
+  if (!e.key) return;
   adminKeySequence += e.key.toLowerCase();
   if (adminKeySequence.includes('gab')) {
     adminKeySequence = '';
