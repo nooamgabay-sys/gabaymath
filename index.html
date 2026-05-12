@@ -264,7 +264,7 @@ select option { background: var(--bg); color: #fff; }
         <div class="glass no-hover">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
                 <h3 style="margin:0;">רשימת שיעורים</h3>
-                <button class="btn btn-sm btn-danger" onclick="deleteCancelledBookings()">מחק שיעורים מבוטלים</button>
+                <button class="btn btn-sm btn-outline" onclick="approveAllBookings()">אשר את כל השיעורים</button>
             </div>
             <div class="schedule-list" id="adminBookingsList">
                 <!-- Bookings injected here -->
@@ -417,7 +417,9 @@ function checkAvailability(date) {
                         slot.classList.add('occupied');
                         slot.style.opacity = '0.3';
                         slot.style.cursor = 'not-allowed';
-                        slot.style.background = 'rgba(239, 68, 68, 0.1)';
+                        slot.style.background = 'rgba(100, 100, 100, 0.2)';
+                        slot.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+                        slot.style.color = 'rgba(255, 255, 255, 0.3)';
                     }
                 });
             }
@@ -425,12 +427,12 @@ function checkAvailability(date) {
     });
 }
 
-function deleteCancelledBookings() {
-    if (!confirm('האם אתה בטוח שברצונך למחוק לצמיתות את כל השיעורים המבוטלים?')) return;
-    db.collection("bookings").where("status", "==", "בוטל").get().then(snapshot => {
+function approveAllBookings() {
+    if (!confirm('האם אתה בטוח שברצונך לאשר את כל השיעורים במערכת?')) return;
+    db.collection("bookings").get().then(snapshot => {
         const batch = db.batch();
-        snapshot.forEach(doc => batch.delete(doc.ref));
-        batch.commit().then(() => showToast('השיעורים המבוטלים נמחקו בהצלחה'));
+        snapshot.forEach(doc => batch.update(doc.ref, { status: 'מאושר' }));
+        batch.commit().then(() => showToast('כל השיעורים אושרו בהצלחה'));
     });
 }
 
@@ -491,7 +493,7 @@ function confirmBooking() {
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Processing...';
+        submitBtn.innerText = 'מעבד...';
         submitBtn.style.opacity = '0.6';
         submitBtn.style.cursor = 'not-allowed';
     }
