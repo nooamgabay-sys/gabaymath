@@ -266,7 +266,10 @@ select option { background: var(--bg); color: #fff; }
         <div class="glass no-hover">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
                 <h3 style="margin:0;">רשימת שיעורים</h3>
-                <button class="btn btn-sm btn-outline" onclick="approveAllBookings()">אשר את כל השיעורים</button>
+                <div style="display:flex; gap: 1rem;">
+                    <button class="btn btn-sm btn-outline" onclick="approveAllBookings()">אשר את כל השיעורים</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteCancelledBookings()">מחק את כל השיעורים המבוטלים</button>
+                </div>
             </div>
             <div class="schedule-list" id="adminBookingsList">
                 <!-- Bookings injected here -->
@@ -612,10 +615,20 @@ function renderAdminBookings() {
       const b = { id: doc.id, ...doc.data() };
       const div = document.createElement('div');
       div.className = 'schedule-item glass';
-      let statusBadge = b.status === 'מאושר' ? `<span class="badge ok">מאושר</span>` : b.status === 'בוטל' ? `<span class="badge cancel">בוטל</span>` : `<span class="badge wait">ממתין לאישור</span>`;
-      let actionBtns = b.status !== 'בוטל' ? `<button class="btn btn-sm btn-danger" onclick="cancelBookingDB('${doc.id}', this)">בטל שיעור</button>` : `<button class="btn btn-sm btn-danger" onclick='deleteFromCalendar(${JSON.stringify(b).replace(/'/g, "&#39;")})'>מחק מגוגל קלנדר</button>`;
-      if (b.status === 'ממתין') actionBtns = `<button class="btn btn-sm btn-outline" onclick="approveBookingDB('${doc.id}', this)">אשר שיעור</button>` + actionBtns;
-      div.innerHTML = `<div class="schedule-info"><strong>${b.name || ''} - ${b.phone || ''}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.lessonFormat || ''} | ${b.date || ''}, ${b.time || ''}</span></div><div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
+      let actionBtns = '';
+      if (b.status === 'בוטל') {
+          actionBtns = `
+            <button class="btn btn-sm" onclick="restoreBookingDB('${doc.id}')">שחזר</button>
+            <button class="btn btn-sm btn-danger" onclick="permanentlyDeleteDB('${doc.id}')">מחק</button>
+            <button class="btn btn-sm btn-danger" onclick='deleteFromCalendar(${JSON.stringify(b).replace(/'/g, "&#39;")})'>מחק מגוגל קלנדר</button>
+          `;
+      } else {
+          actionBtns = `<button class="btn btn-sm btn-danger" onclick="cancelBookingDB('${doc.id}', this)">בטל שיעור</button>`;
+          if (b.status === 'ממתין') {
+              actionBtns = `<button class="btn btn-sm btn-outline" onclick="approveBookingDB('${doc.id}', this)">אשר שיעור</button>` + actionBtns;
+          }
+      }
+      div.innerHTML = `<div class="schedule-info"><strong>${b.name || ''} - ${b.phone || ''}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.lessonFormat || ''} | ${b.date || ''}, ${b.time || ''}</span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
       list.appendChild(div);
     });
     if (snapshot.empty) list.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center">אין שיעורים עדיין</p>';
@@ -683,7 +696,6 @@ function cancelBookingDB(id) {
     db.collection("bookings").doc(id).update({ status: "בוטל" }).then(() => {
       showToast('השיעור בוטל!');
       
-      // Auto-Sync Cancellation to Availability Grid
       const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
       const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
       
@@ -695,6 +707,42 @@ function cancelBookingDB(id) {
         renderAvailGrid();
       });
     });
+  });
+}
+
+function permanentlyDeleteDB(id) {
+  if (!confirm('האם אתה בטוח שברצונך למחוק לצמיתות את השיעור מהמסד?')) return;
+  db.collection("bookings").doc(id).get().then(doc => {
+      if (!doc.exists) return;
+      const b = doc.data();
+      db.collection("bookings").doc(id).delete().then(() => {
+          showToast('השיעור נמחק לצמיתות!');
+          const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+          const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
+          db.collection("availability").doc(`${dayName}_${b.time}`).set({ isFree: true }, { merge: true }).then(() => renderAvailGrid());
+      });
+  });
+}
+
+function restoreBookingDB(id) {
+  db.collection("bookings").doc(id).get().then(doc => {
+    if (!doc.exists) return;
+    const b = doc.data();
+    db.collection("bookings").doc(id).update({ status: "מאושר" }).then(() => {
+      showToast('השיעור שוחזר בהצלחה!');
+      const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+      const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
+      db.collection("availability").doc(`${dayName}_${b.time}`).set({ isFree: false }, { merge: true }).then(() => renderAvailGrid());
+    });
+  });
+}
+
+function deleteCancelledBookings() {
+  if (!confirm('האם אתה בטוח שברצונך למחוק את כל השיעורים המבוטלים?')) return;
+  db.collection("bookings").where("status", "==", "בוטל").get().then(snapshot => {
+    const batch = db.batch();
+    snapshot.forEach(doc => batch.delete(doc.ref));
+    batch.commit().then(() => showToast('כל השיעורים המבוטלים נמחקו'));
   });
 }
 
