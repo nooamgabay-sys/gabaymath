@@ -615,6 +615,7 @@ function renderAdminBookings() {
       const b = { id: doc.id, ...doc.data() };
       const div = document.createElement('div');
       div.className = 'schedule-item glass';
+      let statusBadge = b.status === 'מאושר' ? `<span class="badge ok">מאושר</span>` : b.status === 'בוטל' ? `<span class="badge cancel">בוטל</span>` : `<span class="badge wait">ממתין לאישור</span>`;
       let actionBtns = '';
       if (b.status === 'בוטל') {
           actionBtns = `
