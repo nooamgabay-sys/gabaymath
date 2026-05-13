@@ -110,8 +110,8 @@ select option { background: var(--bg); color: #fff; }
     h1 { font-size: 3rem; }
     .stats { flex-direction: column; }
     .avail-grid { grid-template-columns: 1fr; overflow-x: auto; gap: 2rem; }
-    nav { padding: 0.8rem 1rem; flex-direction: column; align-items: center; gap: 0.5rem; height: auto; }
-    nav .links { gap: 1.2rem; font-size: 0.95rem; width: 100%; justify-content: center; }
+    nav { padding: 0.8rem 0.5rem; flex-direction: column; align-items: center; gap: 0.4rem; height: auto; }
+    nav .links { gap: 0.8rem; font-size: 0.9rem; width: 100%; justify-content: center; }
     nav .logo { font-size: 1.2rem; margin-bottom: 0.2rem; }
     .schedule-item { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
 }
@@ -676,9 +676,25 @@ function isSlotAvailable(date, time) {
 }
 
 function cancelBookingDB(id) {
-  if (!confirm('האם אתה בטוח שברצונך למחוק את השיעור?')) return;
-  db.collection("bookings").doc(id).delete().then(() => {
-    showToast('השיעור נמחק!');
+  if (!confirm('האם אתה בטוח שברצונך לבטל את השיעור?')) return;
+  db.collection("bookings").doc(id).get().then(doc => {
+    if (!doc.exists) return;
+    const b = doc.data();
+    db.collection("bookings").doc(id).update({ status: "בוטל" }).then(() => {
+      showToast('השיעור בוטל!');
+      
+      // Auto-Sync Cancellation to Availability Grid
+      const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+      const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
+      
+      db.collection("availability").doc(`${dayName}_${b.time}`).set({
+        day: dayName,
+        time: b.time,
+        isFree: true
+      }, { merge: true }).then(() => {
+        renderAvailGrid();
+      });
+    });
   });
 }
 
