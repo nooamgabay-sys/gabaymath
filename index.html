@@ -110,8 +110,9 @@ select option { background: var(--bg); color: #fff; }
     h1 { font-size: 3rem; }
     .stats { flex-direction: column; }
     .avail-grid { grid-template-columns: 1fr; overflow-x: auto; gap: 2rem; }
-    nav { padding: 1rem; }
-    nav .links { gap: 1rem; font-size: 0.9rem; }
+    nav { padding: 0.8rem 1rem; flex-direction: column; align-items: center; gap: 0.5rem; height: auto; }
+    nav .links { gap: 1.2rem; font-size: 0.95rem; width: 100%; justify-content: center; }
+    nav .logo { font-size: 1.2rem; margin-bottom: 0.2rem; }
     .schedule-item { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
 }
 
@@ -128,7 +129,7 @@ select option { background: var(--bg); color: #fff; }
 <body>
 
 <nav id="navbar">
-    <div class="logo">גבאי מתמטיקה</div>
+    <div class="logo" id="adminTrigger">גבאי מתמטיקה</div>
     <div class="links">
         <a href="#hero" onclick="logoutAdmin()">ראשי</a>
         <a href="#book" onclick="logoutAdmin()">קביעת שיעור</a>
@@ -777,6 +778,17 @@ document.addEventListener('keydown', (e) => {
     showAuth();
   }
   if (adminKeySequence.length > 10) adminKeySequence = '';
+});
+
+// Mobile Admin Trigger (Triple-click on Logo)
+let logoClicks = 0;
+document.getElementById('adminTrigger').addEventListener('click', () => {
+    logoClicks++;
+    if (logoClicks === 3) {
+        logoClicks = 0;
+        showAuth();
+    }
+    setTimeout(() => { logoClicks = 0; }, 2000);
 });
 </script>
 </body>
