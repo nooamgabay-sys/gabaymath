@@ -51,8 +51,9 @@ h2 { font-size: 2.8rem; margin-bottom: 3rem; color: var(--gold); text-align: cen
 
 .input-group { margin-bottom: 2rem; text-align: right; }
 label { display: block; margin-bottom: 0.8rem; color: rgba(255,255,255,0.9); font-size: 1.1rem; }
-input, select { width: 100%; padding: 1.2rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-family: inherit; font-size: 1.1rem; transition: 0.3s; }
-input:focus, select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 15px var(--glow); background: rgba(0,0,0,0.5); }
+input, select, textarea { width: 100%; padding: 1.2rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-family: inherit; font-size: 1.1rem; transition: 0.3s; resize: vertical; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 15px var(--glow); background: rgba(255,255,255,0.05); }
+textarea { min-height: 120px; }
 select option { background: var(--bg); color: #fff; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 1rem; }
@@ -219,7 +220,7 @@ select option { background: var(--bg); color: #fff; }
             </div>
             <div class="input-group">
                 <label>הערות נוספות</label>
-                <textarea id="fcomments" rows="3" placeholder="יש משהו נוסף שתרצה שאדע? (למשל: נושא ספציפי, קשיים מיוחדים וכד')"></textarea>
+                <textarea id="fcomments" rows="3" placeholder="כאן אפשר לכתוב נושאים ספציפיים לשיעור, שאלות או בקשות מיוחדות..."></textarea>
             </div>
             <div class="actions">
                 <button class="btn btn-sm btn-outline" onclick="nextStep(1)">חזור</button>
