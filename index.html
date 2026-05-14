@@ -8,8 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root { --bg: #121212; --card-bg: #1e1e1e; --nav-bg: #121212; --gold: #c9a84c; --yellow: #ffcc33; --text: #e0e0e0; --text-muted: rgba(255,255,255,0.6); --border: rgba(255,255,255,0.08); --glow: rgba(201, 168, 76, 0.4); --yellow-glow: rgba(255,204,51,0.5); --sym-opacity: 0.06; }
-body.light-mode { --bg: #f5f5f5; --card-bg: #ffffff; --nav-bg: #ffffff; --text: #121212; --text-muted: rgba(0,0,0,0.6); --border: rgba(0,0,0,0.1); --glow: rgba(201, 168, 76, 0.2); --sym-opacity: 0.04; }
+:root { --bg: #121212; --card-bg: #1e1e1e; --nav-bg: #121212; --gold: #c9a84c; --yellow: #ffcc33; --text: #e0e0e0; --text-muted: rgba(255,255,255,0.6); --border: rgba(255,255,255,0.08); --glow: rgba(201, 168, 76, 0.4); --yellow-glow: rgba(255,204,51,0.5); --sym-color: rgba(255,255,255,0.1); }
+body.light-mode { --bg: #f5f5f5; --card-bg: #ffffff; --nav-bg: #ffffff; --text: #121212; --text-muted: rgba(18,18,18,0.7); --border: rgba(0,0,0,0.1); --glow: rgba(201, 168, 76, 0.2); --sym-color: rgba(18,18,18,0.08); }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Heebo', sans-serif; }
 body { background-color: var(--bg); color: var(--text); overflow-x: hidden; min-height: 100vh; scroll-behavior: smooth; }
 ::-webkit-scrollbar { width: 10px; }
@@ -38,7 +38,7 @@ h2 { font-size: 2.8rem; margin-bottom: 3rem; color: var(--gold); text-align: cen
 .btn:active { transform: scale(0.96); }
 
 .math-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; }
-.sym { position: absolute; font-size: 3rem; color: var(--text); opacity: var(--sym-opacity); animation: float linear infinite; font-weight: 300; }
+.sym { position: absolute; font-size: 3rem; color: var(--sym-color); animation: float linear infinite; font-weight: 300; }
 @keyframes float { 
     0% { transform: translateY(110vh) rotate(0deg); } 
     50% { transform: translateY(45vh) rotate(180deg) translateX(20px); }
@@ -75,7 +75,7 @@ select option { background: var(--bg); color: var(--text); }
 .progress::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 3px; background: var(--border); z-index: 0; }
 .dot { width: 45px; height: 45px; background: var(--bg); border: 3px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; transition: 0.4s; z-index: 1; cursor: pointer; color: var(--text); }
 .dot:hover { border-color: var(--gold); transform: scale(1.1); }
-.dot.active { border-color: var(--gold); color: var(--gold) !important; box-shadow: 0 0 20px var(--glow); text-shadow: 0 0 10px var(--glow); }
+.dot.active { border-color: var(--gold); background: var(--gold); color: #000 !important; box-shadow: 0 0 20px var(--glow); text-shadow: none; }
 
 .actions { display: flex; justify-content: space-between; margin-top: 3rem; }
 .btn-sm { padding: 0.8rem 1.5rem; font-size: 1.1rem; }
@@ -162,7 +162,7 @@ select option { background: var(--bg); color: var(--text); }
     </div>
     <h1>שיעורי מתמטיקה פרטיים</h1>
     <div class="bar-ilan-badge">בוגר תוכנית בר-אילן</div>
-    <p style="font-size: 1.8rem; margin-top: 2rem; text-align: center; color: var(--text); opacity: 0; animation: slideDown 1s 0.3s ease forwards;">הדרך להצלחה בבגרות מתחילה כאן.</p>
+    <p style="font-size: 1.8rem; margin-top: 2rem; text-align: center; color: var(--text); opacity: 1 !important; animation: slideDown 1s 0.3s ease forwards;">הדרך להצלחה בבגרות מתחילה כאן.</p>
     
     <div class="stats">
         <div class="glass"><span>4.9★</span>דירוג ממוצע</div>
