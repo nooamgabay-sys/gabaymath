@@ -39,7 +39,11 @@ h2 { font-size: 2.8rem; margin-bottom: 3rem; color: var(--gold); text-align: cen
 
 .math-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; }
 .sym { position: absolute; font-size: 3rem; color: var(--text); opacity: var(--sym-opacity); animation: float linear infinite; font-weight: 300; }
-@keyframes float { 0% { transform: translateY(110vh) rotate(0deg) scale(0.8); } 100% { transform: translateY(-20vh) rotate(360deg) scale(1.2); } }
+@keyframes float { 
+    0% { transform: translateY(110vh) rotate(0deg); } 
+    50% { transform: translateY(45vh) rotate(180deg) translateX(20px); }
+    100% { transform: translateY(-20vh) rotate(360deg); } 
+}
 
 .stats { display: flex; gap: 2.5rem; width: 100%; max-width: 1100px; margin-top: 4rem; opacity: 0; animation: slideUp 1s 0.5s ease forwards; }
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -145,11 +149,16 @@ select option { background: var(--bg); color: var(--text); }
 
 <section id="hero">
     <div class="math-bg" id="mathBg">
-        <span class="sym" style="left: 10%; animation-duration: 20s; animation-delay: 0s; font-size: 3rem;">∑</span>
-        <span class="sym" style="left: 30%; animation-duration: 25s; animation-delay: -5s; font-size: 4rem;">∫</span>
-        <span class="sym" style="left: 50%; animation-duration: 18s; animation-delay: -10s; font-size: 2.5rem;">π</span>
-        <span class="sym" style="left: 70%; animation-duration: 22s; animation-delay: -2s; font-size: 3.5rem;">√</span>
-        <span class="sym" style="left: 90%; animation-duration: 30s; animation-delay: -8s; font-size: 4.5rem;">∞</span>
+        <span class="sym" style="left: 5%; animation-duration: 25s; animation-delay: 0s; font-size: 3rem;">Σ</span>
+        <span class="sym" style="left: 15%; animation-duration: 35s; animation-delay: -5s; font-size: 4rem;">∫</span>
+        <span class="sym" style="left: 25%; animation-duration: 28s; animation-delay: -10s; font-size: 2.5rem;">π</span>
+        <span class="sym" style="left: 35%; animation-duration: 32s; animation-delay: -2s; font-size: 3.5rem;">√</span>
+        <span class="sym" style="left: 45%; animation-duration: 40s; animation-delay: -15s; font-size: 5rem;">∞</span>
+        <span class="sym" style="left: 55%; animation-duration: 30s; animation-delay: -8s; font-size: 3rem;">Δ</span>
+        <span class="sym" style="left: 65%; animation-duration: 38s; animation-delay: -20s; font-size: 4rem;">θ</span>
+        <span class="sym" style="left: 75%; animation-duration: 22s; animation-delay: -12s; font-size: 2.5rem;">Ω</span>
+        <span class="sym" style="left: 85%; animation-duration: 45s; animation-delay: -25s; font-size: 3.5rem;">λ</span>
+        <span class="sym" style="left: 95%; animation-duration: 33s; animation-delay: -30s; font-size: 4.5rem;">φ</span>
     </div>
     <h1>שיעורי מתמטיקה פרטיים</h1>
     <div class="bar-ilan-badge">בוגר תוכנית בר-אילן</div>
