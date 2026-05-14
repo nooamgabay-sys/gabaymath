@@ -297,6 +297,16 @@ select option { background: var(--bg); color: var(--text); }
                     <div class="time-slot" onclick="selectTime(this)">20:00</div>
                 </div>
             </div>
+
+            <div id="bookingSummary" class="glass no-hover" style="margin-top: 2rem; padding: 1.5rem; border: 1px solid var(--gold); border-radius: 15px; text-align: center; display: none;">
+                <h4 style="color: var(--gold); margin-bottom: 1rem; font-size: 1.2rem;">סיכום הזמנה</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.8rem; font-size: 1.1rem;">
+                    <div style="color: var(--text);">תאריך: <span id="summaryDate" style="font-weight: 600; color: var(--gold); margin-right: 5px;">-</span></div>
+                    <div style="color: var(--text);">שעה: <span id="summaryTime" style="font-weight: 600; color: var(--gold); margin-right: 5px;">-</span></div>
+                    <div style="margin-top: 0.5rem; font-size: 1.3rem; font-weight: 800; color: var(--gold); text-shadow: 0 0 10px var(--glow);">עלות שיעור: 60 ₪</div>
+                </div>
+            </div>
+
             <div class="actions" style="justify-content: center; gap: 20px;">
                 <button class="btn btn-sm btn-outline" onclick="nextStep(2)">חזור</button>
                 <button class="btn btn-sm" id="submitBtn" onclick="confirmBooking()">סיים וקבע שיעור</button>
@@ -430,9 +440,26 @@ window.onload = function() {
         nextArrow: '<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>',
         onChange: function(selectedDates, dateStr) {
             checkAvailability(dateStr);
+            updateBookingSummary();
         }
     });
 };
+
+function updateBookingSummary() {
+    const summaryCard = document.getElementById('bookingSummary');
+    const summaryDate = document.getElementById('summaryDate');
+    const summaryTime = document.getElementById('summaryTime');
+    const dateInput = document.getElementById('fdate').value;
+    const timeSlot = document.querySelector('.time-slot.selected');
+
+    if (dateInput || timeSlot) {
+        summaryCard.style.display = 'block';
+        summaryDate.innerText = dateInput || '-';
+        summaryTime.innerText = timeSlot ? timeSlot.innerText : '-';
+    } else {
+        summaryCard.style.display = 'none';
+    }
+}
 
 emailjs.init({publicKey: "JI7HdPnpg063aq0Pl", blockHeadless: false});
 const EMAILJS_SERVICE_ID = "service_uiiqhnd";
@@ -528,6 +555,7 @@ function selectTime(el) {
     if (el.classList.contains('occupied')) return;
     document.querySelectorAll('.time-slot').forEach(e => e.classList.remove('selected'));
     el.classList.add('selected');
+    updateBookingSummary();
 }
 
 function checkAvailability(date) {
@@ -1061,8 +1089,10 @@ function resetForm() {
   document.getElementById('fphone').value = '';
   document.getElementById('femail').value = '';
   document.getElementById('fdate').value = '';
+  document.getElementById('fcomments').value = '';
   document.querySelectorAll('.chip').forEach(e => e.classList.remove('selected'));
   document.querySelectorAll('.time-slot').forEach(e => e.classList.remove('selected'));
+  document.getElementById('bookingSummary').style.display = 'none';
   maxReachedStep = 1;
   nextStep(1);
 }
