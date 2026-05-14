@@ -108,7 +108,7 @@ select option { background: var(--bg); color: var(--text); }
 .copy-btn:hover { background: var(--gold); color: #000; }
 
 /* Theme-Reactive Luxury Flatpickr */
-.flatpickr-calendar { background: var(--card-bg) !important; border: none !important; border-radius: 15px !important; box-shadow: 0 15px 40px rgba(0,0,0,0.3) !important; font-family: 'Heebo', sans-serif !important; color: var(--text) !important; }
+.flatpickr-calendar { background: var(--card-bg) !important; border: 1px solid var(--border) !important; border-radius: 15px !important; box-shadow: 0 15px 40px rgba(0,0,0,0.2) !important; font-family: 'Heebo', sans-serif !important; color: var(--text) !important; }
 .flatpickr-day { color: var(--text) !important; border-radius: 10px !important; }
 .flatpickr-day.selected { background: var(--gold) !important; border-color: var(--gold) !important; color: #fff !important; font-weight: 800 !important; }
 .flatpickr-day.today { border: 2px solid var(--gold) !important; color: var(--gold) !important; }
@@ -120,14 +120,14 @@ select option { background: var(--bg); color: var(--text); }
 .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { fill: var(--gold) !important; }
 
 /* Glassmorphic Input with Icon */
-.input-wrapper { position: relative; width: 100%; }
+.input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
 .input-wrapper input { padding-right: 3.5rem !important; background: rgba(255,255,255,0.03) !important; backdrop-filter: blur(5px); border: 1px solid var(--border); transition: 0.3s; color: var(--text) !important; }
 .input-wrapper input:focus { border-color: var(--gold); box-shadow: 0 0 15px var(--glow); outline: none; }
-.input-icon { position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; stroke: var(--gold); fill: none; pointer-events: none; }
+.input-icon { position: absolute; right: 1.2rem; width: 22px; height: 22px; stroke: var(--gold); fill: none; pointer-events: none; }
 
 /* Theme-Reactive Minimalist Toasts */
 #toast-container { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 10001; display: flex; flex-direction: column; gap: 0.6rem; }
-.toast { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--gold); color: var(--text); padding: 0.6rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.6rem; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideInLeft 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards, fadeOut 0.5s 2.5s ease forwards; max-width: 280px; }
+.toast { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--gold); color: var(--text); padding: 0.6rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.6rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); animation: slideInLeft 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards, fadeOut 0.5s 2.5s ease forwards; max-width: 280px; }
 .toast::before { content: '✓'; color: var(--gold); font-weight: 900; }
 @keyframes slideInLeft { from { transform: translateX(-120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
@@ -168,7 +168,7 @@ select option { background: var(--bg); color: var(--text); }
     </div>
 </nav>
 
-<section id="hero">
+<section id="hero" style="overflow: hidden;">
     <div class="math-bg" id="mathBg">
         <span class="sym" style="left: 5%; animation-duration: 25s; animation-delay: 0s; font-size: 3rem;">Σ</span>
         <span class="sym" style="left: 15%; animation-duration: 35s; animation-delay: -5s; font-size: 4rem;">∫</span>
@@ -265,6 +265,7 @@ select option { background: var(--bg); color: var(--text); }
             </div>
         </div>
 
+        <div id="step3" class="step">
             <div class="input-group">
                 <label>תאריך מבוקש</label>
                 <div class="input-wrapper">
