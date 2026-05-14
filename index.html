@@ -641,6 +641,7 @@ function confirmBooking() {
     const subject = selectedChips.map(c => c.innerText).join(', ');
     const errorDiv = document.getElementById('formError');
     
+    // Safety check: ensure everything is selected before even attempting a push
     if (!fname || !femail || !dateInput || !timeSlot || !gradeValue) {
         if(errorDiv) {
             errorDiv.innerText = 'נא למלא שם, אימייל, לבחור רמה, תאריך ושעה.';
@@ -655,15 +656,7 @@ function confirmBooking() {
         }
         return;
     }
-    if (!isSlotAvailable(dateInput, timeSlot.innerText)) {
-        if(errorDiv) {
-            errorDiv.innerText = 'שעה זו אינה פנויה, אנא בחר שעה אחרת.';
-            errorDiv.style.display = 'block';
-        }
-        return;
-    }
-    if(errorDiv) errorDiv.style.display = 'none';
-
+    
     const selectedTime = timeSlot.innerText.trim();
     if (selectedTime === '14:00') {
         if(errorDiv) {
@@ -672,9 +665,18 @@ function confirmBooking() {
         }
         return;
     }
-    
+
+    if (!isSlotAvailable(dateInput, selectedTime)) {
+        if(errorDiv) {
+            errorDiv.innerText = 'שעה זו אינה פנויה, אנא בחר שעה אחרת.';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+
+    if(errorDiv) errorDiv.style.display = 'none';
+
     const newBooking = {
-        id: Date.now(),
         name: fname,
         phone: fphone,
         email: femail,
@@ -685,45 +687,39 @@ function confirmBooking() {
         date: dateInput,
         time: selectedTime,
         comments: document.getElementById('fcomments').value || '',
-        status: "ממתין"
+        status: "ממתין",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    // Prevent Duplicate Bookings: Disable and show 'Processing...'
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerText = 'מעבד...';
         submitBtn.style.opacity = '0.6';
-        submitBtn.style.cursor = 'not-allowed';
     }
 
+    // ONLY push to Firestore here - never on slot click
     db.collection("bookings").add(newBooking).then(() => {
-      console.log("Booking saved to Firebase!");
-      sendNotification('new_booking', newBooking);
-
-      // Fix Google Calendar Redirect
-      const selectedDate = dateInput;
-      const studentName = fname;
-      const selectedTopic = subject;
-
-      const startDate = selectedDate.replace(/-/g, '') + 'T' + selectedTime.replace(':', '') + '00';
-      const endHour = (parseInt(selectedTime.split(':')[0]) + 1).toString().padStart(2, '0');
-      const endDate = selectedDate.replace(/-/g, '') + 'T' + endHour + selectedTime.split(':')[1] + '00';
-      const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('שיעור מתמטיקה עם גבאי')}&dates=${startDate}/${endDate}&details=${encodeURIComponent('נושא: ' + selectedTopic + '\nשם: ' + studentName)}&location=Online`;
-      
-      window.open(gcalUrl, '_blank');
-
-      document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
-      document.getElementById('success').classList.add('active');
+        sendNotification('new_booking', newBooking);
+        
+        // Success flow
+        const startDate = dateInput.replace(/-/g, '') + 'T' + selectedTime.replace(':', '') + '00';
+        const endHour = (parseInt(selectedTime.split(':')[0]) + 1).toString().padStart(2, '0');
+        const endDate = dateInput.replace(/-/g, '') + 'T' + endHour + selectedTime.split(':')[1] + '00';
+        const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('שיעור מתמטיקה עם גבאי')}&dates=${startDate}/${endDate}&details=${encodeURIComponent('נושא: ' + subject + '\nשם: ' + fname)}&location=Online`;
+        
+        window.open(gcalUrl, '_blank');
+        document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
+        document.getElementById('success').classList.add('active');
+        document.querySelector('.progress').style.display = 'none';
     }).catch(err => {
-      console.error('Firebase Error:', err);
-      showToast('שגיאה בשמירת השיעור, נסה שוב.');
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'סיים וקבע שיעור';
-        submitBtn.style.opacity = '1';
-        submitBtn.style.cursor = 'pointer';
-      }
+        console.error('Firebase Error:', err);
+        showToast('שגיאה בשמירת השיעור, נסה שוב.');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'סיים וקבע שיעור';
+            submitBtn.style.opacity = '1';
+        }
     });
 }
 
