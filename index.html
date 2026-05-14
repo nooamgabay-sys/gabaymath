@@ -8,8 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root { --bg: #121212; --card-bg: #1e1e1e; --nav-bg: #121212; --gold: #c9a84c; --yellow: #ffcc33; --text: #e0e0e0; --text-muted: rgba(255,255,255,0.6); --border: rgba(255,255,255,0.08); --glow: rgba(201, 168, 76, 0.4); --yellow-glow: rgba(255,204,51,0.5); --sym-color: rgba(201, 168, 76, 0.05); }
-body.light-mode { --bg: #f5f5f5; --card-bg: #ffffff; --nav-bg: #ffffff; --text: #121212; --text-muted: rgba(18,18,18,0.7); --border: rgba(0,0,0,0.1); --glow: rgba(201, 168, 76, 0.2); --sym-color: rgba(18,18,18,0.04); }
+:root { --bg: #121212; --card-bg: #1e1e1e; --nav-bg: #121212; --gold: #c9a84c; --yellow: #ffcc33; --text: #e0e0e0; --text-muted: rgba(255,255,255,0.6); --border: rgba(255,255,255,0.08); --glow: rgba(201, 168, 76, 0.4); --yellow-glow: rgba(255,204,51,0.5); --sym-color: rgba(201, 168, 76, 0.12); }
+body.light-mode { --bg: #f5f5f5; --card-bg: #ffffff; --nav-bg: #ffffff; --text: #121212; --text-muted: rgba(18,18,18,0.7); --border: rgba(0,0,0,0.1); --glow: rgba(201, 168, 76, 0.2); --sym-color: rgba(18,18,18,0.08); }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Heebo', sans-serif; }
 body { background-color: var(--bg); color: var(--text); overflow-x: hidden; min-height: 100vh; scroll-behavior: smooth; }
 ::-webkit-scrollbar { width: 10px; }
@@ -18,7 +18,7 @@ body { background-color: var(--bg); color: var(--text); overflow-x: hidden; min-
 ::placeholder { color: var(--text-muted) !important; opacity: 1; }
 nav { position: fixed; top: 0; width: 100%; background: var(--nav-bg); z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-bottom: 2px solid var(--gold); transition: 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
 nav a { color: var(--text); text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: 0.3s; cursor: pointer; position: relative; }
-nav .links { display: flex; gap: 20px; align-items: center; }
+nav .links { display: flex; gap: 32px; align-items: center; }
 nav a:hover { color: var(--gold); text-shadow: 0 0 10px var(--glow); }
 .admin-hidden { display: none !important; }
 nav .logo { color: var(--gold); font-weight: 800; font-size: 1.5rem; letter-spacing: 1px; cursor: default !important; }
