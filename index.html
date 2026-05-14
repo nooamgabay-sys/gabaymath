@@ -298,7 +298,14 @@ select option { background: var(--bg); color: var(--text); }
         </div>
 
         <div class="glass no-hover">
-            <h3>תצוגת יומן שבועית</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
+                <h3 style="margin:0;">תצוגת יומן שבועית</h3>
+                <div style="display:flex; gap: 0.8rem;">
+                    <button class="btn btn-sm btn-outline" onclick="changeWeek(-1)">השבוע הקודם</button>
+                    <button class="btn btn-sm btn-outline" onclick="changeWeek(0)">חזרה להיום</button>
+                    <button class="btn btn-sm btn-outline" onclick="changeWeek(1)">השבוע הבא</button>
+                </div>
+            </div>
             <div class="avail-grid">
                 <div class="avail-col"><h3>ראשון</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div></div>
                 <div class="avail-col"><h3>שני</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div></div>
@@ -348,6 +355,13 @@ const CLIENT_SECRET = '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';
 
 if (history.scrollRestoration) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
+
+let currentWeekOffset = 0;
+function changeWeek(offset) {
+    if (offset === 0) currentWeekOffset = 0;
+    else currentWeekOffset += offset;
+    renderAvailGrid();
+}
 
 const MOON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
 const SUN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
@@ -708,7 +722,7 @@ function renderAvailGrid() {
   const today = new Date();
   const dayOfWeek = today.getDay();
   const sunday = new Date(today);
-  sunday.setDate(today.getDate() - dayOfWeek);
+  sunday.setDate(today.getDate() - dayOfWeek + (currentWeekOffset * 7));
 
   const cols = document.querySelectorAll('.avail-col');
   cols.forEach((col, i) => {
