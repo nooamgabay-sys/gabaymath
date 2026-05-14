@@ -101,8 +101,10 @@ select option { background: var(--bg); color: var(--text); }
 .avail-slot { padding: 1rem; text-align: center; border-radius: 8px; cursor: pointer; margin-bottom: 0.8rem; transition: 0.3s; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-weight: 600; }
 .avail-slot.free { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.3); color: #4ade80; }
 .avail-slot:hover { transform: scale(1.05); filter: brightness(1.2); }
+.copy-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 0.3rem; font-size: 0.75rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; transition: 0.3s; width: 100%; white-space: nowrap; }
+.copy-btn:hover { background: var(--gold); color: #000; }
 
-#success { text-align: center; padding: 2rem 0; }
+@media (max-width: 768px) { text-align: center; padding: 2rem 0; }
 #success h3 { font-size: 2rem; color: var(--gold); margin-bottom: 1rem; }
 #success p { font-size: 1.2rem; margin-bottom: 2rem; }
 
@@ -307,13 +309,13 @@ select option { background: var(--bg); color: var(--text); }
                 </div>
             </div>
             <div class="avail-grid">
-                <div class="avail-col"><h3>ראשון</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div></div>
-                <div class="avail-col"><h3>שני</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div></div>
-                <div class="avail-col"><h3>שלישי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div></div>
-                <div class="avail-col"><h3>רביעי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div></div>
-                <div class="avail-col"><h3>חמישי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div></div>
-                <div class="avail-col"><h3>שישי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div></div>
-                <div class="avail-col"><h3>שבת</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div></div>
+                <div class="avail-col"><h3>ראשון</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>שני</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>שלישי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>רביעי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>חמישי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>שישי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>שבת</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
             </div>
             <button class="btn" style="margin-top: 2rem;" onclick="showToast('הזמינות עודכנה!')">שמור זמינות</button>
         </div>
@@ -896,6 +898,32 @@ function toggleAvail(el) {
     isFree: isFree
   }).then(() => {
     showToast(`זמינות בתאריך ${date} בשעה ${time} עודכנה`);
+  });
+}
+
+function copyDayAvail(btn) {
+  const col = btn.parentElement;
+  const currentDate = col.querySelector('h3').dataset.date;
+  const nextDateObj = new Date(currentDate);
+  nextDateObj.setDate(nextDateObj.getDate() + 7);
+  const nextDate = nextDateObj.toISOString().split('T')[0];
+  
+  const slots = col.querySelectorAll('.avail-slot');
+  const batch = db.batch();
+  
+  slots.forEach(slot => {
+    const time = slot.innerText.trim();
+    const isFree = slot.classList.contains('free');
+    const nextId = `${nextDate}_${time}`;
+    batch.set(db.collection("availability").doc(nextId), {
+      date: nextDate,
+      time: time,
+      isFree: isFree
+    });
+  });
+  
+  batch.commit().then(() => {
+    showToast(`זמינות יום ${currentDate} הועתקה לתאריך ${nextDate}`);
   });
 }
 
