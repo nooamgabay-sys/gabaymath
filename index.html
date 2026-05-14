@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://npmcdn.com/flatpickr/dist/l10n/he.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
 :root { --bg: #121212; --card-bg: #1e1e1e; --nav-bg: #121212; --gold: #c9a84c; --yellow: #ffcc33; --text: #e0e0e0; --text-muted: rgba(255,255,255,0.6); --border: rgba(255,255,255,0.08); --glow: rgba(201, 168, 76, 0.4); --yellow-glow: rgba(255,204,51,0.5); --sym-color: rgba(201, 168, 76, 0.15); }
 body.light-mode { --bg: #f5f5f5; --card-bg: #ffffff; --nav-bg: #ffffff; --text: #121212; --text-muted: rgba(18,18,18,0.7); --border: rgba(0,0,0,0.1); --glow: rgba(201, 168, 76, 0.2); --sym-color: rgba(18,18,18,0.1); }
@@ -727,6 +728,15 @@ function confirmBooking() {
         const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('שיעור מתמטיקה עם גבאי')}&dates=${startDate}/${endDate}&details=${encodeURIComponent('נושא: ' + subject + '\nשם: ' + fname)}&location=Online`;
         
         window.open(gcalUrl, '_blank');
+        
+        // Trigger Golden Confetti Celebration
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#c9a84c', '#ffffff', '#ffffff']
+        });
+
         document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
         document.getElementById('success').classList.add('active');
         document.querySelector('.progress').style.display = 'none';
