@@ -503,11 +503,8 @@ function checkAvailability(date) {
         slot.style.color = '#fff';
     });
 
-    // Check persistent admin availability grid
-    const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
-    const dayName = days[new Date(date + 'T12:00:00').getDay()];
-    
-    db.collection("availability").where("day", "==", dayName).where("isFree", "==", false).get().then(snap => {
+    // Check date-specific availability blocks
+    db.collection("availability").where("date", "==", date).where("isFree", "==", false).get().then(snap => {
         snap.forEach(doc => {
             const data = doc.data();
             document.querySelectorAll('.time-slot').forEach(slot => {
@@ -728,27 +725,40 @@ function renderAvailGrid() {
   cols.forEach((col, i) => {
     const d = new Date(sunday);
     d.setDate(sunday.getDate() + i);
-    const dateStr = d.getDate() + '/' + (d.getMonth() + 1);
-    col.querySelector('h3').innerText = days[i] + '\n' + dateStr;
+    const dateISO = d.toISOString().split('T')[0];
+    const dateDisplay = d.getDate() + '/' + (d.getMonth() + 1);
+    col.querySelector('h3').innerText = days[i] + '\n' + dateDisplay;
     col.querySelector('h3').style.whiteSpace = 'pre';
+    col.querySelector('h3').dataset.date = dateISO;
+    
+    // Reset all slots for this column
+    col.querySelectorAll('.avail-slot').forEach(slot => slot.classList.add('free'));
   });
 
-  // Load persistent availability
-  db.collection("availability").get().then(snapshot => {
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      cols.forEach(col => {
-        if (col.querySelector('h3').innerText.includes(data.day)) {
-          col.querySelectorAll('.avail-slot').forEach(slot => {
-            if (slot.innerText === data.time) {
-              if (data.isFree) slot.classList.add('free');
-              else slot.classList.remove('free');
-            }
-          });
-        }
+  // Load availability for this specific week
+  const start = new Date(sunday).toISOString().split('T')[0];
+  const end = new Date(sunday);
+  end.setDate(sunday.getDate() + 7);
+  const endStr = end.toISOString().split('T')[0];
+
+  db.collection("availability")
+    .where("date", ">=", start)
+    .where("date", "<", endStr)
+    .get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        cols.forEach(col => {
+          if (col.querySelector('h3').dataset.date === data.date) {
+            col.querySelectorAll('.avail-slot').forEach(slot => {
+              if (slot.innerText.trim() === data.time) {
+                if (data.isFree) slot.classList.add('free');
+                else slot.classList.remove('free');
+              }
+            });
+          }
+        });
       });
     });
-  });
 }
 
 function isSlotAvailable(date, time) {
@@ -835,16 +845,11 @@ function approveBookingDB(id, btn) {
     db.collection("bookings").doc(id).update({ status: "מאושר" }).then(() => {
       showToast('השיעור אושר!');
       
-      // Auto-Sync Approval to Availability Grid
-      const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
-      const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
-      
-      db.collection("availability").doc(`${dayName}_${b.time}`).set({
-        day: dayName,
+      db.collection("availability").doc(`${b.date}_${b.time}`).set({
+        date: b.date,
         time: b.time,
         isFree: false
       }).then(() => {
-        // Real-time visual update of the grid
         renderAvailGrid();
       });
     });
@@ -881,16 +886,16 @@ function deleteFromCalendar(booking) {
 
 function toggleAvail(el) {
   el.classList.toggle('free');
-  const dayName = el.parentElement.querySelector('h3').innerText.split('\n')[0];
-  const time = el.innerText;
+  const date = el.parentElement.querySelector('h3').dataset.date;
+  const time = el.innerText.trim();
   const isFree = el.classList.contains('free');
   
-  db.collection("availability").doc(`${dayName}_${time}`).set({
-    day: dayName,
+  db.collection("availability").doc(`${date}_${time}`).set({
+    date: date,
     time: time,
     isFree: isFree
   }).then(() => {
-    showToast(`זמינות יום ${dayName} בשעה ${time} עודכנה`);
+    showToast(`זמינות בתאריך ${date} בשעה ${time} עודכנה`);
   });
 }
 
