@@ -217,6 +217,10 @@ select option { background: var(--bg); color: #fff; }
                     <p style="color:rgba(255,255,255,0.4); font-size:0.95rem">אנא בחר רמה כדי לראות נושאים...</p>
                 </div>
             </div>
+            <div class="input-group">
+                <label>הערות נוספות</label>
+                <textarea id="fcomments" rows="3" placeholder="יש משהו נוסף שתרצה שאדע? (למשל: נושא ספציפי, קשיים מיוחדים וכד')"></textarea>
+            </div>
             <div class="actions">
                 <button class="btn btn-sm btn-outline" onclick="nextStep(1)">חזור</button>
                 <button class="btn btn-sm" onclick="nextStep(3)">המשך לבחירת מועד</button>
@@ -568,6 +572,7 @@ function confirmBooking() {
         lessonFormat: document.getElementById('flessontype').value,
         date: dateInput,
         time: selectedTime,
+        comments: document.getElementById('fcomments').value || '',
         status: "ממתין"
     };
 
@@ -824,6 +829,7 @@ function sendNotification(type, bookingData) {
     phone: bookingData.phone,
     email: bookingData.email,
     lesson_format: bookingData.lessonFormat,
+    user_comments: bookingData.comments || '',
     type: type
   }, "JI7HdPnpg063aq0Pl").then((response) => {
     console.log('EmailJS Success:', response.status, response.text);
