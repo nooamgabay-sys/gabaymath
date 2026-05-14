@@ -105,7 +105,17 @@ select option { background: var(--bg); color: var(--text); }
 .avail-slot.free { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.3); color: #4ade80; }
 .avail-slot:hover { transform: scale(1.05); filter: brightness(1.2); }
 .copy-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 0.3rem; font-size: 0.75rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; transition: 0.3s; width: 100%; }
+.avail-slot:hover { transform: scale(1.05); filter: brightness(1.2); }
+.copy-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 0.3rem; font-size: 0.75rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; transition: 0.3s; width: 100%; }
 .copy-btn:hover { background: var(--gold); color: #000; }
+.avail-slot.booked { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
+
+.btn-mini { border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; min-width: auto; }
+
+/* Tooltip Styling */
+.slot-tooltip { position: absolute; background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--gold); padding: 0.8rem; border-radius: 10px; z-index: 10002; display: none; pointer-events: none; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-width: 150px; }
+.slot-tooltip strong { color: var(--gold); display: block; margin-bottom: 0.2rem; }
+.slot-tooltip span { font-size: 0.85rem; color: var(--text); }
 
 /* Modernized Theme-Reactive Flatpickr */
 .flatpickr-calendar { background: var(--card-bg) !important; border: none !important; border-radius: 20px !important; box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important; font-family: 'Heebo', sans-serif !important; color: var(--text) !important; }
@@ -330,16 +340,16 @@ select option { background: var(--bg); color: var(--text); }
                     <button class="btn btn-sm btn-outline" onclick="changeWeek(1)">השבוע הבא</button>
                 </div>
             </div>
-            <div class="avail-grid">
-                <div class="avail-col"><h3>ראשון</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
-                <div class="avail-col"><h3>שני</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
-                <div class="avail-col"><h3>שלישי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
-                <div class="avail-col"><h3>רביעי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
-                <div class="avail-col"><h3>חמישי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
-                <div class="avail-col"><h3>שישי</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
-                <div class="avail-col"><h3>שבת</h3><div class="avail-slot free" onclick="toggleAvail(this)">14:00</div><div class="avail-slot free" onclick="toggleAvail(this)">15:00</div><div class="avail-slot free" onclick="toggleAvail(this)">16:00</div><div class="avail-slot free" onclick="toggleAvail(this)">17:00</div><div class="avail-slot free" onclick="toggleAvail(this)">18:00</div><div class="avail-slot free" onclick="toggleAvail(this)">19:00</div><div class="avail-slot free" onclick="toggleAvail(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+            <div class="avail-grid" id="adminAvailGrid">
+                <div class="avail-col"><h3>ראשון</h3><div class="avail-slot free" onclick="handleAdminSlotClick(this)">14:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">15:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">16:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">17:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">18:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">19:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>שני</h3><div class="avail-slot free" onclick="handleAdminSlotClick(this)">14:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">15:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">16:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">17:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">18:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">19:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>שלישי</h3><div class="avail-slot free" onclick="handleAdminSlotClick(this)">14:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">15:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">16:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">17:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">18:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">19:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>רביעי</h3><div class="avail-slot free" onclick="handleAdminSlotClick(this)">14:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">15:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">16:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">17:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">18:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">19:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>חמישי</h3><div class="avail-slot free" onclick="handleAdminSlotClick(this)">14:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">15:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">16:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">17:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">18:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">19:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>שישי</h3><div class="avail-slot free" onclick="handleAdminSlotClick(this)">14:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">15:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">16:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">17:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">18:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">19:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
+                <div class="avail-col"><h3>שבת</h3><div class="avail-slot free" onclick="handleAdminSlotClick(this)">14:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">15:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">16:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">17:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">18:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">19:00</div><div class="avail-slot free" onclick="handleAdminSlotClick(this)">20:00</div><button class="copy-btn" onclick="copyDayAvail(this)">העתק לשבוע הבא</button></div>
             </div>
-            <button class="btn" style="margin-top: 2rem;" onclick="showToast('הזמינות עודכנה!')">שמור זמינות</button>
+            <button class="btn btn-mini" style="margin-top: 2rem;" onclick="showToast('הזמינות עודכנה!')">שמור זמינות</button>
         </div>
 
     </div>
@@ -733,14 +743,17 @@ function renderAdminBookings() {
       let actionBtns = '';
       if (b.status === 'בוטל') {
           actionBtns = `
-            <button class="btn btn-sm" onclick="restoreBookingDB('${doc.id}')">שחזר</button>
-            <button class="btn btn-sm btn-danger" onclick="permanentlyDeleteDB('${doc.id}')">מחק</button>
-            <button class="btn btn-sm btn-danger" onclick='deleteFromCalendar(${JSON.stringify(b).replace(/'/g, "&#39;")})'>מחק מגוגל קלנדר</button>
+            <button class="btn btn-mini" onclick="restoreBookingDB('${doc.id}')">שחזר</button>
+            <button class="btn btn-mini btn-danger" onclick="permanentlyDeleteDB('${doc.id}')">מחק</button>
+            <button class="btn btn-mini btn-danger" onclick='deleteFromCalendar(${JSON.stringify(b).replace(/'/g, "&#39;")})'>מחק מגוגל קלנדר</button>
           `;
       } else {
-          actionBtns = `<button class="btn btn-sm btn-danger" onclick="cancelBookingDB('${doc.id}', this)">בטל שיעור</button>`;
+          actionBtns = `
+            <button class="btn btn-mini btn-outline" onclick="startReschedule('${doc.id}', '${b.name}')">הזז שיעור</button>
+            <button class="btn btn-mini btn-danger" onclick="cancelBookingDB('${doc.id}', this)">בטל שיעור</button>
+          `;
           if (b.status === 'ממתין') {
-              actionBtns = `<button class="btn btn-sm btn-outline" onclick="approveBookingDB('${doc.id}', this)">אשר שיעור</button>` + actionBtns;
+              actionBtns = `<button class="btn btn-mini btn-outline" onclick="approveBookingDB('${doc.id}', this)">אשר שיעור</button>` + actionBtns;
           }
       }
       div.innerHTML = `<div class="schedule-info"><strong>${b.name || ''} - ${b.phone || ''}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.lessonFormat || ''} | ${b.date || ''}, ${b.time || ''}</span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
@@ -767,33 +780,107 @@ function renderAvailGrid() {
     col.querySelector('h3').style.whiteSpace = 'pre';
     col.querySelector('h3').dataset.date = dateISO;
     
-    // Reset all slots for this column
-    col.querySelectorAll('.avail-slot').forEach(slot => slot.classList.add('free'));
+    col.querySelectorAll('.avail-slot').forEach(slot => {
+      slot.classList.add('free');
+      slot.classList.remove('booked');
+      slot.onmouseover = null;
+      slot.onmouseout = null;
+    });
   });
 
-  // Load availability for this specific week
   const start = new Date(sunday).toISOString().split('T')[0];
   const end = new Date(sunday);
   end.setDate(sunday.getDate() + 7);
   const endStr = end.toISOString().split('T')[0];
 
-  db.collection("availability")
-    .where("date", ">=", start)
-    .where("date", "<", endStr)
-    .get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        cols.forEach(col => {
-          if (col.querySelector('h3').dataset.date === data.date) {
-            col.querySelectorAll('.avail-slot').forEach(slot => {
-              if (slot.innerText.trim() === data.time) {
-                if (data.isFree) slot.classList.add('free');
-                else slot.classList.remove('free');
+  // Fetch Bookings for current week to show in grid
+  db.collection("bookings").where("date", ">=", start).where("date", "<", endStr).get().then(bookingSnap => {
+      const weekBookings = [];
+      bookingSnap.forEach(d => {
+          const b = d.data();
+          if(b.status !== 'בוטל') weekBookings.push(b);
+      });
+
+      db.collection("availability")
+        .where("date", ">=", start)
+        .where("date", "<", endStr)
+        .get().then(snapshot => {
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            cols.forEach(col => {
+              if (col.querySelector('h3').dataset.date === data.date) {
+                col.querySelectorAll('.avail-slot').forEach(slot => {
+                  if (slot.innerText.trim() === data.time) {
+                    if (data.isFree) slot.classList.add('free');
+                    else slot.classList.remove('free');
+                  }
+                });
               }
             });
-          }
+          });
+
+          // Overlay bookings onto grid
+          weekBookings.forEach(b => {
+              cols.forEach(col => {
+                  if (col.querySelector('h3').dataset.date === b.date) {
+                      col.querySelectorAll('.avail-slot').forEach(slot => {
+                          if (slot.innerText.trim() === b.time) {
+                              slot.classList.remove('free');
+                              slot.classList.add('booked');
+                              slot.onmouseover = (e) => showSlotTooltip(e, b);
+                              slot.onmouseout = hideSlotTooltip;
+                          }
+                      });
+                  }
+              });
+          });
         });
-      });
+  });
+}
+
+function showSlotTooltip(e, b) {
+    let t = document.getElementById('slot-tooltip');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'slot-tooltip';
+        t.className = 'slot-tooltip';
+        document.body.appendChild(t);
+    }
+    t.innerHTML = `<strong>${b.name}</strong><span>${b.topic}</span>`;
+    t.style.display = 'block';
+    t.style.left = (e.pageX + 10) + 'px';
+    t.style.top = (e.pageY - 40) + 'px';
+}
+function hideSlotTooltip() {
+    const t = document.getElementById('slot-tooltip');
+    if (t) t.style.display = 'none';
+}
+
+let rescheduleBookingId = null;
+function startReschedule(id, name) {
+    rescheduleBookingId = id;
+    showToast(`מזיז את השיעור של ${name}... בחר מועד חדש ביומן למטה`);
+    document.getElementById('adminAvailGrid').scrollIntoView({ behavior: 'smooth' });
+}
+
+function handleAdminSlotClick(el) {
+    if (rescheduleBookingId) {
+        completeReschedule(el);
+    } else {
+        toggleAvail(el);
+    }
+}
+
+function completeReschedule(el) {
+    const date = el.parentElement.querySelector('h3').dataset.date;
+    const time = el.innerText.trim();
+    db.collection("bookings").doc(rescheduleBookingId).update({
+        date: date,
+        time: time
+    }).then(() => {
+        showToast("השיעור הועבר בהצלחה");
+        rescheduleBookingId = null;
+        renderAvailGrid();
     });
 }
 
