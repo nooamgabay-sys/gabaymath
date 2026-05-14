@@ -74,12 +74,12 @@ select option { background: var(--bg); color: var(--text); }
 .time-slot { padding: 1.2rem; text-align: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; font-size: 1.2rem; transition: 0.3s; color: #fff; font-weight: 600; }
 .time-slot:hover { border-color: var(--gold); background: rgba(201, 168, 76, 0.1); }
 .time-slot.selected { background: var(--gold) !important; color: #000 !important; font-weight: bold; box-shadow: 0 0 20px var(--glow); border-color: var(--gold) !important; opacity: 1 !important; }
-.time-slot.occupied { background: rgba(255, 255, 255, 0.05) !important; color: rgba(255, 255, 255, 0.2) !important; cursor: not-allowed !important; border: 1px solid rgba(255,255,255,0.1) !important; opacity: 0.3 !important; }
+.time-slot.occupied, .time-slot.past { background: rgba(255, 255, 255, 0.05) !important; color: rgba(255, 255, 255, 0.2) !important; cursor: not-allowed !important; border: 1px solid rgba(255,255,255,0.1) !important; opacity: 0.3 !important; filter: grayscale(1); }
 
 body.light-mode .time-slot { background: #ffffff; border: 1px solid #ddd; color: #121212; }
 body.light-mode .time-slot:hover { background: rgba(201, 168, 76, 0.05); border-color: var(--gold); }
-body.light-mode .time-slot.selected { background: #c9a84c !important; color: #ffffff !important; box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4); border-color: #c9a84c !important; }
-body.light-mode .time-slot.occupied { background: #f0f0f0 !important; color: #ccc !important; border-color: #eee !important; }
+body.light-mode .time-slot.selected { background: #c9a84c !important; color: #ffffff !important; box-shadow: 0 8px 25px rgba(201, 168, 76, 0.4); border-color: #c9a84c !important; }
+body.light-mode .time-slot.occupied, body.light-mode .time-slot.past { background: #f0f0f0 !important; color: #ccc !important; border-color: #eee !important; filter: grayscale(1); }
 body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 800 !important; }
 
 .progress { display: flex; justify-content: space-between; margin-bottom: 3rem; position: relative; }
@@ -560,7 +560,7 @@ function selectChip(el) {
 }
 
 function selectTime(el) {
-    if (el.classList.contains('occupied')) return;
+    if (el.classList.contains('occupied') || el.classList.contains('past')) return;
     document.querySelectorAll('.time-slot').forEach(e => e.classList.remove('selected'));
     el.classList.add('selected');
     updateBookingSummary();
@@ -577,8 +577,22 @@ function checkAvailability(date) {
     grid.style.display = 'grid';
     help.style.display = 'block';
     
+    const now = new Date();
+    const israelTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Jerusalem"}));
+    const todayStr = israelTime.toISOString().split('T')[0];
+    const currentHour = israelTime.getHours();
+    const currentMin = israelTime.getMinutes();
+
     document.querySelectorAll('.time-slot').forEach(slot => {
-        slot.classList.remove('selected', 'occupied');
+        slot.classList.remove('selected', 'occupied', 'past');
+        
+        // Block past slots for today
+        if (date === todayStr) {
+            const [h, m] = slot.innerText.trim().split(':').map(Number);
+            if (h < currentHour || (h === currentHour && m <= currentMin)) {
+                slot.classList.add('past');
+            }
+        }
     });
 
     // Check date-specific availability blocks
