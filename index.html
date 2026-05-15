@@ -239,8 +239,9 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
                 <input type="tel" id="fphone" placeholder="050-0000000">
             </div>
             <div class="input-group">
-                <label>כתובת אימייל</label>
+                <label>כתובת אימייל (מומלץ)</label>
                 <input type="email" id="femail" placeholder="example@email.com">
+                <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.5rem; color: var(--text);">* המייל אינו חובה, אך מומלץ להזינו כדי לקבל תזכורות ועדכונים על השיעור.</p>
             </div>
             <div class="input-group">
                 <label>צורת שיעור</label>
@@ -660,10 +661,10 @@ function confirmBooking() {
     const subject = selectedChips.map(c => c.innerText).join(', ');
     const errorDiv = document.getElementById('formError');
     
-    // Safety check: ensure everything is selected before even attempting a push
-    if (!fname || !femail || !dateInput || !timeSlot || !gradeValue) {
+    // Email is now OPTIONAL, so we only check Name, Date, Time, and Grade.
+    if (!fname || !dateInput || !timeSlot || !gradeValue) {
         if(errorDiv) {
-            errorDiv.innerText = 'נא למלא שם, אימייל, לבחור רמה, תאריך ושעה.';
+            errorDiv.innerText = 'נא למלא שם, לבחור רמה, תאריך ושעה.';
             errorDiv.style.display = 'block';
         }
         return;
@@ -707,7 +708,13 @@ function confirmBooking() {
         time: selectedTime,
         comments: document.getElementById('fcomments').value || '',
         status: "ממתין",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        // Reminder flags for backend scheduling (24h and 2h before)
+        reminders: {
+            confirmationSent: false,
+            h24Sent: false,
+            h2Sent: false
+        }
     };
 
     const submitBtn = document.getElementById('submitBtn');
@@ -719,7 +726,10 @@ function confirmBooking() {
 
     // ONLY push to Firestore here - never on slot click
     db.collection("bookings").add(newBooking).then(() => {
-        sendNotification('new_booking', newBooking);
+        // Only send immediate confirmation if email was provided
+        if (femail) {
+            sendNotification('new_booking', newBooking);
+        }
         
         // Success flow
         const startDate = dateInput.replace(/-/g, '') + 'T' + selectedTime.replace(':', '') + '00';
