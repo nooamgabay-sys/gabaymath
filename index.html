@@ -335,11 +335,15 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
     </div>
 </section>
 
-<!-- PERSONAL AREA SECTION (Isolated) -->
 <section id="my-lessons" style="display:none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2000; background: var(--bg); overflow-y: auto;">
     <div style="width: 100%; max-width: 800px; padding: 4rem 2rem; margin: 0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 3rem;">
-            <h2 style="margin-bottom: 0;">השיעורים שלי</h2>
+            <div style="display:flex; align-items:center; gap: 1rem;">
+                <h2 style="margin-bottom: 0;">השיעורים שלי</h2>
+                <button id="refreshStudentBtn" class="theme-btn" onclick="fetchMyLessons()" style="width: 38px; height: 38px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                </button>
+            </div>
             <button class="btn btn-sm btn-outline" onclick="logoutStudent()">חזרה לדף הבית</button>
         </div>
         
@@ -818,10 +822,12 @@ function fetchMyLessons() {
     const list = document.getElementById('lessonsList');
     const resultArea = document.getElementById('lessonsResult');
     const loginArea = document.getElementById('loginArea');
+    const refreshBtn = document.getElementById('refreshStudentBtn');
     
     list.innerHTML = '<p style="text-align:center; padding: 2rem;">טוען את השיעורים שלך...</p>';
     loginArea.style.display = 'none';
     resultArea.style.display = 'block';
+    if (refreshBtn) refreshBtn.style.display = 'flex';
     
     db.collection("bookings").where("phone", "==", phone).get().then(snap => {
         if (snap.empty) {
@@ -863,6 +869,8 @@ function fetchMyLessons() {
 function backToLogin() {
     document.getElementById('loginArea').style.display = 'block';
     document.getElementById('lessonsResult').style.display = 'none';
+    const refreshBtn = document.getElementById('refreshStudentBtn');
+    if (refreshBtn) refreshBtn.style.display = 'none';
 }
 
 function openStudentArea() {
