@@ -78,7 +78,7 @@ select option { background: var(--bg); color: var(--text); }
 .time-slot { padding: 1.2rem; text-align: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; font-size: 1.2rem; transition: 0.3s; color: #fff; font-weight: 600; }
 .time-slot:hover { border-color: var(--gold); background: rgba(201, 168, 76, 0.1); }
 .time-slot.selected { background: var(--gold) !important; color: #000 !important; font-weight: bold; box-shadow: 0 0 20px var(--glow); border-color: var(--gold) !important; opacity: 1 !important; }
-.time-slot.occupied, .time-slot.past { background: rgba(255, 255, 255, 0.05) !important; color: rgba(255, 255, 255, 0.2) !important; cursor: not-allowed !important; border: 1px solid rgba(255,255,255,0.1) !important; opacity: 0.3 !important; filter: grayscale(1); }
+.time-slot.occupied, .time-slot.past { background: rgba(255, 255, 255, 0.05) !important; color: rgba(255, 255, 255, 0.2) !important; cursor: not-allowed !important; border: 1px solid rgba(255,255,255,0.1) !important; opacity: 0.2 !important; filter: grayscale(1); pointer-events: none !important; }
 
 body.light-mode .time-slot { background: #ffffff; border: 1px solid #ddd; color: #121212; }
 body.light-mode .time-slot:hover { background: rgba(201, 168, 76, 0.05); border-color: var(--gold); }
@@ -241,7 +241,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
             <div class="input-group">
                 <label>כתובת אימייל (מומלץ)</label>
                 <input type="email" id="femail" placeholder="example@email.com">
-                <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.5rem; color: var(--text);">* המייל אינו חובה, אך מומלץ להזינו כדי לקבל תזכורות ועדכונים על השיעור.</p>
+                <p style="font-size: 0.85rem; opacity: 0.7; margin-top: 5px; color: var(--text);">* המייל אינו חובה, אך מומלץ לקבלת תזכורות.</p>
             </div>
             <div class="input-group">
                 <label>צורת שיעור</label>
@@ -726,10 +726,8 @@ function confirmBooking() {
 
     // ONLY push to Firestore here - never on slot click
     db.collection("bookings").add(newBooking).then(() => {
-        // Only send immediate confirmation if email was provided
-        if (femail) {
-            sendNotification('new_booking', newBooking);
-        }
+        // Trigger both Admin and Student notifications
+        sendNotification('new_booking', newBooking);
         
         // Success flow
         const startDate = dateInput.replace(/-/g, '') + 'T' + selectedTime.replace(':', '') + '00';
@@ -1050,25 +1048,39 @@ function approveBookingDB(id, btn) {
 }
 
 function sendNotification(type, bookingData) {
-  if (!bookingData.email) return;
-  emailjs.send("service_uiiqhnd", "template_e6swvbo", {
+  // 1. Always send to Admin
+  const adminParams = {
+    to_email: "gabaymath@gmail.com",
     student_name: bookingData.name,
     date: bookingData.date,
     time: bookingData.time,
     topic: bookingData.topic,
     grade: bookingData.grade,
-    phone: bookingData.phone,
-    email: bookingData.email,
+    phone: bookingData.phone || 'לא הוזן',
+    email: bookingData.email || 'לא הוזן',
     lesson_format: bookingData.lessonFormat,
     user_comments: bookingData.comments || '',
-    type: type
-  }, "JI7HdPnpg063aq0Pl").then((response) => {
-    console.log('EmailJS Success:', response.status, response.text);
-    showToast('אימייל נשלח בהצלחה!');
-  }).catch(err => {
-    console.error('EmailJS Error:', err);
-    showToast('שגיאה: ' + JSON.stringify(err));
-  });
+    type: "ADMIN_NOTIFICATION"
+  };
+  emailjs.send("service_uiiqhnd", "template_e6swvbo", adminParams, "JI7HdPnpg063aq0Pl");
+
+  // 2. Send to Student ONLY if email exists
+  if (bookingData.email) {
+    const studentParams = {
+      to_email: bookingData.email,
+      student_name: bookingData.name,
+      date: bookingData.date,
+      time: bookingData.time,
+      topic: bookingData.topic,
+      grade: bookingData.grade,
+      phone: bookingData.phone,
+      email: bookingData.email,
+      lesson_format: bookingData.lessonFormat,
+      user_comments: bookingData.comments || '',
+      type: type
+    };
+    emailjs.send("service_uiiqhnd", "template_e6swvbo", studentParams, "JI7HdPnpg063aq0Pl");
+  }
 }
 
 function deleteFromCalendar(booking) {
