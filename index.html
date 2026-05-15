@@ -838,6 +838,7 @@ function fetchMyLessons() {
         let html = '';
         lessons.forEach(b => {
             const statusClass = b.status === 'מאושר' ? 'approved' : (b.status === 'בוטל' ? 'cancelled' : 'pending');
+            const displayStatus = b.status === 'ממתין' ? 'ממתין לאישור' : b.status;
             html += `
                 <div class="glass no-hover" style="padding: 1.2rem; border: 1px solid var(--border); background: rgba(255,255,255,0.02);">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -846,7 +847,7 @@ function fetchMyLessons() {
                             <div style="font-size:0.95rem; opacity:0.9;">${b.topic}</div>
                             <div style="font-size:0.85rem; opacity:0.6; margin-top: 4px;">רמה: ${b.grade}</div>
                         </div>
-                        <div class="badge ${statusClass}">${b.status}</div>
+                        <div class="badge ${statusClass}">${displayStatus}</div>
                     </div>
                 </div>
             `;
