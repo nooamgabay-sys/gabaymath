@@ -1127,8 +1127,18 @@ function resetForm() {
   document.querySelectorAll('.chip').forEach(e => e.classList.remove('selected'));
   document.querySelectorAll('.time-slot').forEach(e => e.classList.remove('selected'));
   document.getElementById('bookingSummary').style.display = 'none';
+  
+  // Re-enable the submit button for subsequent bookings
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'סיים וקבע שיעור';
+    submitBtn.style.opacity = '1';
+  }
+  
   maxReachedStep = 1;
   nextStep(1);
+  document.querySelector('.progress').style.display = 'flex';
 }
 
 function showToast(msg) {
