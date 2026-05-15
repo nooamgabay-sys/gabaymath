@@ -189,7 +189,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
         <button id="themeToggle" class="theme-btn" onclick="toggleTheme()"></button>
         <a href="#hero" onclick="logoutAdmin()">ראשי</a>
         <a href="#book" onclick="logoutAdmin()">קביעת שיעור</a>
-        <a href="#my-lessons" onclick="logoutAdmin()">השיעורים שלי</a>
+        <a href="javascript:void(0)" onclick="openStudentArea()">כניסה לתלמידים</a>
     </div>
 </nav>
 
@@ -335,23 +335,29 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
     </div>
 </section>
 
-<!-- PERSONAL AREA SECTION -->
-<section id="my-lessons">
-    <h2>השיעורים שלי</h2>
-    <div class="glass form-container" style="max-width: 600px;">
-        <div id="loginArea">
-            <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הזן את מספר הטלפון שלך כדי לצפות בשיעורים שקבעת:</p>
-            <div class="input-group">
-                <label>מספר טלפון</label>
-                <input type="tel" id="myPhone" placeholder="050-0000000">
-            </div>
-            <button class="btn" onclick="fetchMyLessons()" style="width: 100%; margin-top: 1rem;">הצג את השיעורים שלי</button>
+<!-- PERSONAL AREA SECTION (Isolated) -->
+<section id="my-lessons" style="display:none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2000; background: var(--bg); overflow-y: auto;">
+    <div style="width: 100%; max-width: 800px; padding: 4rem 2rem; margin: 0 auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 3rem;">
+            <h2 style="margin-bottom: 0;">אזור אישי - תלמידים</h2>
+            <button class="btn btn-sm btn-outline" onclick="logoutStudent()">יציאה לדף הבית</button>
         </div>
-        <div id="lessonsResult" style="display: none; margin-top: 1rem;">
-            <div id="lessonsList" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem;">
-                <!-- Lessons will appear here -->
+        
+        <div class="glass form-container" style="max-width: 600px; margin: 0 auto;">
+            <div id="loginArea">
+                <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הזן את מספר הטלפון שלך כדי לצפות בשיעורים שקבעת:</p>
+                <div class="input-group">
+                    <label>מספר טלפון</label>
+                    <input type="tel" id="myPhone" placeholder="050-0000000">
+                </div>
+                <button class="btn" onclick="fetchMyLessons()" style="width: 100%; margin-top: 1rem;">הצג את השיעורים שלי</button>
             </div>
-            <button class="btn btn-outline" onclick="backToLogin()" style="width: 100%; margin-top: 1.5rem;">חזור</button>
+            <div id="lessonsResult" style="display: none; margin-top: 1rem;">
+                <div id="lessonsList" style="max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem;">
+                    <!-- Lessons will appear here -->
+                </div>
+                <button class="btn btn-outline" onclick="backToLogin()" style="width: 100%; margin-top: 1.5rem;">חזור להתחברות</button>
+            </div>
         </div>
     </div>
 </section>
@@ -856,6 +862,28 @@ function fetchMyLessons() {
 function backToLogin() {
     document.getElementById('loginArea').style.display = 'block';
     document.getElementById('lessonsResult').style.display = 'none';
+}
+
+function openStudentArea() {
+    logoutAdminNoConfirm();
+    document.getElementById('book').classList.add('admin-hidden');
+    document.getElementById('hero').classList.add('admin-hidden');
+    document.getElementById('my-lessons').style.display = 'flex';
+    window.scrollTo(0,0);
+}
+
+function logoutStudent() {
+    document.getElementById('book').classList.remove('admin-hidden');
+    document.getElementById('hero').classList.remove('admin-hidden');
+    document.getElementById('my-lessons').style.display = 'none';
+}
+
+function logoutAdminNoConfirm() {
+    document.getElementById('adminDashboard').style.display = 'none';
+    document.getElementById('book').classList.remove('admin-hidden');
+    document.getElementById('hero').classList.remove('admin-hidden');
+    document.querySelectorAll('.sym').forEach(s => s.style.animationPlayState = 'running');
+    document.querySelectorAll('.math-bg').forEach(b => b.style.display = 'block');
 }
 
 function togglePass() {
