@@ -189,6 +189,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
         <button id="themeToggle" class="theme-btn" onclick="toggleTheme()"></button>
         <a href="#hero" onclick="logoutAdmin()">ראשי</a>
         <a href="#book" onclick="logoutAdmin()">קביעת שיעור</a>
+        <a href="#my-lessons" onclick="logoutAdmin()">השיעורים שלי</a>
     </div>
 </nav>
 
@@ -330,6 +331,27 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
         <div id="success" class="step">
             <h3 style="color: #4ade80;">השיעור מופיע בגוגל קלנדר שלך 🎉</h3>
             <button class="btn" style="margin-top: 2rem;" onclick="resetForm()">📅 קבע עוד שיעור</button>
+        </div>
+    </div>
+</section>
+
+<!-- PERSONAL AREA SECTION -->
+<section id="my-lessons">
+    <h2>השיעורים שלי</h2>
+    <div class="glass form-container" style="max-width: 600px;">
+        <div id="loginArea">
+            <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הזן את מספר הטלפון שלך כדי לצפות בשיעורים שקבעת:</p>
+            <div class="input-group">
+                <label>מספר טלפון</label>
+                <input type="tel" id="myPhone" placeholder="050-0000000">
+            </div>
+            <button class="btn" onclick="fetchMyLessons()" style="width: 100%; margin-top: 1rem;">הצג את השיעורים שלי</button>
+        </div>
+        <div id="lessonsResult" style="display: none; margin-top: 1rem;">
+            <div id="lessonsList" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem;">
+                <!-- Lessons will appear here -->
+            </div>
+            <button class="btn btn-outline" onclick="backToLogin()" style="width: 100%; margin-top: 1.5rem;">חזור</button>
         </div>
     </div>
 </section>
@@ -778,6 +800,62 @@ function loginAdmin() {
     } else {
         alert('סיסמה שגויה');
     }
+}
+
+function fetchMyLessons() {
+    const phone = document.getElementById('myPhone').value.trim();
+    if (!phone) {
+        showToast('נא להזין מספר טלפון');
+        return;
+    }
+    
+    const list = document.getElementById('lessonsList');
+    const resultArea = document.getElementById('lessonsResult');
+    const loginArea = document.getElementById('loginArea');
+    
+    list.innerHTML = '<p style="text-align:center; padding: 2rem;">טוען את השיעורים שלך...</p>';
+    loginArea.style.display = 'none';
+    resultArea.style.display = 'block';
+    
+    db.collection("bookings").where("phone", "==", phone).get().then(snap => {
+        if (snap.empty) {
+            list.innerHTML = '<div style="text-align:center; padding: 2rem; opacity:0.7">לא נמצאו שיעורים עתידיים למספר זה.</div>';
+            return;
+        }
+        
+        let lessons = [];
+        snap.forEach(doc => lessons.push(doc.data()));
+        
+        // Sort by date descending locally
+        lessons.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+        
+        let html = '';
+        lessons.forEach(b => {
+            const statusClass = b.status === 'מאושר' ? 'approved' : (b.status === 'בוטל' ? 'cancelled' : 'pending');
+            html += `
+                <div class="glass no-hover" style="padding: 1.2rem; border: 1px solid var(--border); background: rgba(255,255,255,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:800; color:var(--gold); font-size:1.1rem; margin-bottom: 4px;">${b.date} | ${b.time}</div>
+                            <div style="font-size:0.95rem; opacity:0.9;">${b.topic}</div>
+                            <div style="font-size:0.85rem; opacity:0.6; margin-top: 4px;">רמה: ${b.grade}</div>
+                        </div>
+                        <div class="badge ${statusClass}">${b.status}</div>
+                    </div>
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+    }).catch(err => {
+        console.error(err);
+        showToast('שגיאה בטעינת השיעורים');
+        backToLogin();
+    });
+}
+
+function backToLogin() {
+    document.getElementById('loginArea').style.display = 'block';
+    document.getElementById('lessonsResult').style.display = 'none';
 }
 
 function togglePass() {
