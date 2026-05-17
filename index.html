@@ -12,171 +12,610 @@
 <script src="https://npmcdn.com/flatpickr/dist/l10n/he.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
-:root { --bg: #121212; --card-bg: #1e1e1e; --nav-bg: #121212; --gold: #c9a84c; --yellow: #ffcc33; --text: #e0e0e0; --text-muted: rgba(255,255,255,0.6); --border: rgba(255,255,255,0.08); --glow: rgba(201, 168, 76, 0.4); --yellow-glow: rgba(255,204,51,0.5); --sym-color: rgba(201, 168, 76, 0.15); }
-body.light-mode { --bg: #f5f5f5; --card-bg: #ffffff; --nav-bg: #ffffff; --text: #121212; --text-muted: rgba(18,18,18,0.7); --border: rgba(0,0,0,0.1); --glow: rgba(201, 168, 76, 0.2); --sym-color: rgba(18,18,18,0.1); }
+/* ── CSS VARIABLES ─────────────────────────────────── */
+:root {
+  --bg: #0a0a0a;
+  --card-bg: rgba(22, 22, 22, 0.65);
+  --nav-bg: rgba(8, 8, 8, 0.88);
+  --gold: #c9a84c;
+  --yellow: #ffcc33;
+  --text: #e8e8e8;
+  --text-muted: rgba(255,255,255,0.52);
+  --border: rgba(255,255,255,0.07);
+  --border-gold: rgba(201, 168, 76, 0.22);
+  --glow: rgba(201, 168, 76, 0.4);
+  --yellow-glow: rgba(255,204,51,0.5);
+  --sym-color: rgba(201, 168, 76, 0.11);
+}
+body.light-mode {
+  --bg: #f2f2f2;
+  --card-bg: rgba(255,255,255,0.72);
+  --nav-bg: rgba(255,255,255,0.88);
+  --text: #121212;
+  --text-muted: rgba(18,18,18,0.62);
+  --border: rgba(0,0,0,0.07);
+  --border-gold: rgba(201, 168, 76, 0.3);
+  --glow: rgba(201, 168, 76, 0.22);
+  --sym-color: rgba(18,18,18,0.07);
+}
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Heebo', sans-serif; }
 html { scroll-behavior: smooth; }
 body { background-color: var(--bg); color: var(--text); overflow-x: hidden; min-height: 100vh; }
-section { padding: 8rem 2rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+section { padding: 8rem 2rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; opacity: 0; transform: translateY(32px); transition: opacity 0.75s ease-out, transform 0.75s ease-out; }
 section.reveal { opacity: 1; transform: translateY(0); }
-::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar { width: 7px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--gold), #7a5a20); border-radius: 4px; }
 ::placeholder { color: var(--text-muted) !important; opacity: 1; }
-nav { position: fixed; top: 0; width: 100%; background: var(--nav-bg); z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-bottom: 2px solid var(--gold); transition: 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-nav a { color: var(--text); text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: 0.3s; cursor: pointer; position: relative; }
-nav .links { display: flex; gap: 40px; align-items: center; }
-nav a:hover { color: var(--gold); text-shadow: 0 0 10px var(--glow); }
+
+/* ── NAV ─────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; width: 100%;
+  background: var(--nav-bg);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  z-index: 100; display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border-gold);
+  transition: padding 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.6);
+}
+nav a {
+  color: var(--text-muted); text-decoration: none; font-weight: 600;
+  font-size: 1.05rem; transition: color 0.3s; cursor: pointer;
+  position: relative; padding-bottom: 4px;
+}
+nav .links { display: flex; gap: 36px; align-items: center; }
+nav a:hover, nav a.nav-active { color: var(--gold); }
+nav a::after {
+  content: ''; position: absolute; bottom: -2px; left: 0;
+  width: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), rgba(201,168,76,0.4));
+  border-radius: 1px; transition: width 0.3s ease;
+  box-shadow: 0 0 8px var(--glow);
+}
+nav a:hover::after, nav a.nav-active::after { width: 100%; }
 .admin-hidden { display: none !important; }
-nav .logo { color: var(--gold); font-weight: 800; font-size: 1.5rem; letter-spacing: 1px; cursor: default !important; }
-
-.glass { background: var(--card-bg); border: 1px solid var(--border); border-radius: 15px; padding: 2.5rem; transition: all 0.4s ease; }
-.glass:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.4); border-color: var(--gold); }
-.no-hover:hover { transform: none; box-shadow: none; }
-
-
-h1 { font-size: 4.5rem; font-weight: 800; text-align: center; position: relative; margin-bottom: 1.5rem; animation: slideDown 1s ease forwards; opacity: 0; }
-@keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-h1::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 120px; height: 4px; background: var(--gold); box-shadow: 0 0 15px var(--glow); border-radius: 2px; }
-h2 { font-size: 2.8rem; margin-bottom: 3rem; color: var(--gold); text-align: center; }
-
-.btn { background: var(--gold); color: #000; border: none; padding: 1.2rem 2.5rem; font-size: 1.3rem; font-weight: 800; border-radius: 12px; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-.btn:hover { background: var(--yellow); transform: translateY(-3px); box-shadow: 0 8px 25px var(--yellow-glow); }
-.btn:active { transform: scale(0.96); }
-
-.math-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; }
-.sym { position: absolute; font-size: 3rem; color: var(--sym-color); animation: float linear infinite; font-weight: 300; }
-@keyframes float { 
-    0% { transform: translateY(110vh) rotate(0deg); } 
-    50% { transform: translateY(45vh) rotate(180deg) translateX(15px); }
-    100% { transform: translateY(-20vh) rotate(360deg); } 
+nav .logo {
+  color: var(--gold); font-weight: 800; font-size: 1.5rem;
+  letter-spacing: 1px; cursor: default !important;
+  text-shadow: 0 0 20px rgba(201,168,76,0.25);
 }
 
+/* ── GLASSMORPHISM ────────────────────────────────── */
+.glass {
+  background: var(--card-bg);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 2.5rem;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.glass:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px var(--border-gold);
+  border-color: var(--border-gold);
+}
+.no-hover:hover { transform: none !important; box-shadow: none !important; border-color: var(--border) !important; }
+
+/* ── TYPOGRAPHY ──────────────────────────────────── */
+h1 {
+  font-size: 4.5rem; font-weight: 800; text-align: center; position: relative;
+  margin-bottom: 1.5rem; opacity: 0;
+  background: linear-gradient(135deg, #fff 0%, var(--gold) 45%, #fff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  background-size: 200% auto;
+  animation: slideDown 1s ease forwards, shimmer 5s linear 1s infinite;
+}
+@keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+h1::after {
+  content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
+  width: 100px; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  border-radius: 2px;
+}
+h2 { font-size: 2.8rem; margin-bottom: 3rem; color: var(--gold); text-align: center; }
+
+/* ── BUTTONS ──────────────────────────────────────── */
+.btn {
+  background: linear-gradient(135deg, var(--gold) 0%, #a07828 100%);
+  color: #000; border: none; padding: 1.2rem 2.5rem;
+  font-size: 1.3rem; font-weight: 800; border-radius: 14px; cursor: pointer;
+  text-decoration: none; display: inline-block;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  position: relative; overflow: hidden;
+}
+.btn::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transition: left 0.5s ease;
+}
+.btn:hover::before { left: 100%; }
+.btn:hover {
+  background: linear-gradient(135deg, var(--yellow) 0%, var(--gold) 100%);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.35), 0 0 28px var(--glow);
+}
+.btn:active { transform: scale(0.97); }
+
+/* ── FLOATING MATH BG ─────────────────────────────── */
+.math-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; }
+.sym { position: absolute; font-size: 3rem; color: var(--sym-color); animation: float linear infinite; font-weight: 300; }
+@keyframes float {
+  0% { transform: translateY(110vh) rotate(0deg); }
+  50% { transform: translateY(45vh) rotate(180deg) translateX(15px); }
+  100% { transform: translateY(-20vh) rotate(360deg); }
+}
+
+/* ── STATS ──────────────────────────────────────────── */
 .stats { display: flex; gap: 2.5rem; width: 100%; max-width: 1100px; margin-top: 4rem; opacity: 0; animation: slideUp 1s 0.5s ease forwards; }
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .stats .glass { flex: 1; text-align: center; font-size: 1.4rem; font-weight: 600; }
-.stats .glass span { display: block; font-size: 3.5rem; color: var(--gold); margin-bottom: 1rem; text-shadow: 0 0 20px var(--glow); }
+.stats .glass span { display: block; font-size: 3.5rem; color: var(--gold); margin-bottom: 1rem; text-shadow: 0 0 25px var(--glow); }
 
+/* ── FORM / BOOKING FLOW ──────────────────────────── */
 .form-container { width: 100%; max-width: 650px; position: relative; overflow: hidden; }
-.step { display: none; animation: fadeSlide .6s ease; }
+.step { display: none; animation: fadeSlide .5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 .step.active { display: block; }
-@keyframes fadeSlide { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeSlide { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
 
 .input-group { margin-bottom: 2rem; text-align: right; }
-label { display: block; margin-bottom: 0.8rem; color: var(--text); font-size: 1.1rem; }
-input, select, textarea { width: 100%; padding: 1.2rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-family: inherit; font-size: 1.1rem; transition: 0.3s; resize: vertical; }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 15px var(--glow); background: var(--card-bg); opacity: 0.9; }
+label { display: block; margin-bottom: 0.8rem; color: var(--text); font-size: 1.05rem; font-weight: 600; letter-spacing: 0.3px; }
+input, select, textarea {
+  width: 100%; padding: 1.2rem;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 14px; color: var(--text);
+  font-family: inherit; font-size: 1.1rem;
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s; resize: vertical;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.14), 0 0 22px rgba(201,168,76,0.12);
+  background: rgba(201,168,76,0.04);
+}
 textarea { min-height: 120px; }
-select option { background: var(--bg); color: var(--text); }
+select option { background: #1a1a1a; color: var(--text); }
 
-.chips { display: flex; flex-wrap: wrap; gap: 1rem; }
-.chip { padding: 0.8rem 1.5rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 30px; cursor: pointer; transition: 0.3s; font-size: 1.1rem; color: var(--text); }
-.chip:hover, .chip.selected { background: var(--gold); color: #000; border-color: var(--gold); box-shadow: 0 0 15px var(--glow); font-weight: 600; }
-.chip.selected { background: var(--gold) !important; }
+/* ── CHIPS ───────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.chip {
+  padding: 0.7rem 1.4rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 30px; cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 1rem; color: var(--text-muted);
+  backdrop-filter: blur(8px);
+}
+.chip:hover {
+  background: rgba(201,168,76,0.1);
+  color: var(--gold); border-color: var(--border-gold);
+  transform: translateY(-1px);
+}
+.chip.selected {
+  background: linear-gradient(135deg, var(--gold), #a07828) !important;
+  color: #000 !important; border-color: var(--gold);
+  box-shadow: 0 4px 15px rgba(201,168,76,0.3);
+  font-weight: 700;
+}
 
+/* ── TIME SLOTS ──────────────────────────────────── */
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; }
-.time-slot { padding: 1.2rem; text-align: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; font-size: 1.2rem; transition: 0.3s; color: #fff; font-weight: 600; }
-.time-slot:hover { border-color: var(--gold); background: rgba(201, 168, 76, 0.1); }
-.time-slot.selected { background: var(--gold) !important; color: #000 !important; font-weight: bold; box-shadow: 0 0 20px var(--glow); border-color: var(--gold) !important; opacity: 1 !important; }
-.time-slot.occupied, .time-slot.past { background: rgba(255, 255, 255, 0.05) !important; color: rgba(255, 255, 255, 0.2) !important; cursor: not-allowed !important; border: 1px solid rgba(255,255,255,0.1) !important; opacity: 0.2 !important; filter: grayscale(1); pointer-events: none !important; }
+.time-slot {
+  padding: 1.2rem; text-align: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px; cursor: pointer; font-size: 1.2rem;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  color: var(--text); font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+.time-slot:hover {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  transform: scale(1.07);
+  box-shadow: 0 0 22px rgba(201,168,76,0.2), inset 0 0 14px rgba(201,168,76,0.04);
+  color: var(--gold);
+}
+.time-slot.selected {
+  background: linear-gradient(135deg, var(--gold), #a07828) !important;
+  color: #000 !important; font-weight: 800;
+  box-shadow: 0 4px 22px var(--glow), 0 0 30px rgba(201,168,76,0.2);
+  border-color: var(--gold) !important; opacity: 1 !important;
+  transform: scale(1.06);
+}
+.time-slot.occupied, .time-slot.past {
+  background: rgba(255,255,255,0.02) !important;
+  color: rgba(255,255,255,0.15) !important; cursor: not-allowed !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  opacity: 0.22 !important; filter: grayscale(1); pointer-events: none !important;
+}
 
-body.light-mode .time-slot { background: #ffffff; border: 1px solid #ddd; color: #121212; }
-body.light-mode .time-slot:hover { background: rgba(201, 168, 76, 0.05); border-color: var(--gold); }
-body.light-mode .time-slot.selected { background: #c9a84c !important; color: #ffffff !important; box-shadow: 0 8px 25px rgba(201, 168, 76, 0.4); border-color: #c9a84c !important; }
+body.light-mode .time-slot { background: rgba(255,255,255,0.8); border: 1px solid #ddd; color: #121212; }
+body.light-mode .time-slot:hover { background: rgba(201,168,76,0.07); border-color: var(--gold); }
+body.light-mode .time-slot.selected { background: linear-gradient(135deg,#c9a84c,#a07828) !important; color: #ffffff !important; box-shadow: 0 8px 25px rgba(201,168,76,0.4); border-color: #c9a84c !important; }
 body.light-mode .time-slot.occupied, body.light-mode .time-slot.past { background: #f0f0f0 !important; color: #ccc !important; border-color: #eee !important; filter: grayscale(1); }
 body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 800 !important; }
 
-.progress { display: flex; justify-content: space-between; margin-bottom: 3rem; position: relative; }
-.progress::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 3px; background: var(--border); z-index: 0; }
-.dot { width: 45px; height: 45px; background: var(--bg); border: 3px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; transition: 0.4s; z-index: 1; cursor: pointer; color: var(--text); }
-.dot:hover { border-color: var(--gold); transform: scale(1.1); }
-.dot.active { border-color: var(--gold); background: var(--gold); color: #000 !important; box-shadow: 0 0 20px var(--glow); text-shadow: none; }
+/* ── PROGRESS STEPPER ─────────────────────────────── */
+.progress {
+  display: flex; justify-content: space-between; margin-bottom: 3rem;
+  position: relative; align-items: center;
+}
+.progress::before {
+  content: ''; position: absolute; top: 50%; left: 0; right: 0;
+  height: 2px; background: var(--border); z-index: 0; transform: translateY(-50%);
+}
+.progress-fill {
+  position: absolute; top: 50%; left: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), rgba(201,168,76,0.35));
+  z-index: 0; transform: translateY(-50%); transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+  box-shadow: 0 0 10px var(--glow); width: 0%;
+}
+.dot {
+  width: 46px; height: 46px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.1rem; transition: all 0.4s ease;
+  z-index: 1; cursor: pointer; color: var(--text-muted);
+  backdrop-filter: blur(8px);
+}
+.dot:hover { border-color: var(--gold); transform: scale(1.12); color: var(--gold); }
+.dot.active {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, var(--gold), #a07828);
+  color: #000 !important;
+  box-shadow: 0 0 25px var(--glow);
+  text-shadow: none; transform: scale(1.1);
+}
 
+/* ── ACTIONS ──────────────────────────────────────── */
 .actions { display: flex; justify-content: space-between; margin-top: 3rem; }
-.btn-sm { padding: 0.8rem 1.5rem; font-size: 1.1rem; }
-.btn-outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); }
-.btn-outline:hover { background: var(--gold); color: #000; }
-.btn-danger { background: transparent; border: 2px solid #f87171; color: #f87171; }
-.btn-danger:hover { background: #f87171; color: #000; }
+.btn-sm { padding: 0.8rem 1.5rem; font-size: 1rem; }
+.btn-outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); box-shadow: none; }
+.btn-outline:hover { background: rgba(201,168,76,0.08); color: var(--gold); box-shadow: 0 0 18px rgba(201,168,76,0.14); transform: translateY(-2px) scale(1.01); }
+.btn-danger { background: transparent; border: 2px solid #f87171; color: #f87171; box-shadow: none; }
+.btn-danger:hover { background: rgba(248,113,113,0.08); color: #f87171; box-shadow: 0 0 15px rgba(248,113,113,0.18); transform: translateY(-2px); }
 
-.schedule-list { width: 100%; display: flex; flex-direction: column; gap: 1.5rem; }
-.schedule-item { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border); transition: 0.3s; }
-.schedule-item.approved { background: rgba(74, 222, 128, 0.05); border-color: rgba(74, 222, 128, 0.2); }
-.schedule-item.cancelled { background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.2); }
-.schedule-item:hover { border-color: var(--gold); background: var(--card-bg); filter: brightness(1.1); }
-.schedule-info strong { font-size: 1.3rem; color: var(--text); display: block; margin-bottom: 0.5rem; }
-.schedule-info span { color: var(--text-muted); font-size: 1.1rem; }
-.badge { padding: 0.4rem 1rem; border-radius: 30px; font-size: 0.9rem; font-weight: bold; margin-left: 1rem; display: inline-block; }
-.badge.ok { background: rgba(0,255,0,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
-.badge.wait { background: rgba(255,165,0,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
-.badge.cancel { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+/* ── SCHEDULE LIST ───────────────────────────────── */
+.schedule-list { width: 100%; display: flex; flex-direction: column; gap: 1.2rem; }
+.schedule-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.4rem 1.8rem;
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(12px);
+  border-radius: 16px; border: 1px solid var(--border); transition: all 0.3s ease;
+}
+.schedule-item.approved { background: rgba(74,222,128,0.04); border-color: rgba(74,222,128,0.18); }
+.schedule-item.cancelled { background: rgba(239,68,68,0.04); border-color: rgba(239,68,68,0.18); }
+.schedule-item:hover { border-color: var(--border-gold); background: rgba(201,168,76,0.03); }
+.schedule-info strong { font-size: 1.25rem; color: var(--text); display: block; margin-bottom: 0.4rem; }
+.schedule-info span { color: var(--text-muted); font-size: 1rem; }
+.badge {
+  padding: 0.4rem 1rem; border-radius: 30px; font-size: 0.85rem;
+  font-weight: 700; margin-left: 1rem; display: inline-block; letter-spacing: 0.5px;
+}
+.badge.ok { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+.badge.wait { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+.badge.cancel { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
 
+/* ── AVAIL GRID ──────────────────────────────────── */
 .avail-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem; width: 100%; max-width: 1200px; }
-.avail-col h3 { text-align: center; margin-bottom: 1.5rem; font-size: 1.3rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
-.avail-slot { padding: 1rem; text-align: center; border-radius: 8px; cursor: pointer; margin-bottom: 0.8rem; transition: 0.3s; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-weight: 600; }
-.avail-slot.free { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.3); color: #4ade80; }
-.avail-slot:hover { transform: scale(1.05); filter: brightness(1.2); }
-.copy-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 0.3rem; font-size: 0.75rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; transition: 0.3s; width: 100%; }
-.avail-slot:hover { transform: scale(1.05); filter: brightness(1.2); }
-.copy-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 0.3rem; font-size: 0.75rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; transition: 0.3s; width: 100%; }
-.copy-btn:hover { background: var(--gold); color: #000; }
-.avail-slot.booked { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
+.avail-col h3 { text-align: center; margin-bottom: 1.2rem; font-size: 1.2rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+.avail-slot {
+  padding: 0.9rem; text-align: center; border-radius: 10px; cursor: pointer;
+  margin-bottom: 0.7rem; transition: all 0.25s ease;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+  color: #f87171; font-weight: 600; font-size: 0.95rem;
+}
+.avail-slot.free { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.22); color: #4ade80; }
+.avail-slot:hover { transform: scale(1.06); filter: brightness(1.25); }
+.copy-btn {
+  background: none; border: 1px solid var(--border-gold); color: var(--gold);
+  padding: 0.35rem; font-size: 0.75rem; border-radius: 8px; cursor: pointer;
+  margin-top: 0.4rem; transition: all 0.25s ease; width: 100%;
+}
+.copy-btn:hover { background: rgba(201,168,76,0.1); }
+.avail-slot.booked { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.3); color: #f87171; }
 
-.btn-mini { border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; min-width: auto; }
+.btn-mini { border-radius: 10px; padding: 0.5rem 0.9rem; font-size: 0.82rem; font-weight: 700; min-width: auto; }
 
-/* Tooltip Styling */
-.slot-tooltip { position: absolute; background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--gold); padding: 0.8rem; border-radius: 10px; z-index: 10002; display: none; pointer-events: none; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-width: 150px; }
+/* ── TOOLTIP ─────────────────────────────────────── */
+.slot-tooltip {
+  position: absolute;
+  background: rgba(14,14,14,0.95); backdrop-filter: blur(20px);
+  border: 1px solid var(--gold); padding: 0.8rem 1rem; border-radius: 12px;
+  z-index: 10002; display: none; pointer-events: none;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 15px rgba(201,168,76,0.08);
+  min-width: 160px;
+}
 .slot-tooltip strong { color: var(--gold); display: block; margin-bottom: 0.2rem; }
-.slot-tooltip span { font-size: 0.85rem; color: var(--text); }
+.slot-tooltip span { font-size: 0.85rem; color: var(--text-muted); }
 
-/* Modernized Theme-Reactive Flatpickr */
-.flatpickr-calendar { background: var(--card-bg) !important; border: none !important; border-radius: 20px !important; box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important; font-family: 'Heebo', sans-serif !important; color: var(--text) !important; }
+/* ── FLATPICKR ────────────────────────────────────── */
+.flatpickr-calendar { background: rgba(16,16,16,0.97) !important; backdrop-filter: blur(24px) !important; border: 1px solid var(--border-gold) !important; border-radius: 20px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 30px rgba(201,168,76,0.08) !important; font-family: 'Heebo', sans-serif !important; color: var(--text) !important; }
 .flatpickr-day { color: var(--text) !important; border-radius: 50% !important; transition: 0.2s; }
-.flatpickr-day.selected { background: var(--gold) !important; border-color: var(--gold) !important; color: #fff !important; font-weight: 800 !important; }
+.flatpickr-day.selected { background: linear-gradient(135deg, var(--gold), #a07828) !important; border-color: var(--gold) !important; color: #fff !important; font-weight: 800 !important; box-shadow: 0 0 15px var(--glow); }
 .flatpickr-day.today { border: 2px solid var(--gold) !important; color: var(--gold) !important; }
-.flatpickr-day:hover { background: rgba(201, 168, 76, 0.15) !important; }
+.flatpickr-day:hover { background: rgba(201,168,76,0.12) !important; }
 .flatpickr-months .flatpickr-month { color: var(--text) !important; fill: var(--text) !important; }
-.flatpickr-current-month .flatpickr-monthDropdown-months { background: var(--card-bg) !important; color: var(--text) !important; }
+.flatpickr-current-month .flatpickr-monthDropdown-months { background: rgba(16,16,16,0.9) !important; color: var(--text) !important; }
 .flatpickr-weekdays { background: transparent !important; }
 .flatpickr-weekday { color: var(--gold) !important; font-weight: 600 !important; }
 .flatpickr-innerContainer { padding: 12px !important; }
 .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { padding: 10px !important; }
 .flatpickr-months .flatpickr-prev-month svg, .flatpickr-months .flatpickr-next-month svg { fill: var(--gold) !important; width: 14px; height: 14px; }
 
-/* Glassmorphic Input with Icon */
+/* ── INPUT WRAPPER WITH ICON ─────────────────────── */
 .input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
-.input-wrapper input { padding-right: 3.5rem !important; background: rgba(255,255,255,0.03) !important; backdrop-filter: blur(5px); border: 1px solid var(--border); border-radius: 12px !important; transition: 0.3s; color: var(--text) !important; }
-.input-wrapper input:focus { border-color: var(--gold); box-shadow: 0 0 15px var(--glow); outline: none; }
-.input-icon { position: absolute; right: 1.2rem; width: 22px; height: 22px; stroke: var(--gold); fill: none; pointer-events: none; }
+.input-wrapper input { padding-right: 3.5rem !important; }
+.input-icon { position: absolute; right: 1.2rem; width: 20px; height: 20px; stroke: var(--gold); fill: none; pointer-events: none; opacity: 0.7; }
 
-/* Theme-Reactive Minimalist Toasts */
-#toast-container { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 10001; display: flex; flex-direction: column; gap: 0.6rem; }
-.toast { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--gold); color: var(--text); padding: 0.6rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.6rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); animation: slideInLeft 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards, fadeOut 0.5s 2.5s ease forwards; max-width: 260px; }
-.toast::before { content: '✓'; color: var(--gold); font-weight: 900; }
-@keyframes slideInLeft { from { transform: translateX(-120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-
-@media (max-width: 900px) {
-    h1 { font-size: 3rem; }
-    .stats { flex-direction: column; }
-    .avail-grid { grid-template-columns: 1fr; overflow-x: auto; gap: 2rem; }
-    nav { padding: 1rem 0.5rem; flex-direction: column; align-items: center; gap: 0.6rem; height: auto; }
-    nav .links { gap: 1.2rem; font-size: 1rem; width: 100%; justify-content: center; }
-    nav .logo { font-size: 1.2rem; margin-bottom: 0.2rem; }
-    .schedule-item { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+/* ── PREMIUM TOAST – top center ──────────────────── */
+#toast-container {
+  position: fixed; top: 5.2rem; left: 50%; transform: translateX(-50%);
+  z-index: 10001; display: flex; flex-direction: column; align-items: center;
+  gap: 0.6rem; pointer-events: none;
 }
-.theme-btn { background: none; border: none; color: var(--gold); cursor: pointer; transition: 0.3s; padding: 0; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; }
-.theme-btn:hover { background: rgba(201, 168, 76, 0.1); transform: scale(1.1); }
-.theme-btn svg { width: 22px; height: 22px; stroke: var(--gold); stroke-width: 2.5; }
+.toast {
+  background: rgba(10,10,10,0.94);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--border-gold); color: var(--text);
+  padding: 0.85rem 2rem; border-radius: 50px;
+  font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 0 22px rgba(201,168,76,0.08);
+  animation: toastIn 0.45s cubic-bezier(0.18,0.89,0.32,1.28) forwards, toastOut 0.4s 2.9s ease forwards;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--gold);
+}
+/* ── PREMIUM CONFIRM MODAL ───────────────────────── */
+#confirm-modal {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.78); backdrop-filter: blur(8px);
+  z-index: 10005; display: none; align-items: center; justify-content: center;
+}
+.confirm-box {
+  background: rgba(14,14,14,0.97);
+  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--border-gold);
+  border-bottom: 2px solid var(--gold);
+  border-radius: 22px;
+  padding: 2.2rem 2.5rem;
+  max-width: 420px; width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.65), 0 0 30px rgba(201,168,76,0.08);
+  animation: confirmIn 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+@keyframes confirmIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+#confirm-msg {
+  font-size: 1.1rem; color: var(--text); margin-bottom: 1.8rem;
+  line-height: 1.7; font-weight: 500;
+}
+.confirm-actions { display: flex; gap: 1rem; justify-content: center; }
+.toast-icon {
+  width: 22px; height: 22px;
+  background: linear-gradient(135deg, var(--gold), #a07828);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; color: #000; flex-shrink: 0; font-weight: 900;
+}
+@keyframes toastIn { from { transform: translateY(-22px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-16px); } }
 
-/* Auth Modal */
-#auth-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; }
-#auth-modal .glass { max-width: 400px; width: 90%; text-align: center; transition: none !important; backdrop-filter: none !important; background: var(--bg) !important; border: 2px solid var(--gold); border-radius: 12px; }
-#auth-modal input { transition: none !important; box-shadow: none !important; backdrop-filter: none !important; background: var(--card-bg) !important; border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 1rem; margin-bottom: 1rem; }
-#auth-modal input:focus { border-color: var(--gold); }
-#auth-modal .btn-cancel { background: transparent; border: 1px solid var(--gold); color: var(--gold); margin-top: 0.5rem; }
+/* ── PREMIUM LESSON TICKETS ──────────────────────── */
+.lesson-ticket {
+  position: relative; display: flex; align-items: stretch;
+  border-radius: 16px; overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+.lesson-ticket.approved {
+  background: rgba(20,17,8,0.72);
+  border: 1.5px solid rgba(201,168,76,0.45);
+  box-shadow: 0 4px 24px rgba(201,168,76,0.07), inset 0 0 30px rgba(201,168,76,0.02);
+}
+.lesson-ticket.pending {
+  background: rgba(18,15,6,0.68);
+  border: 1.5px dashed rgba(251,191,36,0.38);
+}
+.lesson-ticket.cancelled {
+  background: rgba(14,10,10,0.62);
+  border: 1px solid rgba(239,68,68,0.22);
+  opacity: 0.72;
+}
+.lesson-ticket:hover { transform: translateY(-3px); box-shadow: 0 14px 35px rgba(0,0,0,0.45); }
+.ticket-stripe { width: 5px; flex-shrink: 0; }
+.lesson-ticket.approved .ticket-stripe { background: linear-gradient(180deg, var(--gold), #7a5a20); }
+.lesson-ticket.pending .ticket-stripe { background: repeating-linear-gradient(180deg, #fbbf24 0, #fbbf24 7px, transparent 7px, transparent 13px); }
+.lesson-ticket.cancelled .ticket-stripe { background: #f87171; }
+.ticket-body {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem 1.5rem; flex: 1; gap: 1.2rem;
+}
+.ticket-left { display: flex; flex-direction: column; gap: 0.2rem; min-width: 85px; }
+.ticket-date { font-size: 0.85rem; color: var(--text-muted); letter-spacing: 0.3px; }
+.ticket-time { font-size: 1.65rem; font-weight: 800; color: var(--gold); text-shadow: 0 0 18px rgba(201,168,76,0.28); line-height: 1.1; }
+.ticket-divider { width: 1px; align-self: stretch; background: var(--border); margin: 0 0.4rem; }
+.ticket-right { flex: 1; display: flex; flex-direction: column; gap: 0.3rem; text-align: right; }
+.ticket-topic { font-size: 1rem; font-weight: 700; color: var(--text); }
+.ticket-grade { font-size: 0.85rem; color: var(--text-muted); }
+.ticket-badge-wrap { display: flex; align-items: center; flex-shrink: 0; }
 
-.bar-ilan-badge { background: rgba(201, 168, 76, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 6px 22px; border-radius: 50px; font-weight: 600; margin-top: 1.5rem; display: inline-block; box-shadow: 0 0 15px var(--glow); animation: slideDown 1s 0.2s ease forwards; opacity: 0; font-size: 1.2rem; }
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 900px) {
+  h1 { font-size: 3rem; }
+  .stats { flex-direction: column; }
+  .avail-grid { grid-template-columns: 1fr; overflow-x: auto; gap: 2rem; }
+  nav { padding: 0.8rem 0.5rem; flex-direction: column; align-items: center; gap: 0.6rem; height: auto; }
+  nav .links { gap: 1.2rem; font-size: 0.95rem; width: 100%; justify-content: center; }
+  nav .logo { font-size: 1.2rem; margin-bottom: 0.2rem; }
+  .schedule-item { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+  .ticket-body { flex-wrap: wrap; }
+  .ticket-divider { display: none; }
+}
+
+/* ── THEME TOGGLE ────────────────────────────────── */
+.theme-btn {
+  background: none; border: 1px solid var(--border-gold); color: var(--gold);
+  cursor: pointer; transition: all 0.3s ease; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+}
+.theme-btn:hover { background: rgba(201,168,76,0.1); transform: scale(1.1) rotate(15deg); }
+.theme-btn svg { width: 18px; height: 18px; stroke: var(--gold); stroke-width: 2.5; }
+
+/* ── AUTH MODAL ──────────────────────────────────── */
+#auth-modal {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.88); backdrop-filter: blur(8px);
+  z-index: 1000; display: none; align-items: center; justify-content: center;
+}
+#auth-modal .glass {
+  max-width: 400px; width: 90%; text-align: center;
+  transition: none !important;
+  background: rgba(14,14,14,0.96) !important;
+  border: 1.5px solid var(--border-gold);
+  border-radius: 22px;
+  backdrop-filter: blur(32px) !important; -webkit-backdrop-filter: blur(32px) !important;
+}
+#auth-modal input {
+  transition: none !important; box-shadow: none !important;
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid var(--border); border-radius: 10px;
+  color: var(--text); padding: 1rem; margin-bottom: 1rem;
+}
+#auth-modal input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.12) !important; }
+#auth-modal .btn-cancel { background: transparent; border: 1px solid var(--border-gold); color: var(--gold); margin-top: 0.5rem; }
+
+/* ── FLOATING CONTACT ────────────────────────────── */
+#floatingContact {
+  position: fixed; bottom: 1.6rem; left: 1.6rem;
+  z-index: 999;
+  background: rgba(12,12,12,0.88);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-gold);
+  border-radius: 50px;
+  padding: 0.65rem 1.2rem;
+  display: flex; align-items: center; gap: 0.7rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45), 0 0 18px rgba(201,168,76,0.08);
+  transition: box-shadow 0.3s, transform 0.3s, border-color 0.3s;
+  cursor: pointer;
+  text-decoration: none;
+}
+#floatingContact:hover {
+  box-shadow: 0 10px 40px rgba(0,0,0,0.55), 0 0 30px rgba(201,168,76,0.28);
+  border-color: rgba(201,168,76,0.55);
+  transform: translateY(-3px) scale(1.03);
+}
+#floatingContact .fc-label {
+  font-size: 0.82rem; color: var(--text-muted); font-weight: 500; white-space: nowrap;
+}
+#floatingContact .fc-number {
+  font-size: 0.95rem; font-weight: 800; color: var(--gold);
+  letter-spacing: 0.5px; white-space: nowrap;
+}
+#floatingContact .fc-copy {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; transition: background 0.2s;
+  flex-shrink: 0;
+}
+#floatingContact .fc-copy:hover { background: rgba(201,168,76,0.15); }
+#floatingContact .fc-copy svg { width: 15px; height: 15px; stroke: var(--gold); fill: none; }
+@media (max-width: 900px) {
+  #floatingContact {
+    bottom: 1rem; left: 50%; transform: translateX(-50%);
+    padding: 0.55rem 1rem;
+  }
+  #floatingContact:hover { transform: translateX(-50%) translateY(-2px); }
+  #floatingContact .fc-label { display: none; }
+}
+
+/* ── AUTH SCREEN ─────────────────────────────────── */
+#authButtons { text-align: center; }
+.auth-btn-row { display: flex; gap: 1rem; margin-top: 0.5rem; }
+.auth-btn-row .btn { flex: 1; }
+#loginForm, #registerForm {
+  animation: fadeSlide 0.3s ease;
+}
+.auth-back-btn {
+  width: 100%; margin-top: 0.6rem;
+  font-size: 0.85rem; opacity: 0.65;
+}
+#loggedInChip {
+  background: rgba(201,168,76,0.07);
+  border: 1px solid var(--border-gold);
+  border-radius: 14px; padding: 1.1rem 1.5rem;
+  margin-bottom: 1.5rem; display: none;
+  align-items: center; justify-content: space-between; gap: 1rem;
+  animation: fadeSlide 0.4s ease;
+}
+.profile-chip-name { color: var(--gold); font-weight: 800; font-size: 1.05rem; }
+.profile-chip-phone { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem; }
+input.field-locked {
+  border-color: var(--border-gold) !important;
+  background: rgba(201,168,76,0.04) !important;
+  color: var(--gold) !important; cursor: default;
+}
+.unlock-link {
+  font-size: 0.78rem; color: var(--text-muted); cursor: pointer;
+  text-decoration: underline; margin-top: 0.3rem; display: inline-block;
+  transition: color 0.2s;
+}
+.unlock-link:hover { color: var(--gold); }
+
+/* ── STUDENT AREA ENHANCEMENTS ───────────────────── */
+#welcomeBanner {
+  background: rgba(201,168,76,0.07);
+  border: 1px solid var(--border-gold);
+  border-radius: 14px; padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem; display: none;
+  text-align: center; animation: fadeSlide 0.5s ease;
+}
+.welcome-name { color: var(--gold); font-weight: 800; }
+.badge-soon {
+  background: linear-gradient(135deg, var(--gold), #a07828);
+  color: #000; font-size: 0.72rem; font-weight: 800;
+  padding: 0.18rem 0.65rem; border-radius: 20px;
+  letter-spacing: 0.5px; vertical-align: middle;
+  margin-left: 0.4rem; display: inline-block;
+}
+.lesson-ticket.upcoming {
+  border: 1.5px solid rgba(201,168,76,0.6) !important;
+  box-shadow: 0 0 22px rgba(201,168,76,0.12) !important;
+}
+.gcal-link {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.76rem; color: var(--gold); text-decoration: none;
+  font-weight: 600; padding: 0.28rem 0.65rem;
+  border: 1px solid var(--border-gold); border-radius: 20px;
+  transition: background 0.2s; margin-top: 0.5rem; white-space: nowrap;
+}
+.gcal-link:hover { background: rgba(201,168,76,0.1); }
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E) !important;
+  color: #fff !important; display: flex; align-items: center;
+  justify-content: center; gap: 0.6rem;
+}
+.btn-whatsapp:hover {
+  background: linear-gradient(135deg, #2eef72, #25D366) !important;
+  box-shadow: 0 8px 28px rgba(37,211,102,0.3) !important;
+  transform: translateY(-3px) scale(1.02) !important;
+}
+
+/* ── BAR-ILAN BADGE ──────────────────────────────── */
+.bar-ilan-badge {
+  background: rgba(201,168,76,0.07);
+  border: 1px solid rgba(201,168,76,0.32);
+  color: var(--gold); padding: 7px 26px; border-radius: 50px;
+  font-weight: 600; margin-top: 1.5rem; display: inline-block;
+  box-shadow: 0 0 22px rgba(201,168,76,0.12);
+  animation: slideDown 1s 0.2s ease forwards; opacity: 0; font-size: 1.15rem;
+  backdrop-filter: blur(8px);
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -187,9 +626,9 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
     <div class="logo" id="adminTrigger">גבאי מתמטיקה</div>
     <div class="links">
         <button id="themeToggle" class="theme-btn" onclick="toggleTheme()"></button>
-        <a href="#hero" onclick="logoutAdmin()">ראשי</a>
-        <a href="#book" onclick="logoutAdmin()">קביעת שיעור</a>
-        <a href="javascript:void(0)" onclick="openStudentArea()">השיעורים שלי</a>
+        <a href="#hero" onclick="logoutAdmin()" id="navHome">ראשי</a>
+        <a href="#book" onclick="logoutAdmin()" id="navBook">קביעת שיעור</a>
+        <a href="javascript:void(0)" onclick="openStudentArea()" id="navLessons">השיעורים שלי</a>
     </div>
 </nav>
 
@@ -210,13 +649,13 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
     <h1>שיעורי מתמטיקה פרטיים</h1>
     <div class="bar-ilan-badge">בוגר תוכנית בר-אילן</div>
     <p style="font-size: 1.8rem; margin-top: 2rem; text-align: center; color: var(--text); opacity: 1 !important; animation: slideDown 1s 0.3s ease forwards;">הדרך להצלחה בבגרות מתחילה כאן.</p>
-    
+
     <div class="stats">
         <div class="glass"><span>4.9★</span>דירוג ממוצע</div>
         <div class="glass"><span>50+</span>תלמידים מרוצים</div>
         <div class="glass"><span>60₪</span>לשיעור של שעה</div>
     </div>
-    
+
     <a href="#book" class="btn" style="margin-top: 4rem; opacity: 0; animation: slideUp 1s 0.8s ease forwards;">קבע שיעור עכשיו</a>
 </section>
 
@@ -225,6 +664,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
     <h2>הזמנת שיעור חדש</h2>
     <div class="glass form-container">
         <div class="progress">
+            <div class="progress-fill" id="progressFill"></div>
             <div class="dot active" onclick="goToStep(1)">1</div>
             <div class="dot" onclick="goToStep(2)">2</div>
             <div class="dot" onclick="goToStep(3)">3</div>
@@ -312,7 +752,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
                 </div>
             </div>
 
-            <div id="bookingSummary" class="glass no-hover" style="margin-top: 2rem; padding: 1.5rem; border: 1px solid var(--gold); border-radius: 15px; text-align: center; display: none;">
+            <div id="bookingSummary" class="glass no-hover" style="margin-top: 2rem; padding: 1.5rem; border: 1px solid var(--gold); border-radius: 16px; text-align: center; display: none;">
                 <h4 style="color: var(--gold); margin-bottom: 1rem; font-size: 1.2rem;">סיכום הזמנה</h4>
                 <div style="display: flex; flex-direction: column; gap: 0.8rem; font-size: 1.1rem;">
                     <div style="color: var(--text);">תאריך: <span id="summaryDate" style="font-weight: 600; color: var(--gold); margin-right: 5px;">-</span></div>
@@ -346,21 +786,61 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
             </div>
             <button class="btn btn-sm btn-outline" onclick="logoutStudent()">חזרה לדף הבית</button>
         </div>
-        
+
         <div class="glass form-container" style="max-width: 600px; margin: 0 auto;">
+            <div id="welcomeBanner"></div>
             <div id="loginArea">
-                <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הזן את מספר הטלפון שלך כדי לצפות בשיעורים שקבעת:</p>
-                <div class="input-group">
-                    <label>מספר טלפון</label>
-                    <input type="tel" id="myPhone" placeholder="050-0000000">
+                <!-- Logged-in chip: shown when profile exists in localStorage -->
+                <div id="loggedInChip">
+                    <div>
+                        <div class="profile-chip-name" id="loggedInName"></div>
+                        <div class="profile-chip-phone" id="loggedInPhone"></div>
+                    </div>
+                    <button class="btn btn-outline" onclick="logoutProfile()" style="padding: 0.5rem 1rem; font-size: 0.82rem; white-space: nowrap;">התנתק / החלף משתמש</button>
                 </div>
-                <button class="btn" onclick="fetchMyLessons()" style="width: 100%; margin-top: 1rem;">הצג את השיעורים שלי</button>
+                <!-- Auth buttons: entry point when no profile -->
+                <div id="authButtons">
+                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">כדי לצפות בשיעורים שלך, התחבר או הירשם:</p>
+                    <div class="auth-btn-row">
+                        <button class="btn" onclick="showLoginForm()">התחברות</button>
+                        <button class="btn btn-outline" onclick="showRegisterForm()">הרשמה</button>
+                    </div>
+                </div>
+                <!-- Login form: phone only -->
+                <div id="loginForm" style="display:none;">
+                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הזן את מספר הטלפון שלך:</p>
+                    <div class="input-group">
+                        <label>מספר טלפון</label>
+                        <input type="tel" id="loginPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') submitLogin()">
+                    </div>
+                    <button class="btn" onclick="submitLogin()" style="width:100%; margin-top:1rem;">כניסה</button>
+                    <button class="btn btn-outline auth-back-btn" onclick="showAuthButtons()">חזרה</button>
+                </div>
+                <!-- Register form: name + phone -->
+                <div id="registerForm" style="display:none;">
+                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הרשמה ראשונה — מלא את הפרטים:</p>
+                    <div class="input-group">
+                        <label>שם מלא</label>
+                        <input type="text" id="regName" placeholder="ישראל ישראלי" onkeydown="if(event.key==='Enter') document.getElementById('regPhone').focus()">
+                    </div>
+                    <div class="input-group" style="margin-top:1rem;">
+                        <label>מספר טלפון</label>
+                        <input type="tel" id="regPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') submitRegister()">
+                    </div>
+                    <button class="btn" onclick="submitRegister()" style="width:100%; margin-top:1rem;">הרשמה והתחברות</button>
+                    <button class="btn btn-outline auth-back-btn" onclick="showAuthButtons()">חזרה</button>
+                </div>
             </div>
             <div id="lessonsResult" style="display: none; margin-top: 1rem;">
                 <div id="lessonsList" style="max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem;">
                     <!-- Lessons will appear here -->
                 </div>
-                <button class="btn btn-outline" onclick="backToLogin()" style="width: 100%; margin-top: 1.5rem;">חזור להתחברות</button>
+                <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1.5rem;">
+                    <a href="https://wa.me/972586458414?text=%D7%94%D7%99%D7%99%20%D7%92%D7%91%D7%90%D7%99%2C%20%D7%90%D7%A0%D7%99%20%D7%A4%D7%95%D7%A0%D7%94%20%D7%90%D7%9C%D7%99%D7%9A%20%D7%9E%D7%94%D7%90%D7%AA%D7%A8%20%D7%9C%D7%92%D7%91%D7%99%20%D7%94%D7%A9%D7%99%D7%A2%D7%95%D7%A8%20%D7%A9%D7%9C%D7%99..." target="_blank" class="btn btn-whatsapp" style="width:100%; text-decoration:none; font-size:1rem; padding: 0.9rem;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        שלח לי וואטסאפ
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -373,7 +853,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
         <button class="btn" style="padding: 0.8rem 1.5rem; font-size: 1rem;" onclick="logoutAdmin()">יציאה מניהול</button>
     </div>
     <div style="width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 3rem;">
-        
+
         <div class="glass no-hover">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
                 <h3 style="margin:0;">רשימת שיעורים</h3>
@@ -424,6 +904,27 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
         </div>
     </div>
 </div>
+
+<div id="confirm-modal">
+    <div class="confirm-box">
+        <p id="confirm-msg"></p>
+        <div class="confirm-actions">
+            <button class="btn btn-sm" id="confirm-ok">אשר</button>
+            <button class="btn btn-sm btn-outline" id="confirm-cancel">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<a id="floatingContact" href="https://wa.me/972586458414" target="_blank" rel="noopener noreferrer">
+    <span class="fc-label">לשאלות פנו אליי:</span>
+    <span class="fc-number">058-6458414</span>
+    <button class="fc-copy" onclick="event.preventDefault(); event.stopPropagation(); copyPhone();" title="העתק מספר">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+    </button>
+</a>
 
 <div id="toast-container"></div>
 
@@ -476,6 +977,9 @@ window.onload = function() {
         });
     }
 
+    // Pre-fill and lock booking form if profile exists
+    applyProfileToBookingForm();
+
     flatpickr("#fdate", {
         locale: "he",
         dateFormat: "Y-m-d",
@@ -488,6 +992,31 @@ window.onload = function() {
             updateBookingSummary();
         }
     });
+
+    // Enter-key chain: Name → Phone → Email → Next
+    document.getElementById('fname').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('fphone').focus(); }
+    });
+    document.getElementById('fphone').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('femail').focus(); }
+    });
+    document.getElementById('femail').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); nextStep(2); }
+    });
+
+    // Nav active state on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = { 'hero': 'navHome', 'book': 'navBook' };
+    const scrollObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                document.querySelectorAll('nav a').forEach(a => a.classList.remove('nav-active'));
+                const linkId = navLinks[entry.target.id];
+                if (linkId) document.getElementById(linkId).classList.add('nav-active');
+            }
+        });
+    }, { threshold: 0.4 });
+    sections.forEach(s => scrollObserver.observe(s));
 };
 
 function updateBookingSummary() {
@@ -507,7 +1036,7 @@ function updateBookingSummary() {
 }
 
     emailjs.init({publicKey: "JI7HdPnpg063aq0Pl", blockHeadless: false});
-    
+
     // Intersection Observer for Section Animations
     const observerOptions = { threshold: 0.1 };
     const observer = new IntersectionObserver((entries) => {
@@ -518,6 +1047,7 @@ function updateBookingSummary() {
         });
     }, observerOptions);
     document.querySelectorAll('section').forEach(sec => observer.observe(sec));
+
 function toggleTheme() {
     const body = document.body;
     const btn = document.getElementById('themeToggle');
@@ -534,9 +1064,9 @@ function toggleTheme() {
 window.addEventListener('scroll', () => {
     const nav = document.getElementById('navbar');
     if (window.scrollY > 50) {
-        nav.style.padding = '0.8rem 2rem';
+        nav.style.padding = '0.7rem 2rem';
     } else {
-        nav.style.padding = '1.2rem 2rem';
+        nav.style.padding = '1rem 2rem';
     }
 });
 
@@ -548,6 +1078,9 @@ function nextStep(s) {
     document.querySelectorAll('.dot').forEach((e, i) => {
         if (i < s) e.classList.add('active'); else e.classList.remove('active');
     });
+    // Update progress fill bar
+    const fill = document.getElementById('progressFill');
+    if (fill) fill.style.width = ((s - 1) / 2 * 100) + '%';
 }
 
 function goToStep(s) {
@@ -621,7 +1154,7 @@ function checkAvailability(date) {
     }
     grid.style.display = 'grid';
     help.style.display = 'block';
-    
+
     const now = new Date();
     const israelTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Jerusalem"}));
     const todayStr = israelTime.toISOString().split('T')[0];
@@ -630,7 +1163,7 @@ function checkAvailability(date) {
 
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.classList.remove('selected', 'occupied', 'past');
-        
+
         // Block past slots for today
         if (date === todayStr) {
             const [h, m] = slot.innerText.trim().split(':').map(Number);
@@ -667,18 +1200,19 @@ function checkAvailability(date) {
 }
 
 function approveAllBookings() {
-    if (!confirm('האם אתה בטוח שברצונך לאשר את כל השיעורים במערכת?')) return;
-    db.collection("bookings").get().then(snapshot => {
-        const batch = db.batch();
-        snapshot.forEach(doc => batch.update(doc.ref, { status: 'מאושר' }));
-        batch.commit().then(() => {
-            showToast('כל השיעורים אושרו בהצלחה');
-            // UI will update automatically via onSnapshot listener
+    showConfirm('האם לאשר את כל השיעורים במערכת?', () => {
+        db.collection("bookings").get().then(snapshot => {
+            const batch = db.batch();
+            snapshot.forEach(doc => batch.update(doc.ref, { status: 'מאושר' }));
+            batch.commit().then(() => {
+                showToast('כל השיעורים אושרו בהצלחה');
+            });
         });
     });
 }
 
 let calData = {};
+let sessionPhone = ''; // persists across nav clicks for auto-refresh
 
 function confirmBooking() {
     const fname = document.getElementById('fname').value || '';
@@ -692,7 +1226,7 @@ function confirmBooking() {
     const selectedChips = Array.from(document.querySelectorAll('.chip.selected'));
     const subject = selectedChips.map(c => c.innerText).join(', ');
     const errorDiv = document.getElementById('formError');
-    
+
     // Email is now OPTIONAL, so we only check Name, Date, Time, and Grade.
     if (!fname || !dateInput || !timeSlot || !gradeValue) {
         if(errorDiv) {
@@ -708,7 +1242,7 @@ function confirmBooking() {
         }
         return;
     }
-    
+
     const selectedTime = timeSlot.innerText.trim();
     if (selectedTime === '14:00') {
         if(errorDiv) {
@@ -760,15 +1294,18 @@ function confirmBooking() {
     db.collection("bookings").add(newBooking).then(() => {
         // Trigger both Admin and Student notifications
         sendNotification('new_booking', newBooking);
-        
+
         // Success flow
         const startDate = dateInput.replace(/-/g, '') + 'T' + selectedTime.replace(':', '') + '00';
         const endHour = (parseInt(selectedTime.split(':')[0]) + 1).toString().padStart(2, '0');
         const endDate = dateInput.replace(/-/g, '') + 'T' + endHour + selectedTime.split(':')[1] + '00';
         const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('שיעור מתמטיקה עם גבאי')}&dates=${startDate}/${endDate}&details=${encodeURIComponent('נושא: ' + subject + '\nשם: ' + fname)}&location=Online`;
-        
+
         window.open(gcalUrl, '_blank');
-        
+
+        // Save student profile for next visit
+        saveProfile(fname, fphone);
+
         // Trigger Golden Confetti Celebration
         confetti({
             particleCount: 150,
@@ -808,52 +1345,237 @@ function loginAdmin() {
         renderAvailGrid();
         showToast('התחברת בהצלחה כמנהל');
     } else {
-        alert('סיסמה שגויה');
+        showToast('סיסמה שגויה, נסה שוב');
+    }
+}
+
+function buildGCalLink(b) {
+    const start = b.date.replace(/-/g, '') + 'T' + b.time.replace(':', '') + '00';
+    const endHour = (parseInt(b.time.split(':')[0]) + 1).toString().padStart(2, '0');
+    const end = b.date.replace(/-/g, '') + 'T' + endHour + b.time.split(':')[1] + '00';
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('שיעור מתמטיקה עם גבאי')}&dates=${start}/${end}&details=${encodeURIComponent('נושא: ' + b.topic)}&location=Online`;
+}
+
+function getProfile() {
+    const name = localStorage.getItem('gabay_name');
+    const phone = localStorage.getItem('gabay_phone');
+    return (name && phone) ? { name, phone } : null;
+}
+
+function saveProfile(name, phone) {
+    localStorage.setItem('gabay_name', name);
+    localStorage.setItem('gabay_phone', phone);
+    applyProfileToBookingForm();
+}
+
+function clearProfile() {
+    localStorage.removeItem('gabay_name');
+    localStorage.removeItem('gabay_phone');
+}
+
+/* ── Auth screen navigation ── */
+function showAuthButtons() {
+    document.getElementById('authButtons').style.display = 'block';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loggedInChip').style.display = 'none';
+}
+
+function showLoginForm() {
+    document.getElementById('authButtons').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    setTimeout(() => { const el = document.getElementById('loginPhone'); if (el) el.focus(); }, 80);
+}
+
+function showRegisterForm() {
+    document.getElementById('authButtons').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    setTimeout(() => { const el = document.getElementById('regName'); if (el) el.focus(); }, 80);
+}
+
+function showLoggedInChip(name, phone) {
+    document.getElementById('authButtons').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    const chip = document.getElementById('loggedInChip');
+    chip.style.display = 'flex';
+    document.getElementById('loggedInName').textContent = name;
+    document.getElementById('loggedInPhone').textContent = phone;
+}
+
+/* ── Auth actions ── */
+function submitLogin() {
+    const phone = document.getElementById('loginPhone').value.trim();
+    if (!phone) { showToast('נא להזין מספר טלפון'); return; }
+
+    db.collection("bookings").where("phone", "==", phone).get().then(snap => {
+        if (snap.empty) {
+            showToast('מספר לא נמצא, אנא הירשם קודם');
+            return;
+        }
+        let lessons = [];
+        snap.forEach(doc => lessons.push(doc.data()));
+        lessons.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+        const name = lessons[0].name || '';
+        saveProfile(name, phone);
+        sessionPhone = phone;
+        showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
+        showLoggedInChip(name, phone);
+        fetchMyLessons();
+    }).catch(err => {
+        console.error(err);
+        showToast('שגיאה בכניסה, נסה שוב');
+    });
+}
+
+function submitRegister() {
+    const name = document.getElementById('regName').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    if (!name) { showToast('נא להזין שם'); return; }
+    if (!phone) { showToast('נא להזין מספר טלפון'); return; }
+
+    saveProfile(name, phone);
+    sessionPhone = phone;
+    showToast('שלום ' + name + '! נרשמת בהצלחה');
+    showLoggedInChip(name, phone);
+    fetchMyLessons();
+}
+
+function logoutProfile() {
+    clearProfile();
+    sessionPhone = '';
+    document.getElementById('lessonsResult').style.display = 'none';
+    document.getElementById('loginArea').style.display = 'block';
+    const refreshBtn = document.getElementById('refreshStudentBtn');
+    if (refreshBtn) refreshBtn.style.display = 'none';
+    const wb = document.getElementById('welcomeBanner');
+    if (wb) wb.style.display = 'none';
+    showAuthButtons();
+    applyProfileToBookingForm();
+}
+
+function switchUser() {
+    showConfirm('לנתק את הפרופיל הנוכחי ולהתחבר עם מספר אחר?', logoutProfile);
+}
+
+function applyProfileToBookingForm() {
+    const profile = getProfile();
+    const nameInput = document.getElementById('fname');
+    const phoneInput = document.getElementById('fphone');
+    if (!nameInput || !phoneInput) return;
+
+    if (profile) {
+        nameInput.value = profile.name;
+        phoneInput.value = profile.phone;
+        nameInput.classList.add('field-locked');
+        phoneInput.classList.add('field-locked');
+        nameInput.readOnly = true;
+        phoneInput.readOnly = true;
+
+        if (!document.getElementById('unlockProfileLink')) {
+            const link = document.createElement('span');
+            link.id = 'unlockProfileLink';
+            link.className = 'unlock-link';
+            link.textContent = 'עריכה / החלף משתמש';
+            link.onclick = switchUser;
+            phoneInput.parentElement.appendChild(link);
+        }
+    } else {
+        nameInput.classList.remove('field-locked');
+        phoneInput.classList.remove('field-locked');
+        nameInput.readOnly = false;
+        phoneInput.readOnly = false;
+        const link = document.getElementById('unlockProfileLink');
+        if (link) link.remove();
     }
 }
 
 function fetchMyLessons() {
-    const phone = document.getElementById('myPhone').value.trim();
+    const profile = getProfile();
+    const phone = (profile ? profile.phone : '') || sessionPhone;
     if (!phone) {
-        showToast('נא להזין מספר טלפון');
+        showToast('נא להתחבר תחילה');
         return;
     }
-    
+    sessionPhone = phone;
+
     const list = document.getElementById('lessonsList');
     const resultArea = document.getElementById('lessonsResult');
     const loginArea = document.getElementById('loginArea');
     const refreshBtn = document.getElementById('refreshStudentBtn');
-    
+
     list.innerHTML = '<p style="text-align:center; padding: 2rem;">טוען את השיעורים שלך...</p>';
     loginArea.style.display = 'none';
     resultArea.style.display = 'block';
     if (refreshBtn) refreshBtn.style.display = 'flex';
-    
+
     db.collection("bookings").where("phone", "==", phone).get().then(snap => {
+        const wb = document.getElementById('welcomeBanner');
         if (snap.empty) {
             list.innerHTML = '<div style="text-align:center; padding: 2rem; opacity:0.7">לא נמצאו שיעורים עתידיים למספר זה.</div>';
+            if (wb) wb.style.display = 'none';
             return;
         }
-        
+
         let lessons = [];
         snap.forEach(doc => lessons.push(doc.data()));
-        
-        // Sort by date descending locally
         lessons.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
-        
+
+        // Filter by name if profile exists (data integrity)
+        const profile = getProfile();
+        if (profile && profile.name) {
+            lessons = lessons.filter(l => l.name && l.name.trim() === profile.name.trim());
+        }
+        if (lessons.length === 0) {
+            list.innerHTML = '<div style="text-align:center; padding: 2rem; opacity:0.7">לא נמצאו שיעורים עתידיים למספר זה.</div>';
+            if (wb) wb.style.display = 'none';
+            return;
+        }
+
+        // Welcome banner with name + phone
+        const studentName = lessons[0].name || '';
+        const displayPhone = profile ? profile.phone : phone;
+        if (wb && studentName) {
+            wb.innerHTML = `<span style="font-size:1.05rem">שלום <span class="welcome-name">${studentName}</span>, מציג את השיעורים שלך <span style="color:var(--text-muted);font-size:0.9rem">(${displayPhone})</span> 👋</span>`;
+            wb.style.display = 'block';
+        }
+
+        // Upcoming: today or tomorrow (Israel time)
+        const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jerusalem" }));
+        const todayStr = now.toISOString().split('T')[0];
+        const tom = new Date(now); tom.setDate(now.getDate() + 1);
+        const tomorrowStr = tom.toISOString().split('T')[0];
+
         let html = '';
         lessons.forEach(b => {
             const statusClass = b.status === 'מאושר' ? 'approved' : (b.status === 'בוטל' ? 'cancelled' : 'pending');
             const displayStatus = b.status === 'ממתין' ? 'ממתין לאישור' : b.status;
+            const badgeClass = b.status === 'מאושר' ? 'ok' : (b.status === 'בוטל' ? 'cancel' : 'wait');
+            const isUpcoming = b.status === 'מאושר' && (b.date === todayStr || b.date === tomorrowStr);
+            const upcomingClass = isUpcoming ? ' upcoming' : '';
+            const soonBadge = isUpcoming ? '<span class="badge-soon">בקרוב</span>' : '';
+            const gcalLink = b.status === 'מאושר'
+                ? `<a href="${buildGCalLink(b)}" target="_blank" class="gcal-link"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>הוסף ליומן</a>`
+                : '';
             html += `
-                <div class="glass no-hover" style="padding: 1.2rem; border: 1px solid var(--border); background: rgba(255,255,255,0.02);">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-weight:800; color:var(--gold); font-size:1.1rem; margin-bottom: 4px;">${b.date} | ${b.time}</div>
-                            <div style="font-size:0.95rem; opacity:0.9;">${b.topic}</div>
-                            <div style="font-size:0.85rem; opacity:0.6; margin-top: 4px;">רמה: ${b.grade}</div>
+                <div class="lesson-ticket ${statusClass}${upcomingClass}">
+                    <div class="ticket-stripe"></div>
+                    <div class="ticket-body">
+                        <div class="ticket-left">
+                            <div class="ticket-date">${b.date}</div>
+                            <div class="ticket-time">${b.time}</div>
+                            ${gcalLink}
                         </div>
-                        <div class="badge ${statusClass}">${displayStatus}</div>
+                        <div class="ticket-divider"></div>
+                        <div class="ticket-right">
+                            <div class="ticket-topic">${soonBadge}${b.topic}</div>
+                            <div class="ticket-grade">רמה: ${b.grade}</div>
+                        </div>
+                        <div class="ticket-badge-wrap">
+                            <span class="badge ${badgeClass}">${displayStatus}</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -867,10 +1589,18 @@ function fetchMyLessons() {
 }
 
 function backToLogin() {
-    document.getElementById('loginArea').style.display = 'block';
     document.getElementById('lessonsResult').style.display = 'none';
+    document.getElementById('loginArea').style.display = 'block';
     const refreshBtn = document.getElementById('refreshStudentBtn');
     if (refreshBtn) refreshBtn.style.display = 'none';
+
+    const profile = getProfile();
+    if (profile) {
+        showLoggedInChip(profile.name, profile.phone);
+    } else {
+        sessionPhone = '';
+        showAuthButtons();
+    }
 }
 
 function openStudentArea() {
@@ -879,6 +1609,15 @@ function openStudentArea() {
     document.getElementById('hero').classList.add('admin-hidden');
     document.getElementById('my-lessons').style.display = 'flex';
     window.scrollTo(0,0);
+
+    const profile = getProfile();
+    if (profile) {
+        showLoggedInChip(profile.name, profile.phone);
+        sessionPhone = profile.phone;
+        fetchMyLessons();
+    } else {
+        showAuthButtons();
+    }
 }
 
 function logoutStudent() {
@@ -921,7 +1660,7 @@ function renderAdminBookings() {
       div.className = 'schedule-item glass';
       if (b.status === 'מאושר') div.classList.add('approved');
       else if (b.status === 'בוטל') div.classList.add('cancelled');
-      
+
       let statusBadge = b.status === 'מאושר' ? `<span class="badge ok">מאושר</span>` : b.status === 'בוטל' ? `<span class="badge cancel">בוטל</span>` : `<span class="badge wait">ממתין לאישור</span>`;
       let actionBtns = '';
       if (b.status === 'בוטל') {
@@ -962,7 +1701,7 @@ function renderAvailGrid() {
     col.querySelector('h3').innerText = days[i] + '\n' + dateDisplay;
     col.querySelector('h3').style.whiteSpace = 'pre';
     col.querySelector('h3').dataset.date = dateISO;
-    
+
     col.querySelectorAll('.avail-slot').forEach(slot => {
       slot.classList.add('free');
       slot.classList.remove('booked');
@@ -1087,38 +1826,34 @@ function isSlotAvailable(date, time) {
 }
 
 function cancelBookingDB(id) {
-  if (!confirm('האם אתה בטוח שברצונך לבטל את השיעור?')) return;
-  db.collection("bookings").doc(id).get().then(doc => {
-    if (!doc.exists) return;
-    const b = doc.data();
-    db.collection("bookings").doc(id).update({ status: "בוטל" }).then(() => {
-      showToast('השיעור בוטל!');
-      
-      const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
-      const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
-      
-      db.collection("availability").doc(`${dayName}_${b.time}`).set({
-        day: dayName,
-        time: b.time,
-        isFree: true
-      }, { merge: true }).then(() => {
-        renderAvailGrid();
+  showConfirm('האם לבטל את השיעור?', () => {
+    db.collection("bookings").doc(id).get().then(doc => {
+      if (!doc.exists) return;
+      const b = doc.data();
+      db.collection("bookings").doc(id).update({ status: "בוטל" }).then(() => {
+        showToast('השיעור בוטל!');
+        const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+        const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
+        db.collection("availability").doc(`${dayName}_${b.time}`).set({
+          day: dayName, time: b.time, isFree: true
+        }, { merge: true }).then(() => { renderAvailGrid(); });
       });
     });
   });
 }
 
 function permanentlyDeleteDB(id) {
-  if (!confirm('האם אתה בטוח שברצונך למחוק לצמיתות את השיעור מהמסד?')) return;
-  db.collection("bookings").doc(id).get().then(doc => {
+  showConfirm('האם למחוק לצמיתות את השיעור מהמסד?', () => {
+    db.collection("bookings").doc(id).get().then(doc => {
       if (!doc.exists) return;
       const b = doc.data();
       db.collection("bookings").doc(id).delete().then(() => {
-          showToast('השיעור נמחק לצמיתות!');
-          const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
-          const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
-          db.collection("availability").doc(`${dayName}_${b.time}`).set({ isFree: true }, { merge: true }).then(() => renderAvailGrid());
+        showToast('השיעור נמחק לצמיתות!');
+        const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+        const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
+        db.collection("availability").doc(`${dayName}_${b.time}`).set({ isFree: true }, { merge: true }).then(() => renderAvailGrid());
       });
+    });
   });
 }
 
@@ -1136,11 +1871,12 @@ function restoreBookingDB(id) {
 }
 
 function deleteCancelledBookings() {
-  if (!confirm('האם אתה בטוח שברצונך למחוק את כל השיעורים המבוטלים?')) return;
-  db.collection("bookings").where("status", "==", "בוטל").get().then(snapshot => {
-    const batch = db.batch();
-    snapshot.forEach(doc => batch.delete(doc.ref));
-    batch.commit().then(() => showToast('כל השיעורים המבוטלים נמחקו'));
+  showConfirm('האם למחוק את כל השיעורים המבוטלים?', () => {
+    db.collection("bookings").where("status", "==", "בוטל").get().then(snapshot => {
+      const batch = db.batch();
+      snapshot.forEach(doc => batch.delete(doc.ref));
+      batch.commit().then(() => showToast('כל השיעורים המבוטלים נמחקו'));
+    });
   });
 }
 
@@ -1150,7 +1886,7 @@ function approveBookingDB(id, btn) {
     const b = doc.data();
     db.collection("bookings").doc(id).update({ status: "מאושר" }).then(() => {
       showToast('השיעור אושר!');
-      
+
       db.collection("availability").doc(`${b.date}_${b.time}`).set({
         date: b.date,
         time: b.time,
@@ -1165,7 +1901,7 @@ function approveBookingDB(id, btn) {
 function sendNotification(type, bookingData) {
   // 1. Always send to Admin
   const adminParams = {
-    to_email: "gabaymath@gmail.com",
+    to_email: "nooam.gabay@gmail.com",
     student_name: bookingData.name,
     date: bookingData.date,
     time: bookingData.time,
@@ -1209,7 +1945,7 @@ function toggleAvail(el) {
   const date = el.parentElement.querySelector('h3').dataset.date;
   const time = el.innerText.trim();
   const isFree = el.classList.contains('free');
-  
+
   db.collection("availability").doc(`${date}_${time}`).set({
     date: date,
     time: time,
@@ -1225,10 +1961,10 @@ function copyDayAvail(btn) {
   const nextDateObj = new Date(currentDate);
   nextDateObj.setDate(nextDateObj.getDate() + 7);
   const nextDate = nextDateObj.toISOString().split('T')[0];
-  
+
   const slots = col.querySelectorAll('.avail-slot');
   const batch = db.batch();
-  
+
   slots.forEach(slot => {
     const time = slot.innerText.trim();
     const isFree = slot.classList.contains('free');
@@ -1239,7 +1975,7 @@ function copyDayAvail(btn) {
       isFree: isFree
     });
   });
-  
+
   batch.commit().then(() => {
     showToast(`זמינות יום ${currentDate} הועתקה לתאריך ${nextDate}`);
   });
@@ -1254,7 +1990,7 @@ function resetForm() {
   document.querySelectorAll('.chip').forEach(e => e.classList.remove('selected'));
   document.querySelectorAll('.time-slot').forEach(e => e.classList.remove('selected'));
   document.getElementById('bookingSummary').style.display = 'none';
-  
+
   // Re-enable the submit button for subsequent bookings
   const submitBtn = document.getElementById('submitBtn');
   if (submitBtn) {
@@ -1262,21 +1998,54 @@ function resetForm() {
     submitBtn.innerText = 'סיים וקבע שיעור';
     submitBtn.style.opacity = '1';
   }
-  
+
   maxReachedStep = 1;
   nextStep(1);
   document.querySelector('.progress').style.display = 'flex';
+}
+
+let _confirmCb = null;
+function showConfirm(msg, onConfirm) {
+    _confirmCb = onConfirm;
+    document.getElementById('confirm-msg').innerText = msg;
+    const modal = document.getElementById('confirm-modal');
+    modal.style.display = 'flex';
+    document.getElementById('confirm-ok').onclick = () => {
+        modal.style.display = 'none';
+        if (_confirmCb) _confirmCb();
+        _confirmCb = null;
+    };
+    document.getElementById('confirm-cancel').onclick = () => {
+        modal.style.display = 'none';
+        _confirmCb = null;
+    };
+}
+
+function copyPhone() {
+    navigator.clipboard.writeText('0586458414').then(() => {
+        showToast('המספר הועתק!');
+    }).catch(() => {
+        // Fallback for older browsers
+        const el = document.createElement('textarea');
+        el.value = '0586458414';
+        el.style.position = 'fixed'; el.style.opacity = '0';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast('המספר הועתק!');
+    });
 }
 
 function showToast(msg) {
     const c = document.getElementById('toast-container');
     const t = document.createElement('div');
     t.className = 'toast';
-    t.innerText = msg;
+    t.innerHTML = `<div class="toast-icon">✓</div><span>${msg}</span>`;
     c.appendChild(t);
     setTimeout(() => {
         if(c.contains(t)) c.removeChild(t);
-    }, 4500);
+    }, 4000);
 }
 
 let adminKeySequence = '';
@@ -1284,7 +2053,7 @@ document.addEventListener('keydown', (e) => {
   if (!e.key) return;
   // Ignore if user is typing in a form
   if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-  
+
   adminKeySequence += e.key.toLowerCase();
   if (adminKeySequence.includes('gab') || adminKeySequence.includes('עשנ')) {
     adminKeySequence = '';
