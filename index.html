@@ -52,7 +52,6 @@ section.reveal { opacity: 1; transform: translateY(0); }
 nav {
   position: fixed; top: 0; width: 100%;
   background: var(--nav-bg);
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   z-index: 100; display: flex; justify-content: space-between; align-items: center;
   padding: 1rem 2rem;
   border-bottom: 1px solid var(--border-gold);
@@ -75,7 +74,7 @@ nav {
 
 .sidebar-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.6);
   z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease;
 }
 .sidebar-overlay.active { opacity: 1; visibility: visible; }
@@ -118,7 +117,6 @@ nav .logo {
 /* ── GLASSMORPHISM ────────────────────────────────── */
 .glass {
   background: var(--card-bg);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border);
   border-radius: 20px; padding: 2.5rem;
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -308,7 +306,6 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
   display: flex; justify-content: space-between; align-items: center;
   padding: 1.4rem 1.8rem;
   background: rgba(255,255,255,0.02);
-  backdrop-filter: blur(12px);
   border-radius: 16px; border: 1px solid var(--border); transition: all 0.3s ease;
 }
 .schedule-item.approved { background: rgba(74,222,128,0.04); border-color: rgba(74,222,128,0.18); }
@@ -348,7 +345,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
 /* ── TOOLTIP ─────────────────────────────────────── */
 .slot-tooltip {
   position: absolute;
-  background: rgba(14,14,14,0.95); backdrop-filter: blur(20px);
+  background: rgba(14,14,14,0.98);
   border: 1px solid var(--gold); padding: 0.8rem 1rem; border-radius: 12px;
   z-index: 10002; display: none; pointer-events: none;
   box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 15px rgba(201,168,76,0.08);
@@ -358,7 +355,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
 .slot-tooltip span { font-size: 0.85rem; color: var(--text-muted); }
 
 /* ── FLATPICKR ────────────────────────────────────── */
-.flatpickr-calendar { background: rgba(16,16,16,0.97) !important; backdrop-filter: blur(24px) !important; border: 1px solid var(--border-gold) !important; border-radius: 20px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 30px rgba(201,168,76,0.08) !important; font-family: 'Heebo', sans-serif !important; color: var(--text) !important; }
+.flatpickr-calendar { background: rgba(16,16,16,0.99) !important; border: 1px solid var(--border-gold) !important; border-radius: 20px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 30px rgba(201,168,76,0.08) !important; font-family: 'Heebo', sans-serif !important; color: var(--text) !important; }
 .flatpickr-day { color: var(--text) !important; border-radius: 50% !important; transition: 0.2s; }
 .flatpickr-day.selected { background: linear-gradient(135deg, var(--gold), #a07828) !important; border-color: var(--gold) !important; color: #fff !important; font-weight: 800 !important; box-shadow: 0 0 15px var(--glow); }
 .flatpickr-day.today { border: 2px solid var(--gold) !important; color: var(--gold) !important; }
@@ -383,8 +380,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
   gap: 0.6rem; pointer-events: none;
 }
 .toast {
-  background: rgba(10,10,10,0.94);
-  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  background: rgba(10,10,10,0.97);
   border: 1px solid var(--border-gold); color: var(--text);
   padding: 0.85rem 2rem; border-radius: 50px;
   font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem;
@@ -396,12 +392,11 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
 /* ── PREMIUM CONFIRM MODAL ───────────────────────── */
 #confirm-modal {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.78); backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.82);
   z-index: 10005; display: none; align-items: center; justify-content: center;
 }
 .confirm-box {
-  background: rgba(14,14,14,0.97);
-  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  background: rgba(14,14,14,0.99);
   border: 1px solid var(--border-gold);
   border-bottom: 2px solid var(--gold);
   border-radius: 22px;
@@ -431,7 +426,6 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
   position: relative; display: flex; align-items: stretch;
   border-radius: 16px; overflow: hidden;
   transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
 }
 .lesson-ticket.approved {
   background: rgba(20,17,8,0.72);
@@ -540,16 +534,15 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
 /* ── AUTH MODAL ──────────────────────────────────── */
 #auth-modal {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.88); backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.88);
   z-index: 1000; display: none; align-items: center; justify-content: center;
 }
 #auth-modal .glass {
   max-width: 400px; width: 90%; text-align: center;
   transition: none !important;
-  background: rgba(14,14,14,0.96) !important;
+  background: rgba(14,14,14,0.99) !important;
   border: 1.5px solid var(--border-gold);
   border-radius: 22px;
-  backdrop-filter: blur(32px) !important; -webkit-backdrop-filter: blur(32px) !important;
 }
 #auth-modal input {
   transition: none !important; box-shadow: none !important;
@@ -564,8 +557,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
 #floatingContact {
   position: fixed; bottom: 1.6rem; left: 1.6rem;
   z-index: 999;
-  background: rgba(12,12,12,0.88);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: rgba(12,12,12,0.96);
   border: 1px solid var(--border-gold);
   border-radius: 50px;
   padding: 0.65rem 1.2rem;
@@ -623,7 +615,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
 /* ── STUDENT AUTH MODAL ──────────────────────────── */
 #student-auth-modal {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.78); backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.82);
   z-index: 10005; display: none; align-items: center; justify-content: center;
 }
 
@@ -707,7 +699,6 @@ input.field-locked {
   font-weight: 600; margin-top: 1.5rem; display: inline-block;
   box-shadow: 0 0 22px rgba(201,168,76,0.12);
   animation: slideDown 1s 0.2s ease forwards; opacity: 0; font-size: 1.15rem;
-  backdrop-filter: blur(8px);
 }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
