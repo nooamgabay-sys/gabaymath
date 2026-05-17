@@ -942,7 +942,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const CLIENT_ID = '214964095575-gyhepg783bst139k1kcrolrp7qjpam9f.apps.googleusercontent.com';
-const CLIENT_SECRET = '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';
+
 
 if (history.scrollRestoration) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
@@ -1161,41 +1161,42 @@ function checkAvailability(date) {
     const currentHour = israelTime.getHours();
     const currentMin = israelTime.getMinutes();
 
+    // Create a flat map of time slots for O(1) lookups
+    const slotsMap = {};
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.classList.remove('selected', 'occupied', 'past');
+        const timeStr = slot.innerText.trim();
+        slotsMap[timeStr] = slot;
 
         // Block past slots for today
         if (date === todayStr) {
-            const [h, m] = slot.innerText.trim().split(':').map(Number);
+            const [h, m] = timeStr.split(':').map(Number);
             if (h < currentHour || (h === currentHour && m <= currentMin)) {
                 slot.classList.add('past');
             }
         }
     });
 
-    // Check date-specific availability blocks
-    db.collection("availability").where("date", "==", date).where("isFree", "==", false).get().then(snap => {
-        snap.forEach(doc => {
+    // Fetch availability and bookings concurrently
+    Promise.all([
+        db.collection("availability").where("date", "==", date).where("isFree", "==", false).get(),
+        db.collection("bookings").where("date", "==", date).get()
+    ]).then(([availSnap, bookingsSnap]) => {
+        availSnap.forEach(doc => {
             const data = doc.data();
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                if (slot.innerText.trim() === data.time) {
-                    slot.classList.add('occupied');
-                }
-            });
-        });
-    });
-
-    db.collection("bookings").where("date", "==", date).get().then(snapshot => {
-        snapshot.forEach(doc => {
-            const b = doc.data();
-            if (b.status !== 'בוטל') {
-                document.querySelectorAll('.time-slot').forEach(slot => {
-                    if (slot.innerText.trim() === b.time) {
-                        slot.classList.add('occupied');
-                    }
-                });
+            if (slotsMap[data.time]) {
+                slotsMap[data.time].classList.add('occupied');
             }
         });
+
+        bookingsSnap.forEach(doc => {
+            const b = doc.data();
+            if (b.status !== 'בוטל' && slotsMap[b.time]) {
+                slotsMap[b.time].classList.add('occupied');
+            }
+        });
+    }).catch(err => {
+        console.error("Error fetching availability:", err);
     });
 }
 
