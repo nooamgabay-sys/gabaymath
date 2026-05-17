@@ -52,7 +52,7 @@ section.reveal { opacity: 1; transform: translateY(0); }
 nav {
   position: fixed; top: 0; width: 100%;
   background: var(--nav-bg);
-  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   z-index: 100; display: flex; justify-content: space-between; align-items: center;
   padding: 1rem 2rem;
   border-bottom: 1px solid var(--border-gold);
@@ -118,10 +118,10 @@ nav .logo {
 /* ── GLASSMORPHISM ────────────────────────────────── */
 .glass {
   background: var(--card-bg);
-  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border);
   border-radius: 20px; padding: 2.5rem;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .glass:hover {
   transform: translateY(-8px);
@@ -189,7 +189,6 @@ label { display: block; margin-bottom: 0.8rem; color: var(--text); font-size: 1.
 input, select, textarea {
   width: 100%; padding: 1.2rem;
   background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   border-radius: 14px; color: var(--text);
   font-family: inherit; font-size: 1.1rem;
@@ -213,7 +212,6 @@ select option { background: #1a1a1a; color: var(--text); }
   border-radius: 30px; cursor: pointer;
   transition: all 0.25s ease;
   font-size: 1rem; color: var(--text-muted);
-  backdrop-filter: blur(8px);
 }
 .chip:hover {
   background: rgba(201,168,76,0.1);
@@ -236,7 +234,6 @@ select option { background: #1a1a1a; color: var(--text); }
   border-radius: 14px; cursor: pointer; font-size: 1.2rem;
   transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   color: var(--text); font-weight: 600;
-  backdrop-filter: blur(8px);
 }
 .time-slot:hover {
   border-color: var(--gold);
@@ -287,7 +284,6 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 1.1rem; transition: all 0.4s ease;
   z-index: 1; cursor: pointer; color: var(--text-muted);
-  backdrop-filter: blur(8px);
 }
 .dot:hover { border-color: var(--gold); transform: scale(1.12); color: var(--gold); }
 .dot.active {
@@ -468,6 +464,9 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
 .ticket-topic { font-size: 1rem; font-weight: 700; color: var(--text); }
 .ticket-grade { font-size: 0.85rem; color: var(--text-muted); }
 .ticket-badge-wrap { display: flex; align-items: center; flex-shrink: 0; }
+.ticket-footer { padding: 0.55rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; }
+.cancel-lesson-btn { font-size: 0.78rem; color: rgba(248,113,113,0.7); background: none; border: none; cursor: pointer; transition: color 0.2s; letter-spacing: 0.2px; padding: 0; }
+.cancel-lesson-btn:hover { color: #f87171; }
 
 /* ── RESPONSIVE ──────────────────────────────────── */
 @media (max-width: 900px) {
@@ -479,6 +478,53 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
   .schedule-item { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
   .ticket-body { flex-wrap: wrap; }
   .ticket-divider { display: none; }
+}
+
+/* ── MOBILE (max 600px) ──────────────────────────── */
+@media (max-width: 600px) {
+  section { padding: 5rem 1.2rem; }
+
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.9rem; margin-bottom: 2rem; }
+
+  .btn {
+    font-size: 1rem; padding: 0.95rem 1.6rem;
+    white-space: normal; word-break: keep-all;
+  }
+  .btn-sm { font-size: 0.88rem; padding: 0.7rem 1.1rem; }
+
+  .glass { padding: 1.5rem 1.2rem; }
+
+  input, select, textarea { font-size: 1rem; padding: 1rem; }
+  label { font-size: 0.95rem; }
+
+  .stats { gap: 1.2rem; margin-top: 2.5rem; }
+  .stats .glass span { font-size: 2.5rem; }
+  .stats .glass { font-size: 1.1rem; padding: 1.2rem; }
+
+  .bar-ilan-badge { font-size: 0.95rem; padding: 6px 18px; }
+
+  .progress { margin-bottom: 2rem; }
+  .dot { width: 36px; height: 36px; font-size: 0.95rem; }
+
+  .chips { gap: 0.6rem; }
+  .chip { padding: 0.55rem 1rem; font-size: 0.9rem; }
+
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+  .time-slot { padding: 0.9rem 0.5rem; font-size: 1rem; }
+
+  .ticket-body { padding: 1rem; gap: 0.8rem; }
+  .ticket-time { font-size: 1.3rem; }
+
+  .actions { flex-wrap: wrap; gap: 0.8rem; justify-content: center !important; }
+  .actions .btn { flex: 1; min-width: 120px; text-align: center; }
+
+  .auth-btn-row { flex-direction: column; }
+  .auth-btn-row .btn { width: 100%; }
+
+  #profileSummaryBar { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+
+  #my-lessons .glass { padding: 1.2rem 1rem; }
 }
 
 /* ── THEME TOGGLE ────────────────────────────────── */
@@ -548,7 +594,7 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
   flex-shrink: 0;
 }
 #floatingContact .fc-copy:hover { background: rgba(201,168,76,0.15); }
-#floatingContact .fc-copy svg { width: 15px; height: 15px; stroke: var(--gold); fill: none; }
+#floatingContact .fc-copy svg { width: 16px; height: 16px; fill: var(--gold); stroke: none; }
 @media (max-width: 900px) {
   #floatingContact {
     bottom: 1rem; left: 50%; transform: translateX(-50%);
@@ -556,6 +602,29 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
   }
   #floatingContact:hover { transform: translateX(-50%) translateY(-2px); }
   #floatingContact .fc-label { display: none; }
+}
+
+/* ── NAV AUTH BUTTONS ────────────────────────────── */
+.nav-auth { display: flex; align-items: center; gap: 0.6rem; }
+.nav-auth .btn { padding: 0.45rem 1rem; font-size: 0.82rem; border-radius: 10px; }
+#navUserChip { display: none; align-items: center; gap: 0.5rem; color: var(--gold); font-weight: 700; font-size: 0.9rem; cursor: pointer; padding: 0.35rem 0.8rem; border: 1px solid var(--border-gold); border-radius: 20px; transition: background 0.2s; }
+#navUserChip:hover { background: rgba(201,168,76,0.08); }
+@media (max-width: 900px) { .nav-auth { display: none; } }
+
+/* ── PROFILE SUMMARY BAR (step 1) ────────────────── */
+#profileSummaryBar {
+  background: rgba(201,168,76,0.07); border: 1px solid var(--border-gold);
+  border-radius: 12px; padding: 0.9rem 1.4rem; margin-bottom: 1.5rem;
+  display: none; align-items: center; justify-content: space-between; gap: 1rem;
+}
+#profileSummaryBar .psb-name { color: var(--gold); font-weight: 800; }
+#profileSummaryBar .psb-phone { color: var(--text-muted); font-size: 0.85rem; }
+
+/* ── STUDENT AUTH MODAL ──────────────────────────── */
+#student-auth-modal {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.78); backdrop-filter: blur(8px);
+  z-index: 10005; display: none; align-items: center; justify-content: center;
 }
 
 /* ── AUTH SCREEN ─────────────────────────────────── */
@@ -647,7 +716,19 @@ input.field-locked {
 <body>
 
 <nav id="navbar">
+    <div style="display:flex; align-items:center; gap:1.2rem;">
     <div class="logo" id="adminTrigger">גבאי מתמטיקה</div>
+    <div class="nav-auth" id="navAuth">
+        <div id="navAuthButtons" style="display:flex; gap:0.6rem;">
+            <button class="btn btn-outline nav-auth-btn" onclick="navShowLogin()">התחברות</button>
+            <button class="btn nav-auth-btn" onclick="navShowRegister()">הרשמה</button>
+        </div>
+        <div id="navUserChip" onclick="closeMenuAndOpenStudentArea()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            <span id="navUserName"></span>
+        </div>
+    </div>
+    </div>
     <div class="hamburger" id="hamburgerBtn" onclick="toggleMenu()">
         <span></span><span></span><span></span>
     </div>
@@ -656,6 +737,7 @@ input.field-locked {
         <a href="#hero" onclick="closeMenuAndLogoutAdmin()" id="navHome">ראשי</a>
         <a href="#book" onclick="closeMenuAndLogoutAdmin()" id="navBook">קביעת שיעור</a>
         <a href="javascript:void(0)" onclick="closeMenuAndOpenStudentArea()" id="navLessons">השיעורים שלי</a>
+        <a href="javascript:void(0)" onclick="sidebarLogout()" id="navLogout" style="display:none; color:#f87171;">התנתק</a>
     </div>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
 </nav>
@@ -665,13 +747,13 @@ input.field-locked {
     <div class="bar-ilan-badge">בוגר תוכנית בר-אילן</div>
     <p style="font-size: 1.8rem; margin-top: 2rem; text-align: center; color: var(--text); opacity: 1 !important; animation: slideDown 1s 0.3s ease forwards;">הדרך להצלחה בבגרות מתחילה כאן.</p>
 
+    <a href="#book" class="btn" style="margin-top: 2.5rem; opacity: 0; animation: slideUp 1s 0.8s ease forwards;">קבע שיעור עכשיו</a>
+
     <div class="stats">
         <div class="glass"><span>4.9★</span>דירוג ממוצע</div>
         <div class="glass"><span>50+</span>תלמידים מרוצים</div>
         <div class="glass"><span>60₪</span>לשיעור של שעה</div>
     </div>
-
-    <a href="#book" class="btn" style="margin-top: 4rem; opacity: 0; animation: slideUp 1s 0.8s ease forwards;">קבע שיעור עכשיו</a>
 </section>
 
 <!-- PUBLIC BOOKING SECTION -->
@@ -686,18 +768,29 @@ input.field-locked {
         </div>
 
         <div id="step1" class="step active">
-            <div class="input-group">
-                <label>שם מלא</label>
-                <input type="text" id="fname" placeholder="ישראל ישראלי">
+            <!-- Profile summary: shown when logged in -->
+            <div id="profileSummaryBar">
+                <div>
+                    <div class="psb-name" id="psbName"></div>
+                    <div class="psb-phone" id="psbPhone"></div>
+                </div>
+                <span class="unlock-link" onclick="switchUser()">החלף משתמש</span>
             </div>
-            <div class="input-group">
-                <label>מספר טלפון</label>
-                <input type="tel" id="fphone" placeholder="050-0000000">
-            </div>
-            <div class="input-group">
-                <label>כתובת אימייל (מומלץ)</label>
-                <input type="email" id="femail" placeholder="example@email.com">
-                <p style="font-size: 0.85rem; opacity: 0.7; margin-top: 5px; color: var(--text);">* המייל אינו חובה, אך מומלץ לקבלת תזכורות.</p>
+            <!-- Identity fields: hidden when logged in -->
+            <div id="step1IdentityFields">
+                <div class="input-group">
+                    <label>שם מלא</label>
+                    <input type="text" id="fname" placeholder="ישראל ישראלי">
+                </div>
+                <div class="input-group">
+                    <label>מספר טלפון</label>
+                    <input type="tel" id="fphone" placeholder="050-0000000">
+                </div>
+                <div class="input-group">
+                    <label>כתובת אימייל (מומלץ)</label>
+                    <input type="email" id="femail" placeholder="example@email.com">
+                    <p style="font-size: 0.85rem; opacity: 0.7; margin-top: 5px; color: var(--text);">* המייל אינו חובה, אך מומלץ לקבלת תזכורות.</p>
+                </div>
             </div>
             <div class="input-group">
                 <label>צורת שיעור</label>
@@ -840,7 +933,11 @@ input.field-locked {
                     </div>
                     <div class="input-group" style="margin-top:1rem;">
                         <label>מספר טלפון</label>
-                        <input type="tel" id="regPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') submitRegister()">
+                        <input type="tel" id="regPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') document.getElementById('regEmail').focus()">
+                    </div>
+                    <div class="input-group" style="margin-top:1rem;">
+                        <label>כתובת אימייל (לתזכורות)</label>
+                        <input type="email" id="regEmail" placeholder="example@email.com" onkeydown="if(event.key==='Enter') submitRegister()">
                     </div>
                     <button class="btn" onclick="submitRegister()" style="width:100%; margin-top:1rem;">הרשמה והתחברות</button>
                     <button class="btn btn-outline auth-back-btn" onclick="showAuthButtons()">חזרה</button>
@@ -930,15 +1027,50 @@ input.field-locked {
     </div>
 </div>
 
+<div id="student-auth-modal" onclick="if(event.target===this) closeStudentAuthModal()">
+    <div class="confirm-box" style="max-width:440px; width:92%; text-align:right; padding:2rem 2.2rem;">
+        <!-- Login panel -->
+        <div id="modal-login-panel">
+            <h3 style="color:var(--gold); margin-bottom:1.8rem; font-size:1.6rem;">התחברות</h3>
+            <div class="input-group">
+                <label>מספר טלפון</label>
+                <input type="tel" id="modalLoginPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') modalSubmitLogin()">
+            </div>
+            <button class="btn" onclick="modalSubmitLogin()" style="width:100%; margin-top:0.5rem;">כניסה</button>
+            <p style="text-align:center; margin-top:1.2rem; font-size:0.9rem; opacity:0.7;">אין לך חשבון? <span onclick="showModalRegister()" style="color:var(--gold); cursor:pointer; text-decoration:underline;">הירשם כאן</span></p>
+            <button class="btn btn-outline" onclick="closeStudentAuthModal()" style="width:100%; margin-top:0.8rem; font-size:0.85rem; opacity:0.65;">סגור</button>
+        </div>
+        <!-- Register panel -->
+        <div id="modal-register-panel" style="display:none;">
+            <h3 style="color:var(--gold); margin-bottom:1.8rem; font-size:1.6rem;">הרשמה</h3>
+            <div class="input-group">
+                <label>שם מלא</label>
+                <input type="text" id="modalRegName" placeholder="ישראל ישראלי" onkeydown="if(event.key==='Enter') document.getElementById('modalRegPhone').focus()">
+            </div>
+            <div class="input-group">
+                <label>מספר טלפון</label>
+                <input type="tel" id="modalRegPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') document.getElementById('modalRegEmail').focus()">
+            </div>
+            <div class="input-group">
+                <label>כתובת אימייל לתזכורות</label>
+                <input type="email" id="modalRegEmail" placeholder="example@email.com" onkeydown="if(event.key==='Enter') modalSubmitRegister()">
+            </div>
+            <button class="btn" onclick="modalSubmitRegister()" style="width:100%; margin-top:0.5rem;">הרשמה</button>
+            <p style="text-align:center; margin-top:1.2rem; font-size:0.9rem; opacity:0.7;">כבר רשום? <span onclick="showModalLogin()" style="color:var(--gold); cursor:pointer; text-decoration:underline;">התחבר כאן</span></p>
+            <button class="btn btn-outline" onclick="closeStudentAuthModal()" style="width:100%; margin-top:0.8rem; font-size:0.85rem; opacity:0.65;">סגור</button>
+        </div>
+    </div>
+</div>
+
 <a id="floatingContact" href="https://wa.me/972586458414" target="_blank" rel="noopener noreferrer">
     <span class="fc-label">לשאלות פנו אליי:</span>
     <span class="fc-number">058-6458414</span>
-    <button class="fc-copy" onclick="event.preventDefault(); event.stopPropagation(); copyPhone();" title="העתק מספר">
-        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    <span class="fc-copy" title="WhatsApp">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.554 4.122 1.526 5.857L.057 23.882a.5.5 0 0 0 .614.612l6.094-1.478A11.955 11.955 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.666-.523-5.184-1.434l-.372-.22-3.862.936.975-3.773-.243-.389A9.956 9.956 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
         </svg>
-    </button>
+    </span>
 </a>
 
 <div id="toast-container"></div>
@@ -994,6 +1126,7 @@ window.onload = function() {
 
     // Pre-fill and lock booking form if profile exists
     applyProfileToBookingForm();
+    updateNavAuth();
 
     flatpickr("#fdate", {
         locale: "he",
@@ -1076,14 +1209,17 @@ function toggleTheme() {
     }
 }
 
+const _navbar = document.getElementById('navbar');
+let _scrollTicking = false;
 window.addEventListener('scroll', () => {
-    const nav = document.getElementById('navbar');
-    if (window.scrollY > 50) {
-        nav.style.padding = '0.7rem 2rem';
-    } else {
-        nav.style.padding = '1rem 2rem';
+    if (!_scrollTicking) {
+        requestAnimationFrame(() => {
+            _navbar.style.padding = window.scrollY > 50 ? '0.7rem 2rem' : '1rem 2rem';
+            _scrollTicking = false;
+        });
+        _scrollTicking = true;
     }
-});
+}, { passive: true });
 
 let maxReachedStep = 1;
 function nextStep(s) {
@@ -1377,18 +1513,115 @@ function buildGCalLink(b) {
 function getProfile() {
     const name = localStorage.getItem('gabay_name');
     const phone = localStorage.getItem('gabay_phone');
-    return (name && phone) ? { name, phone } : null;
+    const email = localStorage.getItem('gabay_email') || '';
+    return (name && phone) ? { name, phone, email } : null;
 }
 
-function saveProfile(name, phone) {
+function saveProfile(name, phone, email) {
     localStorage.setItem('gabay_name', name);
     localStorage.setItem('gabay_phone', phone);
+    if (email) localStorage.setItem('gabay_email', email);
     applyProfileToBookingForm();
+    updateNavAuth();
 }
 
 function clearProfile() {
     localStorage.removeItem('gabay_name');
     localStorage.removeItem('gabay_phone');
+    localStorage.removeItem('gabay_email');
+}
+
+function updateNavAuth() {
+    const profile = getProfile();
+    const authButtons = document.getElementById('navAuthButtons');
+    const userChip = document.getElementById('navUserChip');
+    const navLogout = document.getElementById('navLogout');
+    if (profile) {
+        if (authButtons) authButtons.style.display = 'none';
+        if (userChip) { userChip.style.display = 'flex'; document.getElementById('navUserName').textContent = profile.name; }
+        if (navLogout) navLogout.style.display = 'block';
+    } else {
+        if (authButtons) authButtons.style.display = 'flex';
+        if (userChip) userChip.style.display = 'none';
+        if (navLogout) navLogout.style.display = 'none';
+    }
+}
+
+function navShowLogin() {
+    if (getProfile()) { openStudentArea(); return; }
+    document.getElementById('modal-login-panel').style.display = 'block';
+    document.getElementById('modal-register-panel').style.display = 'none';
+    document.getElementById('student-auth-modal').style.display = 'flex';
+    setTimeout(() => { const el = document.getElementById('modalLoginPhone'); if(el) el.focus(); }, 80);
+}
+
+function navShowRegister() {
+    if (getProfile()) { openStudentArea(); return; }
+    document.getElementById('modal-login-panel').style.display = 'none';
+    document.getElementById('modal-register-panel').style.display = 'block';
+    document.getElementById('student-auth-modal').style.display = 'flex';
+    setTimeout(() => { const el = document.getElementById('modalRegName'); if(el) el.focus(); }, 80);
+}
+
+function showModalLogin() {
+    document.getElementById('modal-login-panel').style.display = 'block';
+    document.getElementById('modal-register-panel').style.display = 'none';
+    setTimeout(() => document.getElementById('modalLoginPhone').focus(), 80);
+}
+
+function showModalRegister() {
+    document.getElementById('modal-login-panel').style.display = 'none';
+    document.getElementById('modal-register-panel').style.display = 'block';
+    setTimeout(() => document.getElementById('modalRegName').focus(), 80);
+}
+
+function closeStudentAuthModal() {
+    document.getElementById('student-auth-modal').style.display = 'none';
+}
+
+function modalSubmitLogin() {
+    const phone = document.getElementById('modalLoginPhone').value.trim();
+    if (!phone) { showToast('נא להזין מספר טלפון'); return; }
+
+    db.collection("bookings").where("phone", "==", phone).get().then(snap => {
+        if (snap.empty) {
+            showToast('מספר לא נמצא — עבור להרשמה');
+            showModalRegister();
+            return;
+        }
+        let lessons = [];
+        snap.forEach(doc => lessons.push(doc.data()));
+        lessons.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+        const name = lessons[0].name || '';
+        const email = lessons[0].email || '';
+        saveProfile(name, phone, email);
+        sessionPhone = phone;
+        closeStudentAuthModal();
+        showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
+        document.getElementById('modalLoginPhone').value = '';
+    }).catch(() => showToast('שגיאה בכניסה, נסה שוב'));
+}
+
+function modalSubmitRegister() {
+    const name = document.getElementById('modalRegName').value.trim();
+    const phone = document.getElementById('modalRegPhone').value.trim();
+    const email = document.getElementById('modalRegEmail').value.trim();
+    if (!name) { showToast('נא להזין שם'); return; }
+    if (!phone) { showToast('נא להזין מספר טלפון'); return; }
+    if (!email) { showToast('נא להזין כתובת אימייל'); return; }
+
+    saveProfile(name, phone, email);
+    sessionPhone = phone;
+    closeStudentAuthModal();
+    showToast('שלום ' + name + '! נרשמת בהצלחה');
+    document.getElementById('modalRegName').value = '';
+    document.getElementById('modalRegPhone').value = '';
+    document.getElementById('modalRegEmail').value = '';
+}
+
+function sidebarLogout() {
+    closeMenu();
+    logoutProfile();
 }
 
 /* ── Auth screen navigation ── */
@@ -1397,6 +1630,7 @@ function showAuthButtons() {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'none';
     document.getElementById('loggedInChip').style.display = 'none';
+    updateNavAuth();
 }
 
 function showLoginForm() {
@@ -1421,6 +1655,7 @@ function showLoggedInChip(name, phone) {
     chip.style.display = 'flex';
     document.getElementById('loggedInName').textContent = name;
     document.getElementById('loggedInPhone').textContent = phone;
+    updateNavAuth();
 }
 
 /* ── Auth actions ── */
@@ -1437,7 +1672,8 @@ function submitLogin() {
         snap.forEach(doc => lessons.push(doc.data()));
         lessons.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
         const name = lessons[0].name || '';
-        saveProfile(name, phone);
+        const email = lessons[0].email || '';
+        saveProfile(name, phone, email);
         sessionPhone = phone;
         showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
         showLoggedInChip(name, phone);
@@ -1451,10 +1687,11 @@ function submitLogin() {
 function submitRegister() {
     const name = document.getElementById('regName').value.trim();
     const phone = document.getElementById('regPhone').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
     if (!name) { showToast('נא להזין שם'); return; }
     if (!phone) { showToast('נא להזין מספר טלפון'); return; }
 
-    saveProfile(name, phone);
+    saveProfile(name, phone, email);
     sessionPhone = phone;
     showToast('שלום ' + name + '! נרשמת בהצלחה');
     showLoggedInChip(name, phone);
@@ -1482,31 +1719,30 @@ function applyProfileToBookingForm() {
     const profile = getProfile();
     const nameInput = document.getElementById('fname');
     const phoneInput = document.getElementById('fphone');
+    const emailInput = document.getElementById('femail');
+    const identityFields = document.getElementById('step1IdentityFields');
+    const summaryBar = document.getElementById('profileSummaryBar');
     if (!nameInput || !phoneInput) return;
 
     if (profile) {
+        // Fill hidden inputs so confirmBooking() can read them
         nameInput.value = profile.name;
         phoneInput.value = profile.phone;
-        nameInput.classList.add('field-locked');
-        phoneInput.classList.add('field-locked');
-        nameInput.readOnly = true;
-        phoneInput.readOnly = true;
+        if (emailInput && profile.email) emailInput.value = profile.email;
 
-        if (!document.getElementById('unlockProfileLink')) {
-            const link = document.createElement('span');
-            link.id = 'unlockProfileLink';
-            link.className = 'unlock-link';
-            link.textContent = 'עריכה / החלף משתמש';
-            link.onclick = switchUser;
-            phoneInput.parentElement.appendChild(link);
+        // Hide the full identity fields, show compact summary
+        if (identityFields) identityFields.style.display = 'none';
+        if (summaryBar) {
+            summaryBar.style.display = 'flex';
+            document.getElementById('psbName').textContent = profile.name;
+            document.getElementById('psbPhone').textContent = profile.phone + (profile.email ? ' · ' + profile.email : '');
         }
     } else {
-        nameInput.classList.remove('field-locked');
-        phoneInput.classList.remove('field-locked');
-        nameInput.readOnly = false;
-        phoneInput.readOnly = false;
-        const link = document.getElementById('unlockProfileLink');
-        if (link) link.remove();
+        nameInput.value = '';
+        phoneInput.value = '';
+        if (emailInput) emailInput.value = '';
+        if (identityFields) identityFields.style.display = 'block';
+        if (summaryBar) summaryBar.style.display = 'none';
     }
 }
 
@@ -1538,7 +1774,7 @@ function fetchMyLessons() {
         }
 
         let lessons = [];
-        snap.forEach(doc => lessons.push(doc.data()));
+        snap.forEach(doc => lessons.push({ id: doc.id, ...doc.data() }));
         lessons.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
 
         // Filter by name if profile exists (data integrity)
@@ -1595,6 +1831,7 @@ function fetchMyLessons() {
                             <span class="badge ${badgeClass}">${displayStatus}</span>
                         </div>
                     </div>
+                    ${b.status !== 'בוטל' ? `<div class="ticket-footer"><button class="cancel-lesson-btn" onclick="cancelMyLesson('${b.id}')">ביטול שיעור ×</button></div>` : ''}
                 </div>
             `;
         });
@@ -1604,6 +1841,41 @@ function fetchMyLessons() {
         showToast('שגיאה בטעינת השיעורים');
         backToLogin();
     });
+}
+
+function cancelMyLesson(bookingId) {
+    showConfirm('האם לבטל את השיעור? לא ניתן לבטל פחות מ-24 שעות לפני.', () => {
+        db.collection("bookings").doc(bookingId).get().then(doc => {
+            if (!doc.exists) return;
+            const b = doc.data();
+            db.collection("bookings").doc(bookingId).update({ status: "בוטל" }).then(() => {
+                sendCancellationEmails(b);
+                showToast('השיעור בוטל — נשלחה הודעה במייל');
+                fetchMyLessons();
+            });
+        }).catch(() => showToast('שגיאה בביטול השיעור'));
+    });
+}
+
+function sendCancellationEmails(b) {
+    const base = {
+        student_name: b.name || '',
+        date: b.date || '',
+        time: b.time || '',
+        topic: b.topic || '',
+        grade: b.grade || '',
+        phone: b.phone || '',
+        email: b.email || '',
+        lesson_format: b.lessonFormat || '',
+        user_comments: 'השיעור בוטל על ידי התלמיד',
+        type: 'ביטול שיעור'
+    };
+    // Admin
+    emailjs.send("service_uiiqhnd", "template_e6swvbo", { ...base, to_email: "nooam.gabay@gmail.com" }, "JI7HdPnpg063aq0Pl");
+    // Student
+    if (b.email) {
+        emailjs.send("service_uiiqhnd", "template_e6swvbo", { ...base, to_email: b.email }, "JI7HdPnpg063aq0Pl");
+    }
 }
 
 function backToLogin() {
@@ -1679,11 +1951,10 @@ function closeMenuAndOpenStudentArea() {
 }
 
 function logoutAdmin() {
+  if (unsubBookings) { unsubBookings(); unsubBookings = null; }
   document.getElementById('adminDashboard').style.display = 'none';
   document.getElementById('hero').classList.remove('admin-hidden');
   document.getElementById('book').classList.remove('admin-hidden');
-  document.querySelectorAll('.sym').forEach(s => s.style.animationPlayState = 'running');
-  document.querySelectorAll('.math-bg').forEach(b => b.style.display = 'block');
 }
 
 let unsubBookings = null;
@@ -2041,6 +2312,7 @@ function resetForm() {
   maxReachedStep = 1;
   nextStep(1);
   document.querySelector('.progress').style.display = 'flex';
+  applyProfileToBookingForm();
 }
 
 let _confirmCb = null;
