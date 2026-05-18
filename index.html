@@ -2200,7 +2200,8 @@ function approveBookingDB(id, btn) {
 }
 
 function sendNotification(type, bookingData) {
-  // 1. Always send to Admin
+  // 1. Admin Notification (Disabled to save email quota)
+  /*
   const adminParams = {
     to_email: "nooam.gabay@gmail.com",
     student_name: bookingData.name,
@@ -2215,6 +2216,7 @@ function sendNotification(type, bookingData) {
     type: "ADMIN_NOTIFICATION"
   };
   emailjs.send("service_uiiqhnd", "template_e6swvbo", adminParams, "JI7HdPnpg063aq0Pl");
+  */
 
   // 2. Send to Student ONLY if email exists
   if (bookingData.email) {
