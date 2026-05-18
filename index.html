@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://npmcdn.com/flatpickr/dist/l10n/he.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -105,6 +105,25 @@ nav {
 
 .sidebar-menu .theme-btn {
   align-self: flex-start; margin-bottom: 1rem;
+}
+.sidebar-auth {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-gold);
+  width: 100%;
+}
+.sidebar-auth .btn {
+  width: 100%;
+  text-align: center;
+  font-size: 1rem;
+  padding: 0.85rem 1.2rem;
+}
+.sidebar-auth.is-hidden { display: none !important; }
+@media (max-width: 900px) {
+  .sidebar-auth:not(.is-hidden) { display: flex; }
 }
 
 .admin-hidden { display: none !important; }
@@ -322,12 +341,6 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
 .schedule-item:hover { border-color: var(--border-gold); background: rgba(201,168,76,0.03); }
 .schedule-info strong { font-size: 1.25rem; color: var(--text); display: block; margin-bottom: 0.4rem; }
 .schedule-info span { color: var(--text-muted); font-size: 1rem; }
-/* Light-mode overrides for admin booking cards */
-body.light-mode .schedule-item { background: #ffffff; border-color: rgba(0,0,0,0.1); }
-body.light-mode .schedule-item.approved { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.35); }
-body.light-mode .schedule-item.cancelled { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.3); }
-body.light-mode .schedule-info strong { color: #111111; }
-body.light-mode .schedule-info span { color: #444444; }
 .badge {
   padding: 0.4rem 1rem; border-radius: 30px; font-size: 0.85rem;
   font-weight: 700; margin-left: 1rem; display: inline-block; letter-spacing: 0.5px;
@@ -368,6 +381,14 @@ body.light-mode .schedule-info span { color: #444444; }
 }
 .slot-tooltip strong { color: var(--gold); display: block; margin-bottom: 0.2rem; }
 .slot-tooltip span { font-size: 0.85rem; color: var(--text-muted); }
+body.light-mode .slot-tooltip {
+  background: #f7f7f7 !important;
+  border: 1px solid var(--border-gold) !important;
+  color: #121212 !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12), 0 0 14px rgba(201,168,76,0.12) !important;
+}
+body.light-mode .slot-tooltip strong { color: #1a1a1a !important; }
+body.light-mode .slot-tooltip span { color: #333333 !important; }
 
 /* ── FLATPICKR ────────────────────────────────────── */
 .flatpickr-calendar { background: rgba(16,16,16,0.99) !important; border: 1px solid var(--border-gold) !important; border-radius: 20px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 30px rgba(201,168,76,0.08) !important; font-family: 'Heebo', sans-serif !important; color: var(--text) !important; }
@@ -382,6 +403,76 @@ body.light-mode .schedule-info span { color: #444444; }
 .flatpickr-innerContainer { padding: 12px !important; }
 .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { padding: 10px !important; }
 .flatpickr-months .flatpickr-prev-month svg, .flatpickr-months .flatpickr-next-month svg { fill: var(--gold) !important; width: 14px; height: 14px; }
+/* Light-mode flatpickr (overrides dark.css theme) */
+body.light-mode .flatpickr-calendar,
+body.light-mode .flatpickr-calendar.dark {
+  background: #ffffff !important;
+  color: #121212 !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.12), 0 0 24px rgba(201,168,76,0.14) !important;
+}
+body.light-mode .flatpickr-months,
+body.light-mode .flatpickr-months .flatpickr-month {
+  background: #ffffff !important;
+  color: #121212 !important;
+  fill: #121212 !important;
+}
+body.light-mode .flatpickr-current-month .flatpickr-monthDropdown-months,
+body.light-mode .flatpickr-current-month input.cur-year,
+body.light-mode .numInputWrapper span.arrowUp:after,
+body.light-mode .numInputWrapper span.arrowDown:after {
+  background: #f5f5f5 !important;
+  color: #121212 !important;
+  fill: #121212 !important;
+}
+body.light-mode .flatpickr-day {
+  color: #121212 !important;
+}
+body.light-mode .flatpickr-day.prevMonthDay,
+body.light-mode .flatpickr-day.nextMonthDay,
+body.light-mode .flatpickr-day.flatpickr-disabled {
+  color: rgba(0,0,0,0.28) !important;
+}
+body.light-mode .flatpickr-day.today {
+  color: #8a6a1e !important;
+  border-color: var(--gold) !important;
+}
+body.light-mode .flatpickr-day:hover {
+  background: rgba(201,168,76,0.14) !important;
+}
+body.light-mode .flatpickr-day.selected {
+  color: #ffffff !important;
+}
+body.light-mode .flatpickr-weekday {
+  color: #8a6a1e !important;
+}
+body.light-mode .flatpickr-months .flatpickr-prev-month svg,
+body.light-mode .flatpickr-months .flatpickr-next-month svg {
+  fill: var(--gold) !important;
+}
+body.light-mode .flatpickr-current-month .numInputWrapper span,
+body.light-mode .flatpickr-current-month .flatpickr-monthDropdown-months option {
+  color: #121212 !important;
+  background: #ffffff !important;
+}
+body.light-mode span.flatpickr-weekday {
+  background: transparent !important;
+  color: #8a6a1e !important;
+}
+body.light-mode .flatpickr-days,
+body.light-mode .flatpickr-dayContainer,
+body.light-mode .flatpickr-innerContainer,
+body.light-mode .flatpickr-rContainer {
+  background: #ffffff !important;
+}
+body.light-mode .flatpickr-calendar .flatpickr-day,
+body.light-mode .flatpickr-calendar.dark .flatpickr-day {
+  color: #121212 !important;
+}
+body.light-mode .flatpickr-current-month,
+body.light-mode .flatpickr-current-month .flatpickr-monthDropdown-months,
+body.light-mode .flatpickr-current-month input.cur-year {
+  color: #121212 !important;
+}
 
 /* ── INPUT WRAPPER WITH ICON ─────────────────────── */
 .input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
@@ -432,6 +523,9 @@ body.light-mode .confirm-box {
   color: #111111;
   box-shadow: 0 16px 50px rgba(0,0,0,0.14), 0 0 20px rgba(201,168,76,0.12);
 }
+body.light-mode #confirm-msg { color: #111111; }
+body.light-mode #student-auth-modal .confirm-box label,
+body.light-mode #student-auth-modal .confirm-box p { color: #333333; }
 @keyframes confirmIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 #confirm-msg {
   font-size: 1.1rem; color: var(--text); margin-bottom: 1.8rem;
@@ -467,15 +561,6 @@ body.light-mode .confirm-box {
   border: 1px solid rgba(239,68,68,0.22);
   opacity: 0.72;
 }
-/* Light-mode lesson ticket overrides */
-body.light-mode .lesson-ticket.approved { background: #ffffff; border-color: rgba(201,168,76,0.5); box-shadow: 0 4px 18px rgba(201,168,76,0.1); }
-body.light-mode .lesson-ticket.pending { background: #fffdf4; border-color: rgba(251,191,36,0.5); }
-body.light-mode .lesson-ticket.cancelled { background: #fff5f5; border-color: rgba(239,68,68,0.35); }
-body.light-mode .ticket-date { color: #555555; }
-body.light-mode .ticket-topic { color: #111111; }
-body.light-mode .ticket-grade { color: #555555; }
-body.light-mode .ticket-divider { background: rgba(0,0,0,0.1); }
-body.light-mode .ticket-footer { border-top-color: rgba(0,0,0,0.07); }
 .lesson-ticket:hover { transform: translateY(-3px); box-shadow: 0 14px 35px rgba(0,0,0,0.45); }
 .ticket-stripe { width: 5px; flex-shrink: 0; }
 .lesson-ticket.approved .ticket-stripe { background: linear-gradient(180deg, var(--gold), #7a5a20); }
@@ -624,8 +709,7 @@ body.light-mode #auth-modal input::placeholder { color: rgba(0,0,0,0.4); }
   font-size: 0.82rem; color: #e0e0e0; font-weight: 500; white-space: nowrap;
 }
 #floatingContact .fc-number {
-  font-size: 0.95rem; font-weight: 800; color: #222222; letter-spacing: 0.5px; white-space: nowrap;
-  letter-spacing: 0.5px; white-space: nowrap;
+  font-size: 0.95rem; font-weight: 800; color: #f0f0f0; letter-spacing: 0.5px; white-space: nowrap;
 }
 /* Light mode overrides for floating contact */
 body.light-mode #floatingContact {
@@ -633,8 +717,8 @@ body.light-mode #floatingContact {
   border-color: rgba(201,168,76,0.45);
   box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 0 16px rgba(201,168,76,0.18);
 }
-body.light-mode #floatingContact .fc-label { color: #1a1a1a; }
-body.light-mode #floatingContact .fc-number { color: #1a1a1a !important; }
+body.light-mode #floatingContact .fc-label { color: #111111 !important; }
+body.light-mode #floatingContact .fc-number { color: #111111 !important; }
 body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
 
 #floatingContact .fc-copy {
@@ -787,10 +871,9 @@ input.field-locked {
         <a href="#book" onclick="closeMenuAndLogoutAdmin()" id="navBook">קביעת שיעור</a>
         <a href="javascript:void(0)" onclick="closeMenuAndOpenStudentArea()" id="navLessons">השיעורים שלי</a>
         <a href="javascript:void(0)" onclick="sidebarLogout()" id="navLogout" style="display:none; color:#f87171;">התנתק</a>
-        <!-- Mobile auth buttons (hidden on desktop via updateNavAuth) -->
-        <div id="sidebarAuthButtons" style="display:flex; flex-direction:column; gap:0.8rem; margin-top:0.5rem;">
-            <button class="btn" style="width:100%; font-size:1rem;" onclick="closeMenu(); navShowRegister()">הרשמה</button>
-            <button class="btn btn-outline" style="width:100%; font-size:1rem;" onclick="closeMenu(); navShowLogin()">התחברות</button>
+        <div class="sidebar-auth" id="sidebarAuthButtons">
+            <button type="button" class="btn btn-outline" onclick="sidebarShowLogin()">התחברות</button>
+            <button type="button" class="btn" onclick="sidebarShowRegister()">הרשמה</button>
         </div>
     </div>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
@@ -1592,20 +1675,30 @@ function clearProfile() {
 function updateNavAuth() {
     const profile = getProfile();
     const authButtons = document.getElementById('navAuthButtons');
+    const sidebarAuthButtons = document.getElementById('sidebarAuthButtons');
     const userChip = document.getElementById('navUserChip');
     const navLogout = document.getElementById('navLogout');
-    const sidebarAuth = document.getElementById('sidebarAuthButtons');
     if (profile) {
         if (authButtons) authButtons.style.display = 'none';
+        if (sidebarAuthButtons) sidebarAuthButtons.classList.add('is-hidden');
         if (userChip) { userChip.style.display = 'flex'; document.getElementById('navUserName').textContent = profile.name; }
         if (navLogout) navLogout.style.display = 'block';
-        if (sidebarAuth) sidebarAuth.style.display = 'none';
     } else {
         if (authButtons) authButtons.style.display = 'flex';
+        if (sidebarAuthButtons) sidebarAuthButtons.classList.remove('is-hidden');
         if (userChip) userChip.style.display = 'none';
         if (navLogout) navLogout.style.display = 'none';
-        if (sidebarAuth) sidebarAuth.style.display = 'flex';
     }
+}
+
+function sidebarShowLogin() {
+    closeMenu();
+    navShowLogin();
+}
+
+function sidebarShowRegister() {
+    closeMenu();
+    navShowRegister();
 }
 
 function navShowLogin() {
