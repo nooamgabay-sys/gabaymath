@@ -322,6 +322,12 @@ body.light-mode #bookingSummary span { color: #121212 !important; font-weight: 8
 .schedule-item:hover { border-color: var(--border-gold); background: rgba(201,168,76,0.03); }
 .schedule-info strong { font-size: 1.25rem; color: var(--text); display: block; margin-bottom: 0.4rem; }
 .schedule-info span { color: var(--text-muted); font-size: 1rem; }
+/* Light-mode overrides for admin booking cards */
+body.light-mode .schedule-item { background: #ffffff; border-color: rgba(0,0,0,0.1); }
+body.light-mode .schedule-item.approved { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.35); }
+body.light-mode .schedule-item.cancelled { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.3); }
+body.light-mode .schedule-info strong { color: #111111; }
+body.light-mode .schedule-info span { color: #444444; }
 .badge {
   padding: 0.4rem 1rem; border-radius: 30px; font-size: 0.85rem;
   font-weight: 700; margin-left: 1rem; display: inline-block; letter-spacing: 0.5px;
@@ -461,6 +467,15 @@ body.light-mode .confirm-box {
   border: 1px solid rgba(239,68,68,0.22);
   opacity: 0.72;
 }
+/* Light-mode lesson ticket overrides */
+body.light-mode .lesson-ticket.approved { background: #ffffff; border-color: rgba(201,168,76,0.5); box-shadow: 0 4px 18px rgba(201,168,76,0.1); }
+body.light-mode .lesson-ticket.pending { background: #fffdf4; border-color: rgba(251,191,36,0.5); }
+body.light-mode .lesson-ticket.cancelled { background: #fff5f5; border-color: rgba(239,68,68,0.35); }
+body.light-mode .ticket-date { color: #555555; }
+body.light-mode .ticket-topic { color: #111111; }
+body.light-mode .ticket-grade { color: #555555; }
+body.light-mode .ticket-divider { background: rgba(0,0,0,0.1); }
+body.light-mode .ticket-footer { border-top-color: rgba(0,0,0,0.07); }
 .lesson-ticket:hover { transform: translateY(-3px); box-shadow: 0 14px 35px rgba(0,0,0,0.45); }
 .ticket-stripe { width: 5px; flex-shrink: 0; }
 .lesson-ticket.approved .ticket-stripe { background: linear-gradient(180deg, var(--gold), #7a5a20); }
@@ -772,6 +787,11 @@ input.field-locked {
         <a href="#book" onclick="closeMenuAndLogoutAdmin()" id="navBook">קביעת שיעור</a>
         <a href="javascript:void(0)" onclick="closeMenuAndOpenStudentArea()" id="navLessons">השיעורים שלי</a>
         <a href="javascript:void(0)" onclick="sidebarLogout()" id="navLogout" style="display:none; color:#f87171;">התנתק</a>
+        <!-- Mobile auth buttons (hidden on desktop via updateNavAuth) -->
+        <div id="sidebarAuthButtons" style="display:flex; flex-direction:column; gap:0.8rem; margin-top:0.5rem;">
+            <button class="btn" style="width:100%; font-size:1rem;" onclick="closeMenu(); navShowRegister()">הרשמה</button>
+            <button class="btn btn-outline" style="width:100%; font-size:1rem;" onclick="closeMenu(); navShowLogin()">התחברות</button>
+        </div>
     </div>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
 </nav>
@@ -1574,14 +1594,17 @@ function updateNavAuth() {
     const authButtons = document.getElementById('navAuthButtons');
     const userChip = document.getElementById('navUserChip');
     const navLogout = document.getElementById('navLogout');
+    const sidebarAuth = document.getElementById('sidebarAuthButtons');
     if (profile) {
         if (authButtons) authButtons.style.display = 'none';
         if (userChip) { userChip.style.display = 'flex'; document.getElementById('navUserName').textContent = profile.name; }
         if (navLogout) navLogout.style.display = 'block';
+        if (sidebarAuth) sidebarAuth.style.display = 'none';
     } else {
         if (authButtons) authButtons.style.display = 'flex';
         if (userChip) userChip.style.display = 'none';
         if (navLogout) navLogout.style.display = 'none';
+        if (sidebarAuth) sidebarAuth.style.display = 'flex';
     }
 }
 
