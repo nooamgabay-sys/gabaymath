@@ -128,6 +128,15 @@ nav .logo {
 }
 .no-hover:hover { transform: none !important; box-shadow: none !important; border-color: var(--border) !important; }
 
+/* ── FLOATING MATH BG ─────────────────────────────── */
+.math-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; will-change: transform; }
+.sym { position: absolute; font-size: 2rem; color: var(--sym-color, rgba(201, 168, 76, 0.11)); animation: float linear infinite; font-weight: 300; will-change: transform; }
+@keyframes float {
+  0% { transform: translateY(110vh) rotate(0deg); }
+  50% { transform: translateY(45vh) rotate(180deg) translateX(15px); }
+  100% { transform: translateY(-20vh) rotate(360deg); }
+}
+
 /* ── TYPOGRAPHY ──────────────────────────────────── */
 h1 {
   font-size: 4.5rem; font-weight: 800; text-align: center; position: relative;
@@ -1484,6 +1493,10 @@ function loginAdmin() {
         document.getElementById('auth-modal').style.display = 'none';
         document.getElementById('book').classList.add('admin-hidden');
         document.getElementById('hero').classList.add('admin-hidden');
+        
+        document.querySelectorAll('.sym').forEach(s => s.style.animationPlayState = 'paused');
+        document.querySelectorAll('.math-bg').forEach(b => b.style.display = 'none');
+
         document.getElementById('adminDashboard').style.display = 'flex';
         renderAdminBookings();
         renderAvailGrid();
@@ -1906,11 +1919,13 @@ function logoutStudent() {
     document.getElementById('hero').classList.remove('admin-hidden');
     document.getElementById('my-lessons').style.display = 'none';
 }
-
 function logoutAdminNoConfirm() {
     document.getElementById('adminDashboard').style.display = 'none';
     document.getElementById('book').classList.remove('admin-hidden');
     document.getElementById('hero').classList.remove('admin-hidden');
+    
+    document.querySelectorAll('.sym').forEach(s => s.style.animationPlayState = 'running');
+    document.querySelectorAll('.math-bg').forEach(b => b.style.display = 'block');
 }
 
 function togglePass() {
@@ -1946,6 +1961,9 @@ function logoutAdmin() {
   document.getElementById('adminDashboard').style.display = 'none';
   document.getElementById('hero').classList.remove('admin-hidden');
   document.getElementById('book').classList.remove('admin-hidden');
+  
+  document.querySelectorAll('.sym').forEach(s => s.style.animationPlayState = 'running');
+  document.querySelectorAll('.math-bg').forEach(b => b.style.display = 'block');
 }
 
 let unsubBookings = null;
@@ -2376,6 +2394,28 @@ document.getElementById('adminTrigger').addEventListener('click', () => {
     }
     setTimeout(() => { logoClicks = 0; }, 2000);
 });
+// Generate Floating Math Symbols dynamically
+function createMathBg() {
+    const bg = document.createElement('div');
+    bg.className = 'math-bg';
+    bg.id = 'mathBg';
+    
+    const symbols = ['Σ', '∫', 'π', '√', '∞', 'Δ', 'θ', 'Ω', 'λ', 'φ'];
+    symbols.forEach((sym, i) => {
+        const span = document.createElement('span');
+        span.className = 'sym';
+        span.innerText = sym;
+        span.style.left = `${(i * 10) + 5}%`;
+        span.style.animationDuration = `${20 + Math.random() * 25}s`;
+        span.style.animationDelay = `-${Math.random() * 30}s`;
+        span.style.fontSize = `${1.5 + Math.random() * 2.5}rem`;
+        bg.appendChild(span);
+    });
+    
+    document.body.insertBefore(bg, document.body.firstChild);
+}
+createMathBg();
+
 </script>
 </body>
 </html>
