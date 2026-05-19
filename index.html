@@ -876,7 +876,7 @@ input.field-locked {
             <button type="button" class="btn" onclick="sidebarShowRegister()">הרשמה</button>
         </div>
     </div>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
+    <motion class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></motion>
 </nav>
 
 <section id="hero" style="overflow: hidden;">
@@ -889,7 +889,7 @@ input.field-locked {
     <div class="stats">
         <div class="glass"><span>4.9★</span>דירוג ממוצע</div>
         <div class="glass"><span>50+</span>תלמידים מרוצים</div>
-        <div class="glass"><span>60₪</span>לשיעור של שעה</div>
+        <div class="glass"><span>60₪</span>לשיעור של שעה<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">*מחיר היכרות</div></div>
     </div>
 </section>
 
@@ -1227,6 +1227,12 @@ const db = firebase.firestore();
 
 const CLIENT_ID = '214964095575-gyhepg783bst139k1kcrolrp7qjpam9f.apps.googleusercontent.com';
 
+// Admin credentials for auto-bypass
+const ADMIN_CREDENTIALS = {
+    name: 'נעם גבאי',
+    phone: '0586458414',
+    email: 'nooam.gabay@gmail.com'
+};
 
 if (history.scrollRestoration) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
@@ -1504,9 +1510,7 @@ let calData = {};
 let sessionPhone = ''; // persists across nav clicks for auto-refresh
 
 function confirmBooking() {
-    const fname = document.getElementById('fname').value || '';
-    const fphone = document.getElementById('fphone').value || '';
-    const femail = document.getElementById('femail').value || '';
+    const { name: fname, phone: fphone, email: femail } = getBookingIdentity();
     const dateInput = document.getElementById('fdate').value;
     const timeSlot = document.querySelector('.time-slot.selected');
     const gradeSelect = document.getElementById('fgrade');
@@ -1581,6 +1585,11 @@ function confirmBooking() {
 
     // ONLY push to Firestore here - never on slot click
     db.collection("bookings").add(newBooking).then(() => {
+        // Also save/update user record in users collection
+        const sanitizedPhone = sanitizePhoneNumber(fphone);
+        saveUserToFirebase(fname, sanitizedPhone, femail)
+            .catch(err => console.error('Error saving user record:', err));
+
         // Trigger both Admin and Student notifications
         sendNotification('new_booking', newBooking);
 
@@ -1593,7 +1602,7 @@ function confirmBooking() {
         window.open(gcalUrl, '_blank');
 
         // Save student profile for next visit
-        saveProfile(fname, fphone);
+        saveProfile(fname, fphone, femail);
 
         // Trigger Golden Confetti Celebration
         confetti({
@@ -1618,10 +1627,38 @@ function confirmBooking() {
 }
 
 function showAuth() {
+    // Check if there's a logged-in user and if they match admin credentials
+    const profile = getProfile();
+    if (profile && 
+        profile.name === ADMIN_CREDENTIALS.name && 
+        profile.phone === ADMIN_CREDENTIALS.phone && 
+        profile.email === ADMIN_CREDENTIALS.email) {
+        // Auto-bypass: logged-in user matches admin credentials
+        loginAdminAutomatically();
+        return;
+    }
+    
+    // Otherwise, show the password modal
     document.getElementById('auth-modal').style.display = 'flex';
     setTimeout(() => {
         document.getElementById('adminPass').focus();
     }, 100);
+}
+
+function loginAdminAutomatically() {
+    // Automatically log in the admin user without requiring password
+    document.getElementById('auth-modal').style.display = 'none';
+    document.getElementById('book').classList.add('admin-hidden');
+    document.getElementById('hero').classList.add('admin-hidden');
+    
+    document.querySelectorAll('.sym').forEach(s => s.style.animationPlayState = 'paused');
+    document.querySelectorAll('.math-bg').forEach(b => b.style.display = 'none');
+
+    document.getElementById('adminDashboard').style.display = 'flex';
+    renderAdminBookings();
+    renderAvailGrid();
+    showToast('התחברת בהצלחה כמנהל');
+    document.getElementById('adminPass').value = '';
 }
 
 function loginAdmin() {
@@ -1658,12 +1695,46 @@ function getProfile() {
     return (name && phone) ? { name, phone, email } : null;
 }
 
+function getBookingIdentity() {
+    const profile = getProfile();
+    const nameEl = document.getElementById('fname');
+    const phoneEl = document.getElementById('fphone');
+    const emailEl = document.getElementById('femail');
+    return {
+        name: (nameEl && nameEl.value.trim()) || (profile && profile.name) || '',
+        phone: (phoneEl && phoneEl.value.trim()) || (profile && profile.phone) || '',
+        email: (emailEl && emailEl.value.trim()) || (profile && profile.email) || ''
+    };
+}
+
 function saveProfile(name, phone, email) {
+    // Sanitize phone for storage
+    const sanitizedPhone = sanitizePhoneNumber(phone);
     localStorage.setItem('gabay_name', name);
-    localStorage.setItem('gabay_phone', phone);
+    localStorage.setItem('gabay_phone', sanitizedPhone);
     if (email) localStorage.setItem('gabay_email', email);
     applyProfileToBookingForm();
     updateNavAuth();
+}
+
+// Save user registration to Firebase
+function saveUserToFirebase(name, phone, email) {
+    const sanitizedPhone = sanitizePhoneNumber(phone);
+    
+    const userData = {
+        name: name,
+        phone: sanitizedPhone,
+        email: email || '',
+        role: 'student',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    return db.collection('users').doc(sanitizedPhone).set(userData, { merge: true })
+        .catch(err => {
+            console.error('Error saving user to Firebase:', err);
+            throw err;
+        });
 }
 
 function clearProfile() {
@@ -1717,6 +1788,18 @@ function navShowRegister() {
     setTimeout(() => { const el = document.getElementById('modalRegName'); if(el) el.focus(); }, 80);
 }
 
+// Sanitize phone number: remove spaces, dashes, and convert +972 to 0
+function sanitizePhoneNumber(phone) {
+    if (!phone) return '';
+    // Remove spaces and dashes
+    let cleaned = phone.replace(/[\s-]/g, '');
+    // Convert +972 country code to 0
+    if (cleaned.startsWith('+972')) {
+        cleaned = '0' + cleaned.slice(4);
+    }
+    return cleaned;
+}
+
 function showModalLogin() {
     document.getElementById('modal-login-panel').style.display = 'block';
     document.getElementById('modal-register-panel').style.display = 'none';
@@ -1734,43 +1817,84 @@ function closeStudentAuthModal() {
 }
 
 function modalSubmitLogin() {
-    const phone = document.getElementById('modalLoginPhone').value.trim();
-    if (!phone) { showToast('נא להזין מספר טלפון'); return; }
+    const phoneInput = document.getElementById('modalLoginPhone').value.trim();
+    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
+    
+    const phone = sanitizePhoneNumber(phoneInput);
+    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
 
-    db.collection("bookings").where("phone", "==", phone).get().then(snap => {
-        if (snap.empty) {
-            showToast('מספר לא נמצא — עבור להרשמה');
-            showModalRegister();
+    // Try to find user in users collection first (registered users)
+    db.collection('users').doc(phone).get().then(doc => {
+        if (doc.exists) {
+            const userData = doc.data();
+            const name = userData.name || '';
+            const email = userData.email || '';
+            saveProfile(name, phone, email);
+            sessionPhone = phone;
+            closeStudentAuthModal();
+            showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
+            document.getElementById('modalLoginPhone').value = '';
             return;
         }
-        let lessons = [];
-        snap.forEach(doc => lessons.push(doc.data()));
-        lessons.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
-        const name = lessons[0].name || '';
-        const email = lessons[0].email || '';
-        saveProfile(name, phone, email);
-        sessionPhone = phone;
-        closeStudentAuthModal();
-        showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-        document.getElementById('modalLoginPhone').value = '';
-    }).catch(() => showToast('שגיאה בכניסה, נסה שוב'));
+        
+        // If not in users collection, search bookings collection
+        db.collection('bookings').get().then(snap => {
+            let foundLesson = null;
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.phone && sanitizePhoneNumber(data.phone) === phone) {
+                    if (!foundLesson || new Date(data.date + 'T' + data.time) > new Date(foundLesson.date + 'T' + foundLesson.time)) {
+                        foundLesson = data;
+                    }
+                }
+            });
+            
+            if (foundLesson) {
+                const name = foundLesson.name || '';
+                const email = foundLesson.email || '';
+                saveProfile(name, phone, email);
+                sessionPhone = phone;
+                closeStudentAuthModal();
+                showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
+                document.getElementById('modalLoginPhone').value = '';
+            } else {
+                showToast('מספר לא נמצא — עבור להרשמה');
+                showModalRegister();
+            }
+        }).catch(err => {
+            console.error('Error searching bookings:', err);
+            showToast('שגיאה בכניסה, נסה שוב');
+        });
+    }).catch(err => {
+        console.error('Error fetching user:', err);
+        showToast('שגיאה בכניסה, נסה שוב');
+    });
 }
 
 function modalSubmitRegister() {
     const name = document.getElementById('modalRegName').value.trim();
-    const phone = document.getElementById('modalRegPhone').value.trim();
+    const phoneInput = document.getElementById('modalRegPhone').value.trim();
     const email = document.getElementById('modalRegEmail').value.trim();
+    
     if (!name) { showToast('נא להזין שם'); return; }
-    if (!phone) { showToast('נא להזין מספר טלפון'); return; }
+    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
     if (!email) { showToast('נא להזין כתובת אימייל'); return; }
-
-    saveProfile(name, phone, email);
-    sessionPhone = phone;
-    closeStudentAuthModal();
-    showToast('שלום ' + name + '! נרשמת בהצלחה');
-    document.getElementById('modalRegName').value = '';
-    document.getElementById('modalRegPhone').value = '';
-    document.getElementById('modalRegEmail').value = '';
+    
+    const phone = sanitizePhoneNumber(phoneInput);
+    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
+    
+    // Save to Firebase first, then localStorage
+    saveUserToFirebase(name, phone, email)
+        .then(() => {
+            saveProfile(name, phone, email);
+            sessionPhone = phone;
+            closeStudentAuthModal();
+            showToast('שלום ' + name + '! נרשמת בהצלחה');
+            document.getElementById('modalRegName').value = '';
+            document.getElementById('modalRegPhone').value = '';
+            document.getElementById('modalRegEmail').value = '';
+        })
+        .catch(() => showToast('שגיאה בהרשמה, נסה שוב'));
 }
 
 function sidebarLogout() {
@@ -1814,42 +1938,80 @@ function showLoggedInChip(name, phone) {
 
 /* ── Auth actions ── */
 function submitLogin() {
-    const phone = document.getElementById('loginPhone').value.trim();
-    if (!phone) { showToast('נא להזין מספר טלפון'); return; }
+    const phoneInput = document.getElementById('loginPhone').value.trim();
+    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
+    
+    const phone = sanitizePhoneNumber(phoneInput);
+    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
 
-    db.collection("bookings").where("phone", "==", phone).get().then(snap => {
-        if (snap.empty) {
-            showToast('מספר לא נמצא, אנא הירשם קודם');
+    // Try to find user in users collection first (registered users)
+    db.collection('users').doc(phone).get().then(doc => {
+        if (doc.exists) {
+            const userData = doc.data();
+            const name = userData.name || '';
+            const email = userData.email || '';
+            saveProfile(name, phone, email);
+            sessionPhone = phone;
+            showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
+            showLoggedInChip(name, phone);
+            fetchMyLessons();
             return;
         }
-        let lessons = [];
-        snap.forEach(doc => lessons.push(doc.data()));
-        lessons.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
-        const name = lessons[0].name || '';
-        const email = lessons[0].email || '';
-        saveProfile(name, phone, email);
-        sessionPhone = phone;
-        showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-        showLoggedInChip(name, phone);
-        fetchMyLessons();
+        
+        // If not in users collection, search bookings collection
+        db.collection('bookings').get().then(snap => {
+            let foundLesson = null;
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.phone && sanitizePhoneNumber(data.phone) === phone) {
+                    if (!foundLesson || new Date(data.date + 'T' + data.time) > new Date(foundLesson.date + 'T' + foundLesson.time)) {
+                        foundLesson = data;
+                    }
+                }
+            });
+            
+            if (foundLesson) {
+                const name = foundLesson.name || '';
+                const email = foundLesson.email || '';
+                saveProfile(name, phone, email);
+                sessionPhone = phone;
+                showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
+                showLoggedInChip(name, phone);
+                fetchMyLessons();
+            } else {
+                showToast('מספר לא נמצא, אנא הירשם קודם');
+            }
+        }).catch(err => {
+            console.error('Error searching bookings:', err);
+            showToast('שגיאה בכניסה, נסה שוב');
+        });
     }).catch(err => {
-        console.error(err);
+        console.error('Error fetching user:', err);
         showToast('שגיאה בכניסה, נסה שוב');
     });
 }
 
 function submitRegister() {
     const name = document.getElementById('regName').value.trim();
-    const phone = document.getElementById('regPhone').value.trim();
+    const phoneInput = document.getElementById('regPhone').value.trim();
     const email = document.getElementById('regEmail').value.trim();
+    
     if (!name) { showToast('נא להזין שם'); return; }
-    if (!phone) { showToast('נא להזין מספר טלפון'); return; }
-
-    saveProfile(name, phone, email);
-    sessionPhone = phone;
-    showToast('שלום ' + name + '! נרשמת בהצלחה');
-    showLoggedInChip(name, phone);
-    fetchMyLessons();
+    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
+    
+    const phone = sanitizePhoneNumber(phoneInput);
+    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
+    
+    // Save to Firebase first, then localStorage
+    saveUserToFirebase(name, phone, email || '')
+        .then(() => {
+            saveProfile(name, phone, email || '');
+            sessionPhone = phone;
+            showToast('שלום ' + name + '! נרשמת בהצלחה');
+            showLoggedInChip(name, phone);
+            fetchMyLessons();
+        })
+        .catch(() => showToast('שגיאה בהרשמה, נסה שוב'));
 }
 
 function logoutProfile() {
@@ -2368,10 +2530,7 @@ function approveBookingDB(id, btn) {
 }
 
 function sendNotification(type, bookingData) {
-  // 1. Admin Notification (Disabled to save email quota)
-  /*
-  const adminParams = {
-    to_email: "nooam.gabay@gmail.com",
+  const baseParams = {
     student_name: bookingData.name,
     date: bookingData.date,
     time: bookingData.time,
@@ -2381,27 +2540,21 @@ function sendNotification(type, bookingData) {
     email: bookingData.email || 'לא הוזן',
     lesson_format: bookingData.lessonFormat,
     user_comments: bookingData.comments || '',
-    type: "ADMIN_NOTIFICATION"
+    type: type
   };
-  emailjs.send("service_uiiqhnd", "template_e6swvbo", adminParams, "JI7HdPnpg063aq0Pl");
-  */
 
-  // 2. Send to Student ONLY if email exists
+  // Admin copy (always)
+  emailjs.send("service_uiiqhnd", "template_e6swvbo", {
+    ...baseParams,
+    to_email: "nooam.gabay@gmail.com"
+  }, "JI7HdPnpg063aq0Pl");
+
+  // Student confirmation when email is available
   if (bookingData.email) {
-    const studentParams = {
-      to_email: bookingData.email,
-      student_name: bookingData.name,
-      date: bookingData.date,
-      time: bookingData.time,
-      topic: bookingData.topic,
-      grade: bookingData.grade,
-      phone: bookingData.phone,
-      email: bookingData.email,
-      lesson_format: bookingData.lessonFormat,
-      user_comments: bookingData.comments || '',
-      type: type
-    };
-    emailjs.send("service_uiiqhnd", "template_e6swvbo", studentParams, "JI7HdPnpg063aq0Pl");
+    emailjs.send("service_uiiqhnd", "template_e6swvbo", {
+      ...baseParams,
+      to_email: bookingData.email
+    }, "JI7HdPnpg063aq0Pl");
   }
 }
 
