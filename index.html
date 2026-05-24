@@ -1054,7 +1054,7 @@ input.field-locked {
 
         <div id="success" class="step">
             <h3 style="color: #4ade80;">השיעור מופיע בגוגל קלנדר שלך 🎉</h3>
-            <button class="btn" style="margin-top: 2rem;" onclick="resetForm()">📅 קבע עוד שיעור</button>
+            <button class="btn" style="margin-top: 2rem;" onclick="resetForm()">קבע עוד שיעור</button>
         </div>
     </div>
 </section>
@@ -1349,17 +1349,42 @@ window.onload = function() {
     sections.forEach(s => scrollObserver.observe(s));
 };
 
+function formatTimeSlot(timeStr) {
+    const [hour, minute] = timeStr.split(':').map(Number);
+    return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+}
+
+function getSelectedTimeSlots() {
+    return Array.from(document.querySelectorAll('.time-slot.selected'))
+        .map(slot => slot.innerText.trim())
+        .sort((a, b) => {
+            const [hA, mA] = a.split(':').map(Number);
+            const [hB, mB] = b.split(':').map(Number);
+            return hA - hB || mA - mB;
+        });
+}
+
+function getSelectedTimeRangeText() {
+    const selected = getSelectedTimeSlots();
+    if (!selected.length) return '-';
+    const start = selected[0];
+    const last = selected[selected.length - 1];
+    const endHour = parseInt(last.split(':')[0], 10) + 1;
+    const end = `${endHour.toString().padStart(2, '0')}:${last.split(':')[1]}`;
+    return `${start} - ${end}`;
+}
+
 function updateBookingSummary() {
     const summaryCard = document.getElementById('bookingSummary');
     const summaryDate = document.getElementById('summaryDate');
     const summaryTime = document.getElementById('summaryTime');
     const dateInput = document.getElementById('fdate').value;
-    const timeSlot = document.querySelector('.time-slot.selected');
+    const selectedTimeText = getSelectedTimeRangeText();
 
-    if (dateInput || timeSlot) {
+    if (dateInput || selectedTimeText !== '-') {
         summaryCard.style.display = 'block';
         summaryDate.innerText = dateInput || '-';
-        summaryTime.innerText = timeSlot ? timeSlot.innerText : '-';
+        summaryTime.innerText = selectedTimeText;
     } else {
         summaryCard.style.display = 'none';
     }
@@ -1472,8 +1497,38 @@ function selectChip(el) {
 
 function selectTime(el) {
     if (el.classList.contains('occupied') || el.classList.contains('past')) return;
-    document.querySelectorAll('.time-slot').forEach(e => e.classList.remove('selected'));
-    el.classList.add('selected');
+
+    const selectedSlots = Array.from(document.querySelectorAll('.time-slot.selected'));
+    const clickedTime = el.innerText.trim();
+    const clickedHour = parseInt(clickedTime.split(':')[0], 10);
+
+    if (el.classList.contains('selected')) {
+        el.classList.remove('selected');
+        updateBookingSummary();
+        return;
+    }
+
+    if (selectedSlots.length === 0) {
+        el.classList.add('selected');
+        updateBookingSummary();
+        return;
+    }
+
+    const selectedTimes = selectedSlots
+        .map(slot => slot.innerText.trim())
+        .sort((a, b) => parseInt(a.split(':')[0], 10) - parseInt(b.split(':')[0], 10));
+    const firstHour = parseInt(selectedTimes[0].split(':')[0], 10);
+    const lastHour = parseInt(selectedTimes[selectedTimes.length - 1].split(':')[0], 10);
+    const isAdjacentToStart = clickedHour === firstHour - 1;
+    const isAdjacentToEnd = clickedHour === lastHour + 1;
+
+    if (selectedSlots.length === 1 && (isAdjacentToStart || isAdjacentToEnd)) {
+        el.classList.add('selected');
+    } else {
+        selectedSlots.forEach(slot => slot.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
     updateBookingSummary();
 }
 
@@ -1551,7 +1606,8 @@ let sessionPhone = ''; // persists across nav clicks for auto-refresh
 function confirmBooking() {
     const { name: fname, phone: fphone, email: femail } = getBookingIdentity();
     const dateInput = document.getElementById('fdate').value;
-    const timeSlot = document.querySelector('.time-slot.selected');
+    const selectedSlots = Array.from(document.querySelectorAll('.time-slot.selected'))
+        .sort((a, b) => parseInt(a.innerText.split(':')[0], 10) - parseInt(b.innerText.split(':')[0], 10));
     const gradeSelect = document.getElementById('fgrade');
     const gradeText = gradeSelect.selectedOptions[0] ? gradeSelect.selectedOptions[0].text : '';
     const gradeValue = gradeSelect.value;
@@ -1560,7 +1616,7 @@ function confirmBooking() {
     const errorDiv = document.getElementById('formError');
 
     // Email is now OPTIONAL, so we only check Name, Date, Time, and Grade.
-    if (!fname || !dateInput || !timeSlot || !gradeValue) {
+    if (!fname || !dateInput || !selectedSlots.length || !gradeValue) {
         if(errorDiv) {
             errorDiv.innerText = 'נא למלא שם, לבחור רמה, תאריך ושעה.';
             errorDiv.style.display = 'block';
@@ -1575,8 +1631,25 @@ function confirmBooking() {
         return;
     }
 
-    const selectedTime = timeSlot.innerText.trim();
-    if (selectedTime === '14:00') {
+    const selectedTimes = selectedSlots.map(slot => slot.innerText.trim());
+    const selectedStartTime = selectedTimes[0];
+    const selectedEndHour = parseInt(selectedTimes[selectedTimes.length - 1].split(':')[0], 10) + 1;
+    const selectedEndTime = `${selectedEndHour.toString().padStart(2, '0')}:${selectedTimes[selectedTimes.length - 1].split(':')[1]}`;
+
+    const isConsecutive = selectedTimes.every((time, index, arr) => {
+        if (index === 0) return true;
+        return parseInt(time.split(':')[0], 10) - parseInt(arr[index - 1].split(':')[0], 10) === 1;
+    });
+
+    if (!isConsecutive || selectedTimes.length > 2) {
+        if(errorDiv) {
+            errorDiv.innerText = 'בחר עד שעתיים רצופות, בבקשה.';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+
+    if (selectedStartTime === '14:00') {
         if(errorDiv) {
             errorDiv.innerText = 'שעה זו אינה פנויה יותר לתיאום.';
             errorDiv.style.display = 'block';
@@ -1584,9 +1657,9 @@ function confirmBooking() {
         return;
     }
 
-    if (!isSlotAvailable(dateInput, selectedTime)) {
+    if (!isSlotAvailable(dateInput, selectedTimes)) {
         if(errorDiv) {
-            errorDiv.innerText = 'שעה זו אינה פנויה, אנא בחר שעה אחרת.';
+            errorDiv.innerText = 'השעות שנבחרו אינן פנוייות, אנא בחר שוב.';
             errorDiv.style.display = 'block';
         }
         return;
@@ -1603,7 +1676,9 @@ function confirmBooking() {
         grade: gradeText,
         lessonFormat: document.getElementById('flessontype').value,
         date: dateInput,
-        time: selectedTime,
+        time: selectedStartTime,
+        endTime: selectedEndTime,
+        durationHours: selectedTimes.length,
         comments: document.getElementById('fcomments').value || '',
         status: "ממתין",
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1633,9 +1708,8 @@ function confirmBooking() {
         sendNotification('new_booking', newBooking);
 
         // Success flow
-        const startDate = dateInput.replace(/-/g, '') + 'T' + selectedTime.replace(':', '') + '00';
-        const endHour = (parseInt(selectedTime.split(':')[0]) + 1).toString().padStart(2, '0');
-        const endDate = dateInput.replace(/-/g, '') + 'T' + endHour + selectedTime.split(':')[1] + '00';
+        const startDate = dateInput.replace(/-/g, '') + 'T' + selectedStartTime.replace(':', '') + '00';
+        const endDate = dateInput.replace(/-/g, '') + 'T' + selectedEndTime.replace(':', '') + '00';
         const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('שיעור מתמטיקה עם גבאי')}&dates=${startDate}/${endDate}&details=${encodeURIComponent('נושא: ' + subject + '\nשם: ' + fname)}&location=Online`;
 
         window.open(gcalUrl, '_blank');
@@ -2477,6 +2551,10 @@ function completeReschedule(el) {
 }
 
 function isSlotAvailable(date, time) {
+  if (Array.isArray(time)) {
+    return time.every(slotTime => isSlotAvailable(date, slotTime));
+  }
+
   const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
   const dayIndex = new Date(date + 'T12:00:00').getDay();
   const dayName = days[dayIndex];
@@ -2666,6 +2744,11 @@ function resetForm() {
   nextStep(1);
   document.querySelector('.progress').style.display = 'flex';
   applyProfileToBookingForm();
+  window.location.hash = '#book';
+  const bookSection = document.getElementById('book');
+  if (bookSection) {
+    bookSection.scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
 let _confirmCb = null;
