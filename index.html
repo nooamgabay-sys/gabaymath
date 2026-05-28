@@ -882,6 +882,7 @@ input.field-locked {
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -1142,6 +1143,56 @@ input.field-locked {
     </div>
     <div style="width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 3rem;">
 
+        <!-- STATISTICS DASHBOARD -->
+        <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%;">
+            <!-- Metrics Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; width: 100%;">
+                <div class="glass no-hover" style="text-align: center; padding: 1.5rem;">
+                    <h4 style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.5rem;">שיעורים השבוע</h4>
+                    <span id="statLessonsWeek" style="font-size: 2.5rem; font-weight: 800; color: var(--gold); text-shadow: 0 0 15px var(--glow);">0</span>
+                </div>
+                <div class="glass no-hover" style="text-align: center; padding: 1.5rem;">
+                    <h4 style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.5rem;">שיעורים החודש</h4>
+                    <span id="statLessonsMonth" style="font-size: 2.5rem; font-weight: 800; color: var(--gold); text-shadow: 0 0 15px var(--glow);">0</span>
+                </div>
+                <div class="glass no-hover" style="text-align: center; padding: 1.5rem;">
+                    <h4 style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.5rem;">תלמידים ייחודיים</h4>
+                    <span id="statUniqueStudents" style="font-size: 2.5rem; font-weight: 800; color: var(--gold); text-shadow: 0 0 15px var(--glow);">0</span>
+                </div>
+                <div class="glass no-hover" style="text-align: center; padding: 1.5rem;">
+                    <h4 style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.5rem;">ממתינים לאישור</h4>
+                    <span id="statPendingApprovals" style="font-size: 2.5rem; font-weight: 800; color: var(--gold); text-shadow: 0 0 15px var(--glow);">0</span>
+                </div>
+            </div>
+
+            <!-- Charts and List Row -->
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem; width: 100%;">
+                <!-- Bar Chart -->
+                <div class="glass no-hover" style="flex: 2; min-width: 350px; padding: 2rem; display: flex; flex-direction: column;">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1.2rem; color: var(--gold);">שיעורים שבועיים (8 שבועות אחרונים)</h3>
+                    <div style="position: relative; flex-grow: 1; min-height: 250px;">
+                        <canvas id="weeklyLessonsChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Donut Chart -->
+                <div class="glass no-hover" style="flex: 1.2; min-width: 280px; padding: 2rem; display: flex; flex-direction: column;">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1.2rem; color: var(--gold);">התפלגות נושאי לימוד</h3>
+                    <div style="position: relative; flex-grow: 1; min-height: 250px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="topicDistributionChart" style="max-height: 240px; max-width: 240px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Active Students -->
+                <div class="glass no-hover" style="flex: 1.2; min-width: 280px; padding: 2rem; display: flex; flex-direction: column;">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1.2rem; color: var(--gold);">תלמידים פעילים ביותר</h3>
+                    <div id="topStudentsList" style="display: flex; flex-direction: column; gap: 1rem; flex-grow: 1; justify-content: center;">
+                        <!-- Top students will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="glass no-hover">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
                 <h3 style="margin:0;">רשימת שיעורים</h3>
@@ -1276,6 +1327,8 @@ const ADMIN_CREDENTIALS = {
 if (history.scrollRestoration) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 
+let weeklyChartInstance = null;
+let topicChartInstance = null;
 let currentWeekOffset = 0;
 function changeWeek(offset) {
     if (offset === 0) currentWeekOffset = 0;
@@ -2398,8 +2451,10 @@ function renderAdminBookings() {
   list.innerHTML = '<p style="color:rgba(255,255,255,0.5)">טוען שיעורים...</p>';
   unsubBookings = db.collection("bookings").orderBy("date").onSnapshot(snapshot => {
     list.innerHTML = '';
+    const bookings = [];
     snapshot.forEach(doc => {
       const b = { id: doc.id, ...doc.data() };
+      bookings.push(b);
       const div = document.createElement('div');
       div.className = 'schedule-item glass';
       if (b.status === 'מאושר') div.classList.add('approved');
@@ -2426,8 +2481,256 @@ function renderAdminBookings() {
       list.appendChild(div);
     });
     if (snapshot.empty) list.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center">אין שיעורים עדיין</p>';
+    updateAdminStats(bookings);
   });
 }
+
+function updateAdminStats(bookings) {
+  const activeBookings = bookings.filter(b => b.status !== 'בוטל');
+  const now = new Date();
+
+  // 1. Lessons this week (Sunday 00:00:00 to Saturday 23:59:59)
+  const currentDay = now.getDay();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - currentDay);
+  startOfWeek.setHours(0,0,0,0);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 7);
+  endOfWeek.setHours(0,0,0,0);
+
+  const lessonsThisWeek = activeBookings.filter(b => {
+    if (!b.date) return false;
+    const bDate = new Date(b.date);
+    bDate.setHours(0,0,0,0);
+    return bDate >= startOfWeek && bDate < endOfWeek;
+  }).length;
+
+  // 2. Lessons this month
+  const lessonsThisMonth = activeBookings.filter(b => {
+    if (!b.date) return false;
+    const bDate = new Date(b.date);
+    return bDate.getFullYear() === now.getFullYear() && bDate.getMonth() === now.getMonth();
+  }).length;
+
+  // 3. Unique students (based on name or phone, using set)
+  const uniqueStudents = new Set();
+  activeBookings.forEach(b => {
+    const key = (b.phone || b.name || '').trim();
+    if (key) uniqueStudents.add(key);
+  });
+  const totalUniqueStudents = uniqueStudents.size;
+
+  // 4. Pending approvals (status === 'ממתין')
+  const pendingApprovals = bookings.filter(b => b.status === 'ממתין').length;
+
+  // Update DOM metrics
+  document.getElementById('statLessonsWeek').innerText = lessonsThisWeek;
+  document.getElementById('statLessonsMonth').innerText = lessonsThisMonth;
+  document.getElementById('statUniqueStudents').innerText = totalUniqueStudents;
+  document.getElementById('statPendingApprovals').innerText = pendingApprovals;
+
+  // --- 8 WEEKS BAR CHART ---
+  const weeksData = [];
+  for (let i = 7; i >= 0; i--) {
+    const start = new Date(startOfWeek);
+    start.setDate(startOfWeek.getDate() - (i * 7));
+    const end = new Date(start);
+    end.setDate(start.getDate() + 7);
+    const label = start.getDate() + '/' + (start.getMonth() + 1);
+    weeksData.push({ start, end, label, count: 0 });
+  }
+
+  activeBookings.forEach(b => {
+    if (!b.date) return;
+    const bDate = new Date(b.date);
+    bDate.setHours(0,0,0,0);
+    for (const wk of weeksData) {
+      if (bDate >= wk.start && bDate < wk.end) {
+        wk.count++;
+        break;
+      }
+    }
+  });
+
+  const barLabels = weeksData.map(wk => wk.label);
+  const barCounts = weeksData.map(wk => wk.count);
+
+  const isLight = document.body.classList.contains('light-mode');
+  const textColor = isLight ? '#121212' : '#e8e8e8';
+  const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
+
+  const weeklyCtx = document.getElementById('weeklyLessonsChart').getContext('2d');
+
+  if (weeklyChartInstance) {
+    weeklyChartInstance.data.labels = barLabels;
+    weeklyChartInstance.data.datasets[0].data = barCounts;
+    weeklyChartInstance.options.scales.x.ticks.color = textColor;
+    weeklyChartInstance.options.scales.y.ticks.color = textColor;
+    weeklyChartInstance.options.scales.x.grid.color = gridColor;
+    weeklyChartInstance.options.scales.y.grid.color = gridColor;
+    weeklyChartInstance.update();
+  } else {
+    weeklyChartInstance = new Chart(weeklyCtx, {
+      type: 'bar',
+      data: {
+        labels: barLabels,
+        datasets: [{
+          label: 'שיעורים',
+          data: barCounts,
+          backgroundColor: '#c9a84c',
+          borderColor: '#ffcc33',
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            ticks: { color: textColor, font: { family: 'Heebo' } },
+            grid: { color: gridColor }
+          },
+          y: {
+            ticks: {
+              color: textColor,
+              font: { family: 'Heebo' },
+              stepSize: 1,
+              precision: 0
+            },
+            grid: { color: gridColor },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  // --- TOPIC DONUT CHART ---
+  const topicCounts = {};
+  activeBookings.forEach(b => {
+    const topic = (b.subject || b.topic || 'אחר').trim();
+    topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+  });
+
+  const topicLabels = Object.keys(topicCounts);
+  const topicData = Object.values(topicCounts);
+
+  const topicCtx = document.getElementById('topicDistributionChart').getContext('2d');
+  const donutColors = ['#c9a84c', '#ffcc33', '#dfc377', '#917027', '#e69922', '#5c4514', '#b3923b'];
+
+  if (topicChartInstance) {
+    topicChartInstance.data.labels = topicLabels;
+    topicChartInstance.data.datasets[0].data = topicData;
+    topicChartInstance.options.plugins.legend.labels.color = textColor;
+    topicChartInstance.update();
+  } else {
+    topicChartInstance = new Chart(topicCtx, {
+      type: 'doughnut',
+      data: {
+        labels: topicLabels,
+        datasets: [{
+          data: topicData,
+          backgroundColor: donutColors,
+          borderColor: isLight ? '#ffffff' : '#161616',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: textColor,
+              font: { family: 'Heebo', size: 11 },
+              boxWidth: 12
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // --- TOP 3 ACTIVE STUDENTS LIST ---
+  const studentLessonsCount = {};
+  activeBookings.forEach(b => {
+    const name = (b.name || '').trim();
+    if (name) {
+      studentLessonsCount[name] = (studentLessonsCount[name] || 0) + 1;
+    }
+  });
+
+  const topStudents = Object.entries(studentLessonsCount)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
+  const topListEl = document.getElementById('topStudentsList');
+  topListEl.innerHTML = '';
+
+  if (topStudents.length === 0) {
+    topListEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; font-size:0.95rem;">אין נתוני תלמידים</p>';
+  } else {
+    topStudents.forEach((student, idx) => {
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.justifyContent = 'space-between';
+      row.style.alignItems = 'center';
+      row.style.padding = '0.8rem 1rem';
+      row.style.background = isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)';
+      row.style.border = '1px solid var(--border)';
+      row.style.borderRadius = '12px';
+
+      const rankColors = ['#ffcc33', '#c9a84c', '#dfc377'];
+      const rankColor = rankColors[idx] || 'var(--text-muted)';
+
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:0.8rem;">
+          <span style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:${rankColor}; color:#000; font-weight:bold; font-size:0.9rem;">
+            ${idx + 1}
+          </span>
+          <strong style="color:var(--text);">${student.name}</strong>
+        </div>
+        <span style="color:var(--gold); font-weight:600;">${student.count} שיעורים</span>
+      `;
+      topListEl.appendChild(row);
+    });
+  }
+}
+
+function updateChartColors() {
+  const isLight = document.body.classList.contains('light-mode');
+  const textColor = isLight ? '#121212' : '#e8e8e8';
+  const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
+
+  if (weeklyChartInstance) {
+    weeklyChartInstance.options.scales.x.ticks.color = textColor;
+    weeklyChartInstance.options.scales.y.ticks.color = textColor;
+    weeklyChartInstance.options.scales.x.grid.color = gridColor;
+    weeklyChartInstance.options.scales.y.grid.color = gridColor;
+    weeklyChartInstance.update();
+  }
+  if (topicChartInstance) {
+    topicChartInstance.options.plugins.legend.labels.color = textColor;
+    topicChartInstance.options.datasets[0].borderColor = isLight ? '#ffffff' : '#161616';
+    topicChartInstance.update();
+  }
+}
+
+// Observe theme class changes
+const themeObserver = new MutationObserver(mutations => {
+  mutations.forEach(mutation => {
+    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+      updateChartColors();
+    }
+  });
+});
+themeObserver.observe(document.body, { attributes: true });
 
 function renderAvailGrid() {
   const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
