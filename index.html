@@ -579,9 +579,15 @@ body.light-mode #student-auth-modal .confirm-box p { color: #333333; }
 .ticket-topic { font-size: 1rem; font-weight: 700; color: var(--text); }
 .ticket-grade { font-size: 0.85rem; color: var(--text-muted); }
 .ticket-badge-wrap { display: flex; align-items: center; flex-shrink: 0; }
-.ticket-footer { padding: 0.55rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; }
-.cancel-lesson-btn { font-size: 0.78rem; color: rgba(248,113,113,0.7); background: none; border: none; cursor: pointer; transition: color 0.2s; letter-spacing: 0.2px; padding: 0; }
+.ticket-footer { padding: 0.55rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; gap: 1rem; align-items: center; }
+.cancel-lesson-btn { font-size: 0.78rem; color: rgba(248,113,113,0.7); background: none; border: none; cursor: pointer; transition: color 0.2s; letter-spacing: 0.2px; padding: 0.25rem 0.6rem; }
 .cancel-lesson-btn:hover { color: #f87171; }
+.reschedule-lesson-btn { font-size: 0.78rem; color: rgba(201,168,76,0.7); background: none; border: none; cursor: pointer; transition: color 0.2s; letter-spacing: 0.2px; padding: 0.25rem 0.6rem; }
+.reschedule-lesson-btn:hover { color: var(--gold); }
+.ticket-footer-disabled { padding: 0.55rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; }
+.ticket-footer-disabled span { font-size: 0.76rem; color: rgba(255,255,255,0.4); font-style: italic; }
+.lesson-ticket.rescheduled { background: rgba(14,14,20,0.62); border: 1px solid rgba(96,165,250,0.3); opacity: 0.72; }
+.lesson-ticket.rescheduled .ticket-stripe { background: #60a5fa; }
 
 /* ── RESPONSIVE ──────────────────────────────────── */
 @media (max-width: 900px) {
@@ -1752,6 +1758,21 @@ function confirmBooking() {
 
     // ONLY push to Firestore here - never on slot click
     db.collection("bookings").add(newBooking).then(() => {
+        // Handle reschedule: mark old booking and free its slot
+        if (rescheduleOldBookingId) {
+            db.collection("bookings").doc(rescheduleOldBookingId).get().then(oldDoc => {
+                if (oldDoc.exists) {
+                    const oldB = oldDoc.data();
+                    db.collection("bookings").doc(rescheduleOldBookingId).update({ status: "rescheduled" });
+                    const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+                    const dayName = days[new Date(oldB.date + 'T12:00:00').getDay()];
+                    db.collection("availability").doc(`${dayName}_${oldB.time}`).set({ day: dayName, time: oldB.time, isFree: true }, { merge: true });
+                    db.collection("availability").doc(`${oldB.date}_${oldB.time}`).set({ date: oldB.date, time: oldB.time, isFree: true }, { merge: true });
+                }
+            });
+            rescheduleOldBookingId = null;
+        }
+
         // Also save/update user record in users collection
         const sanitizedPhone = sanitizePhoneNumber(fphone);
         saveUserToFirebase(fname, sanitizedPhone, femail)
@@ -2286,15 +2307,28 @@ function fetchMyLessons() {
 
         let html = '';
         lessons.forEach(b => {
-            const statusClass = b.status === 'מאושר' ? 'approved' : (b.status === 'בוטל' ? 'cancelled' : 'pending');
-            const displayStatus = b.status === 'ממתין' ? 'ממתין לאישור' : b.status;
-            const badgeClass = b.status === 'מאושר' ? 'ok' : (b.status === 'בוטל' ? 'cancel' : 'wait');
+            const statusClass = b.status === 'מאושר' ? 'approved' : (b.status === 'בוטל' ? 'cancelled' : (b.status === 'rescheduled' ? 'rescheduled' : 'pending'));
+            const displayStatus = b.status === 'ממתין' ? 'ממתין לאישור' : (b.status === 'rescheduled' ? 'שונה מועד' : b.status);
+            const badgeClass = b.status === 'מאושר' ? 'ok' : (b.status === 'בוטל' ? 'cancel' : (b.status === 'rescheduled' ? 'cancel' : 'wait'));
             const isUpcoming = b.status === 'מאושר' && (b.date === todayStr || b.date === tomorrowStr);
             const upcomingClass = isUpcoming ? ' upcoming' : '';
             const soonBadge = isUpcoming ? '<span class="badge-soon">בקרוב</span>' : '';
             const gcalLink = b.status === 'מאושר'
                 ? `<a href="${buildGCalLink(b)}" target="_blank" class="gcal-link"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>הוסף ליומן</a>`
                 : '';
+
+            let footerHtml = '';
+            const isActive = b.status !== 'בוטל' && b.status !== 'rescheduled';
+            if (isActive) {
+                const lessonTime = new Date(b.date + 'T' + b.time + ':00');
+                const hoursUntil = (lessonTime - now) / (1000 * 60 * 60);
+                if (hoursUntil < 4) {
+                    footerHtml = `<div class="ticket-footer-disabled"><span>לא ניתן לשנות פחות מ-4 שעות לפני השיעור</span></div>`;
+                } else {
+                    footerHtml = `<div class="ticket-footer"><button class="cancel-lesson-btn" onclick="cancelMyLesson('${b.id}')">בטל שיעור ×</button><button class="reschedule-lesson-btn" onclick="rescheduleMyLesson('${b.id}')">שנה מועד ✎</button></div>`;
+                }
+            }
+
             html += `
                 <div class="lesson-ticket ${statusClass}${upcomingClass}">
                     <div class="ticket-stripe"></div>
@@ -2313,7 +2347,7 @@ function fetchMyLessons() {
                             <span class="badge ${badgeClass}">${displayStatus}</span>
                         </div>
                     </div>
-                    ${b.status !== 'בוטל' ? `<div class="ticket-footer"><button class="cancel-lesson-btn" onclick="cancelMyLesson('${b.id}')">ביטול שיעור ×</button></div>` : ''}
+                    ${footerHtml}
                 </div>
             `;
         });
@@ -2326,17 +2360,67 @@ function fetchMyLessons() {
 }
 
 function cancelMyLesson(bookingId) {
-    showConfirm('האם לבטל את השיעור? לא ניתן לבטל פחות מ-24 שעות לפני.', () => {
+    showConfirm('האם אתה בטוח שברצונך לבטל את השיעור?', () => {
         db.collection("bookings").doc(bookingId).get().then(doc => {
             if (!doc.exists) return;
             const b = doc.data();
+            const lessonTime = new Date(b.date + 'T' + b.time + ':00');
+            const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jerusalem" }));
+            if ((lessonTime - now) / (1000 * 60 * 60) < 4) {
+                showToast('לא ניתן לבטל פחות מ-4 שעות לפני השיעור');
+                return;
+            }
             db.collection("bookings").doc(bookingId).update({ status: "בוטל" }).then(() => {
+                const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+                const dayName = days[new Date(b.date + 'T12:00:00').getDay()];
+                db.collection("availability").doc(`${dayName}_${b.time}`).set({ day: dayName, time: b.time, isFree: true }, { merge: true });
+                db.collection("availability").doc(`${b.date}_${b.time}`).set({ date: b.date, time: b.time, isFree: true }, { merge: true });
                 sendCancellationEmails(b);
                 showToast('השיעור בוטל — נשלחה הודעה במייל');
                 fetchMyLessons();
             });
         }).catch(() => showToast('שגיאה בביטול השיעור'));
     });
+}
+
+let rescheduleOldBookingId = null;
+function rescheduleMyLesson(bookingId) {
+    db.collection("bookings").doc(bookingId).get().then(doc => {
+        if (!doc.exists) return;
+        const b = doc.data();
+        const lessonTime = new Date(b.date + 'T' + b.time + ':00');
+        const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jerusalem" }));
+        if ((lessonTime - now) / (1000 * 60 * 60) < 4) {
+            showToast('לא ניתן לשנות מועד פחות מ-4 שעות לפני השיעור');
+            return;
+        }
+        rescheduleOldBookingId = bookingId;
+        document.getElementById('my-lessons').style.display = 'none';
+        resetForm();
+        document.getElementById('fname').value = b.name || '';
+        document.getElementById('fphone').value = b.phone || '';
+        document.getElementById('femail').value = b.email || '';
+        document.getElementById('flessontype').value = b.lessonFormat || 'פרונטלי';
+        const gradeSelect = document.getElementById('fgrade');
+        for (let i = 0; i < gradeSelect.options.length; i++) {
+            if (gradeSelect.options[i].text === b.grade || gradeSelect.options[i].value === b.grade) {
+                gradeSelect.selectedIndex = i;
+                updateTopics(gradeSelect.value);
+                break;
+            }
+        }
+        setTimeout(() => {
+            const topics = (b.topic || '').split(',').map(t => t.trim());
+            document.querySelectorAll('.chip').forEach(chip => {
+                if (topics.includes(chip.innerText.trim())) chip.classList.add('selected');
+            });
+        }, 50);
+        document.getElementById('fcomments').value = b.comments || '';
+        maxReachedStep = 3;
+        nextStep(3);
+        document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
+        showToast('בחר תאריך ושעה חדשים לשיעור');
+    }).catch(() => showToast('שגיאה בטעינת פרטי השיעור'));
 }
 
 function sendCancellationEmails(b) {
@@ -2458,11 +2542,11 @@ function renderAdminBookings() {
       const div = document.createElement('div');
       div.className = 'schedule-item glass';
       if (b.status === 'מאושר') div.classList.add('approved');
-      else if (b.status === 'בוטל') div.classList.add('cancelled');
+      else if (b.status === 'בוטל' || b.status === 'rescheduled') div.classList.add('cancelled');
 
-      let statusBadge = b.status === 'מאושר' ? `<span class="badge ok">מאושר</span>` : b.status === 'בוטל' ? `<span class="badge cancel">בוטל</span>` : `<span class="badge wait">ממתין לאישור</span>`;
+      let statusBadge = b.status === 'מאושר' ? `<span class="badge ok">מאושר</span>` : b.status === 'בוטל' ? `<span class="badge cancel">בוטל</span>` : b.status === 'rescheduled' ? `<span class="badge cancel" style="background:rgba(96,165,250,0.15);color:#60a5fa;border-color:rgba(96,165,250,0.3)">שונה מועד</span>` : `<span class="badge wait">ממתין לאישור</span>`;
       let actionBtns = '';
-      if (b.status === 'בוטל') {
+      if (b.status === 'בוטל' || b.status === 'rescheduled') {
           actionBtns = `
             <button class="btn btn-mini" onclick="restoreBookingDB('${doc.id}')">שחזר</button>
             <button class="btn btn-mini btn-danger" onclick="permanentlyDeleteDB('${doc.id}')">מחק</button>
@@ -2486,7 +2570,7 @@ function renderAdminBookings() {
 }
 
 function updateAdminStats(bookings) {
-  const activeBookings = bookings.filter(b => b.status !== 'בוטל');
+  const activeBookings = bookings.filter(b => b.status !== 'בוטל' && b.status !== 'rescheduled');
   const now = new Date();
 
   // 1. Lessons this week (Sunday 00:00:00 to Saturday 23:59:59)
