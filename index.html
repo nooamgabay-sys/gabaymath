@@ -1324,6 +1324,8 @@ const ADMIN_CREDENTIALS = {
     email: 'nooam.gabay@gmail.com'
 };
 
+const AUTHORIZED_ADMIN_EMAIL = 'nooam.gabay@gmail.com';
+
 if (history.scrollRestoration) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 
@@ -1793,18 +1795,16 @@ function confirmBooking() {
 }
 
 function showAuth() {
-    // Check if there's a logged-in user and if they match admin credentials
     const profile = getProfile();
-    if (profile && 
-        profile.name === ADMIN_CREDENTIALS.name && 
-        profile.phone === ADMIN_CREDENTIALS.phone && 
+    if (!profile || profile.email !== AUTHORIZED_ADMIN_EMAIL) return;
+
+    if (profile.name === ADMIN_CREDENTIALS.name &&
+        profile.phone === ADMIN_CREDENTIALS.phone &&
         profile.email === ADMIN_CREDENTIALS.email) {
-        // Auto-bypass: logged-in user matches admin credentials
         loginAdminAutomatically();
         return;
     }
-    
-    // Otherwise, show the password modal
+
     document.getElementById('auth-modal').style.display = 'flex';
     setTimeout(() => {
         document.getElementById('adminPass').focus();
