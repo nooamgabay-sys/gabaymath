@@ -2578,27 +2578,93 @@ function normalizeTopicText(text) {
     return (text || '').replace(/\s+/g, ' ').replace(/[׳״"']/g, '').trim();
 }
 
-function getTopicsList() {
-    const chips = document.querySelectorAll('#topicChips .chip');
-    return Array.from(chips).map(chip => chip.innerText.trim()).filter(Boolean);
+function normalizeLevelText(text) {
+    return normalizeTopicText(text)
+        .replace(/\b(אני|רוצה|לקבוע|שיעור|ללמוד|על|בנושא|ב)\b/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
-function matchTopicFromSpokenText(text) {
-    const normalized = normalizeTopicText(text);
-    const topics = getTopicsList();
-    for (const topic of topics) {
-        const t = normalizeTopicText(topic);
-        if (!t) continue;
-        if (normalized.includes(t) || t.includes(normalized)) return topic;
+function getGradeOptions() {
+    const select = document.getElementById('fgrade');
+    if (!select) return [];
+    return Array.from(select.options)
+        .map(option => option.value || option.textContent || '')
+        .filter(Boolean);
+}
+
+function matchGradeFromText(text) {
+    const normalized = normalizeLevelText(text);
+    const options = getGradeOptions();
+    for (const option of options) {
+        const normalizedOption = normalizeLevelText(option);
+        if (!normalizedOption) continue;
+        if (normalized.includes(normalizedOption) || normalizedOption.includes(normalized)) return option;
+    }
+    const gradeSynonyms = [
+        { patterns: ['ז', 'ז\'', 'ז׳'], value: 'כיתה ז׳' },
+        { patterns: ['ח', 'ח\'', 'ח׳'], value: 'כיתה ח׳' },
+        { patterns: ['ט', 'ט\'', 'ט׳'], value: 'כיתה ט׳' },
+        { patterns: ['י א', 'יא', 'י״א', 'י"א', '10'], value: 'כיתה י״א - 3 יח״ל' },
+        { patterns: ['יב', 'י״ב', 'י"ב', '12'], value: 'כיתה י״ב - 3 יח״ל' }
+    ];
+    for (const entry of gradeSynonyms) {
+        if (entry.patterns.some(pattern => normalized.includes(normalizeLevelText(pattern)))) {
+            return entry.value;
+        }
     }
     return '';
 }
 
-function getRecommendedTopicsForText(text) {
+function getTopicsForGrade(grade) {
+    const topicsByGrade = {
+        'כיתה ז׳': ['מספרים שלמים', 'שברים פשוטים', 'מספרים עשרוניים', 'אחוזים', 'משוואות פשוטות', 'גיאומטריה בסיסית'],
+        'כיתה ח׳': ['פונקציות', 'משוואות', 'מערכת משוואות', 'גיאומטריה', 'אחוזים', 'שטחים והיקפים'],
+        'כיתה ט׳': ['פונקציות', 'משוואות ריבועיות', 'טריגונומטריה', 'גיאומטריה', 'הסתברות', 'סטטיסטיקה'],
+        'כיתה י׳ - 3 יח״ל': ['אלגברה', 'פונקציות', 'משוואות', 'גיאומטריה', 'הסתברות', 'סטטיסטיקה'],
+        'כיתה י׳ - 4 יח״ל': ['פונקציות', 'מערכת משוואות', 'טריגונומטריה', 'הסתברות', 'סטטיסטיקה', 'גיאומטריה'],
+        'כיתה י׳ - 5 יח״ל': ['פונקציות', 'טריגונומטריה', 'הסתברות', 'גיאומטריה', 'חקירה', 'אינדוקציה'],
+        'כיתה י״א - 3 יח״ל': ['גדילה ודעיכה', 'הסתברות', 'גיאומטריה', 'טריגונומטריה במישור', 'סטטיסטיקה', 'פונקציה קווית'],
+        'כיתה י״א - 4 יח״ל': ['סטטיסטיקה', 'הסתברות', 'גאומטרייה', 'חקירה של פולינומים', 'חקירה של פונקציות רציונליות', 'חקירה של פונקציות שורש'],
+        'כיתה י״א - 5 יח״ל': ['שאלות קצרות', 'אינדוקציה', 'סדרות', 'הסתברות', 'גאומטרייה', 'טריגונומטריה במישור', 'חקירה', 'אינטגרלים'],
+        'כיתה י״ב - 3 יח״ל': ['תכנון ליניארי', 'גיאומטריה אנליטית', 'התפלגות נורמלית', 'מודל ריבועי', 'ראייה מרחבית', 'גופים במרחב'],
+        'כיתה י״ב - 4 יח״ל': ['סדרות', 'גיאומטריה במרחב', 'גדילה ודעיכה', 'חקירה מעריכית', 'חקירה לוגריתמית', 'אינטגרלים'],
+        'כיתה י״ב - 5 יח״ל': ['גיאומטריה אנליטית', 'וקטורים', 'טריגונומטריה במרחב', 'מספרים מרוכבים', 'פונקציות מעריכיות', 'פונקציות לוגריתמיות', 'גדילה ודעיכה']
+    };
+    return topicsByGrade[grade] || getTopicsList();
+}
+
+function matchTopicForGrade(text, grade) {
     const normalized = normalizeTopicText(text);
-    const known = getTopicsList();
-    const matches = known.filter(topic => normalized.includes(normalizeTopicText(topic)));
-    return { matches, custom: matches.length ? '' : normalized };
+    const topics = getTopicsForGrade(grade);
+    for (const topic of topics) {
+        const normalizedTopic = normalizeTopicText(topic);
+        if (!normalizedTopic) continue;
+        if (normalized.includes(normalizedTopic) || normalizedTopic.includes(normalized)) return topic;
+    }
+    return '';
+}
+
+function extractCustomTopicFromText(text) {
+    const raw = normalizeTopicText(text);
+    if (!raw) return '';
+    const match = raw.match(/(?:בנושא|בנושא של|על|ב|ל)\s+([א-ת0-9״"'׳\-\s]+)$/);
+    if (!match) return '';
+    const candidate = match[1]
+        .replace(/[.,!?;:]+$/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    if (!candidate) return '';
+    const words = candidate.split(' ').filter(Boolean);
+    const banned = ['אני', 'רוצה', 'לקבוע', 'שיעור', 'לעשות', 'צריך', 'צריכה', 'ללמוד', 'עזרה', 'בבקשה'];
+    if (words.length > 6) return '';
+    if (banned.some(word => candidate.includes(word))) return '';
+    return candidate;
+}
+
+function getTopicsList() {
+    const chips = document.querySelectorAll('#topicChips .chip');
+    return Array.from(chips).map(chip => chip.innerText.trim()).filter(Boolean);
 }
 
 function setBookingDate(dateStr) {
@@ -2636,10 +2702,16 @@ function fillAssistantBooking(parsed) {
     const name = getCurrentStudentName();
     const fName = document.getElementById('fname');
     const fEmail = document.getElementById('femail');
+    const fGrade = document.getElementById('fgrade');
     const comments = document.getElementById('fcomments');
     if (name && fName) fName.value = name;
     const currentUser = firebase.auth().currentUser;
     if (currentUser && fEmail) fEmail.value = currentUser.email || '';
+
+    if (parsed.grade && fGrade) {
+        fGrade.value = parsed.grade;
+        updateTopics(parsed.grade);
+    }
 
     if (parsed.date) setBookingDate(parsed.date);
     if (parsed.time) setBookingTime(parsed.time);
@@ -2658,7 +2730,7 @@ function fillAssistantBooking(parsed) {
                 if (chip.innerText.trim() === match) chip.classList.add('selected');
             });
         });
-        if (comments) comments.value = parsed.topicText || comments.value;
+        if (comments) comments.value = '';
     }
 }
 
@@ -2676,14 +2748,16 @@ async function handleVoiceTranscript(transcript) {
 
     const date = parseSpokenDate(transcript);
     const time = parseSpokenTime(transcript);
-    const { matches, custom } = getRecommendedTopicsForText(transcript);
-    const topicText = matches.length ? matches.join(', ') : custom;
+    const grade = matchGradeFromText(transcript);
+    const topicMatch = matchTopicForGrade(transcript, grade);
+    const customTopic = topicMatch ? '' : extractCustomTopicFromText(transcript);
     const parsed = {
+        grade,
         date,
         time,
-        topicMatches: matches,
-        topicMode: matches.length ? 'known' : (custom ? 'custom' : ''),
-        topicText
+        topicMatches: topicMatch ? [topicMatch] : [],
+        topicMode: topicMatch ? 'known' : (customTopic ? 'custom' : ''),
+        topicText: topicMatch || customTopic
     };
 
     fillAssistantBooking(parsed);
@@ -2702,7 +2776,7 @@ async function handleVoiceTranscript(transcript) {
     if (available) {
         setBookingDate(date);
         setBookingTime(time);
-        if (!topicText && commentsEl) commentsEl.value = '';
+        if (!parsed.topicText && commentsEl) commentsEl.value = '';
         setAssistantState('processing', 'מעדכן הזמנה...');
         const response = `מצוין, קבעתי לך שיעור ל${date} בשעה ${time}.`;
         showAssistantMessage(response);
