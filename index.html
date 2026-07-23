@@ -806,10 +806,11 @@ body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  width: 126px;
-  padding: 12px 16px 14px;
-  border-radius: 20px;
+  gap: 0.2rem;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border-radius: 50%;
   border: 1px solid var(--border-gold);
   background: var(--voice-widget-bg);
   backdrop-filter: blur(12px);
@@ -819,13 +820,6 @@ body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
   user-select: none;
 }
 .voice-assistant-fab:hover { transform: translateY(-2px); }
-.voice-assistant-panel {
-  width: min(320px, 92vw);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.7rem;
-}
 .voice-assistant-meta {
   display: flex;
   flex-direction: column;
@@ -859,8 +853,8 @@ body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
 .voice-assistant-status[data-state="busy"] { color: #f87171; }
 .voice-assistant-status[data-state="typing"] { color: var(--voice-widget-typing); }
 .voice-assistant-visual {
-  width: 46px;
-  height: 46px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   overflow: hidden;
   position: relative;
@@ -932,58 +926,112 @@ body.light-mode .voice-assistant-visual {
 body.light-mode .voice-assistant-canvas {
   filter: saturate(1.08) brightness(1.02);
 }
-.voice-assistant-message {
+.voice-assistant-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10019;
   display: none;
-  width: 100%;
-  padding: 0.75rem 0.9rem;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+}
+.voice-assistant-overlay.active { display: flex; }
+.voice-assistant-modal {
+  width: min(460px, 92vw);
+  border-radius: 28px;
+  padding: 1.25rem;
+  border: 1px solid var(--voice-widget-border);
+  background: var(--voice-widget-bg);
+  box-shadow: var(--voice-widget-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.voice-assistant-modal-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 1rem;
+}
+.voice-assistant-modal-title {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  flex:1;
+  gap:0.2rem;
+  text-align:center;
+}
+.voice-assistant-modal-title strong { color: var(--voice-widget-title); font-size: 1rem; }
+.voice-assistant-close {
+  border: 0;
+  background: transparent;
+  color: var(--voice-widget-status-text);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.voice-assistant-center {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap: 0.75rem;
+  padding: 0.4rem 0 0.2rem;
+}
+.voice-assistant-center .voice-assistant-visual {
+  width: 180px;
+  height: 180px;
+  box-shadow: inset 0 0 24px rgba(255,255,255,0.08), 0 14px 40px rgba(0,0,0,0.18), 0 0 18px var(--voice-widget-orb-glow);
+}
+.voice-assistant-modal-response {
+  min-height: 64px;
+  padding: 0.8rem 0.95rem;
   border-radius: 16px;
-  border: 1px solid var(--border-gold);
-  background: rgba(255,255,255,0.05);
-  color: var(--text);
-  font-size: 0.86rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: var(--voice-widget-text);
   line-height: 1.6;
   white-space: pre-wrap;
   text-align: right;
 }
-.voice-assistant-message.active { display: block; }
-.voice-assistant-entry {
-  width: 100%;
-  display: flex;
-  gap: 0.55rem;
-  align-items: center;
-}
-.voice-assistant-entry input {
-  flex: 1;
-  min-width: 0;
-  padding: 0.8rem 0.95rem;
-  font-size: 0.95rem;
-  border-radius: 14px;
-}
-.voice-assistant-entry .btn {
-  padding: 0.8rem 1rem;
-  font-size: 0.9rem;
-  border-radius: 14px;
-  white-space: nowrap;
+.voice-assistant-bottom {
+  display:flex;
+  flex-direction:column;
+  gap: 0.7rem;
 }
 .voice-assistant-separator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
+  display:flex;
+  align-items:center;
+  gap:0.6rem;
   color: var(--text-muted);
   font-size: 0.78rem;
-  letter-spacing: 0.06em;
 }
 .voice-assistant-separator::before,
 .voice-assistant-separator::after {
-  content: '';
-  flex: 1;
-  height: 1px;
+  content:'';
+  flex:1;
+  height:1px;
   background: rgba(255,255,255,0.08);
 }
-.voice-assistant-separator span { padding: 0 0.6rem; }
-body.light-mode .voice-assistant-message {
-  background: rgba(255,255,255,0.7);
+.voice-assistant-entry {
+  width:100%;
+  display:flex;
+  gap:0.6rem;
+  align-items:center;
+}
+.voice-assistant-entry input {
+  flex:1;
+  min-width:0;
+}
+body.light-mode .voice-assistant-overlay {
+  background: rgba(255,255,255,0.45);
+}
+body.light-mode .voice-assistant-modal-response,
+body.light-mode .voice-assistant-modal {
+  border-color: rgba(0,0,0,0.08);
+}
+body.light-mode .voice-assistant-modal-response {
+  background: rgba(255,255,255,0.62);
   color: #111827;
 }
 body.light-mode .voice-assistant-separator::before,
@@ -991,10 +1039,8 @@ body.light-mode .voice-assistant-separator::after {
   background: rgba(0,0,0,0.08);
 }
 @media (max-width: 600px) {
-  .voice-assistant-fab { right: 0.75rem; bottom: 5.8rem; width: 92vw; max-width: 300px; padding: 10px 12px 12px; }
-  .voice-assistant-visual { width: 40px; height: 40px; }
-  .voice-assistant-meta strong { font-size: 0.76rem; }
-  .voice-assistant-status { font-size: 0.58rem; padding: 0.18rem 0.4rem; }
+  .voice-assistant-fab { right: 0.75rem; bottom: 5.8rem; width: 56px; height: 56px; }
+  .voice-assistant-center .voice-assistant-visual { width: 160px; height: 160px; }
   .voice-assistant-entry { flex-direction: column; align-items: stretch; }
 }
 
@@ -1552,22 +1598,35 @@ input.field-locked {
 
 <div id="toast-container"></div>
 
-<div id="voiceAssistantFab" class="voice-assistant-fab">
-    <div class="voice-assistant-panel">
-        <div class="voice-assistant-meta">
-            <strong>עוזרת קולית</strong>
-            <div id="voiceAssistantStatus" class="voice-assistant-status" data-state="idle" aria-live="polite"></div>
-        </div>
-        <button type="button" class="voice-assistant-visual" aria-label="הפעלת הקלטה קולית" onclick="toggleVoiceAssistant()">
-            <canvas id="voiceAssistantCanvas" class="voice-assistant-canvas"></canvas>
-        </button>
-        <div class="voice-assistant-separator"><span>או</span></div>
-        <div class="voice-assistant-entry">
-            <input type="text" id="assistantTextInput" placeholder="שאל שאלה במתמטיקה..." oninput="handleAssistantTyping()" onkeydown="handleAssistantTextKeydown(event)">
-            <button class="btn" type="button" onclick="submitAssistantText()">שלח</button>
-        </div>
-        <div id="voiceAssistantMessage" class="voice-assistant-message" aria-live="polite"></div>
+<button id="voiceAssistantFab" class="voice-assistant-fab" type="button" aria-label="פתח עוזרת קולית" onclick="openVoiceAssistantModal()">
+    <div class="voice-assistant-visual" aria-hidden="true">
+        <canvas id="voiceAssistantCanvasFab" class="voice-assistant-canvas"></canvas>
     </div>
+</button>
+
+<div id="voiceAssistantOverlay" class="voice-assistant-overlay" onclick="closeVoiceAssistantModal(event)">
+  <div class="voice-assistant-modal" role="dialog" aria-modal="true" aria-labelledby="voiceAssistantTitle">
+    <div class="voice-assistant-modal-head">
+      <div class="voice-assistant-modal-title">
+        <strong id="voiceAssistantTitle">עוזרת קולית</strong>
+        <div id="voiceAssistantStatus" class="voice-assistant-status" data-state="idle" aria-live="polite"></div>
+      </div>
+      <button class="voice-assistant-close" type="button" aria-label="סגור" onclick="closeVoiceAssistantModal()">×</button>
+    </div>
+    <div class="voice-assistant-center">
+      <button type="button" class="voice-assistant-visual" aria-label="הפעלת הקלטה קולית" onclick="startVoiceAssistantListening()">
+        <canvas id="voiceAssistantCanvasModal" class="voice-assistant-canvas"></canvas>
+      </button>
+      <div id="voiceAssistantMessage" class="voice-assistant-modal-response" aria-live="polite"></div>
+    </div>
+    <div class="voice-assistant-bottom">
+      <div class="voice-assistant-separator"><span>או</span></div>
+      <div class="voice-assistant-entry">
+        <input type="text" id="assistantTextInput" placeholder="שאל שאלה..." oninput="handleAssistantTyping()" onkeydown="handleAssistantTextKeydown(event)">
+        <button class="btn" type="button" onclick="submitAssistantText()">שלח</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -2136,8 +2195,7 @@ function getCurrentStudentName() {
 }
 
 const voiceAssistantVisual = {
-    canvas: null,
-    ctx: null,
+    canvases: [],
     raf: null,
     state: 'idle',
     idle: { speed: 0.4, amplitude: 1.0, glow: 2.0, colors: ['#06B6D4', '#7C3AED', '#FF4242'] },
@@ -2156,89 +2214,90 @@ function isLightTheme() {
 }
 
 function resizeVoiceCanvas() {
-    const canvas = voiceAssistantVisual.canvas;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.max(1, Math.round(rect.width * dpr));
-    canvas.height = Math.max(1, Math.round(rect.height * dpr));
-    const ctx = voiceAssistantVisual.ctx;
-    if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    voiceAssistantVisual.canvases.forEach(canvas => {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = Math.max(1, Math.round(rect.width * dpr));
+        canvas.height = Math.max(1, Math.round(rect.height * dpr));
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
 }
 
 function drawVoiceAssistantVisual(now) {
-    const canvas = voiceAssistantVisual.canvas;
-    const ctx = voiceAssistantVisual.ctx;
-    if (!canvas || !ctx) return;
-
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    const cx = w / 2;
-    const cy = h / 2;
-    const radius = Math.min(w, h) * 0.5;
+    if (!voiceAssistantVisual.canvases.length) return;
     const props = getVoiceVisualProps(voiceAssistantVisual.state);
     const lightMode = isLightTheme();
     const t = now * 0.001;
-    ctx.clearRect(0, 0, w, h);
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius - 0.5, 0, Math.PI * 2);
-    ctx.clip();
-
-    const bg = ctx.createRadialGradient(cx * 0.35, cy * 0.35, radius * 0.2, cx, cy, radius);
-    bg.addColorStop(0, lightMode ? 'rgba(255,255,255,0.48)' : 'rgba(255,255,255,0.15)');
-    bg.addColorStop(0.35, lightMode ? 'rgba(6,182,212,0.2)' : 'rgba(6,182,212,0.16)');
-    bg.addColorStop(1, lightMode ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)');
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.globalCompositeOperation = 'lighter';
-    const strands = 8;
-    for (let i = 0; i < strands; i++) {
-        const phase = i * 0.9;
-        const yBase = cy + Math.sin(t * props.speed + phase) * (radius * 0.12);
-        const amplitude = radius * 0.12 * props.amplitude;
-        const color = props.colors[i % props.colors.length];
+    voiceAssistantVisual.canvases.forEach(canvas => {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        const cx = w / 2;
+        const cy = h / 2;
+        const radius = Math.min(w, h) * 0.5;
+        ctx.clearRect(0, 0, w, h);
+        ctx.save();
         ctx.beginPath();
-        for (let x = 0; x <= w; x += 2) {
-            const nx = x / w;
-            const wave =
-                Math.sin(nx * Math.PI * 4 + t * (props.speed * 2.2) + phase) * 0.55 +
-                Math.sin(nx * Math.PI * 7 - t * (props.speed * 1.3) + phase * 1.7) * 0.35;
-            const y = yBase + wave * amplitude;
-            if (x === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
+        ctx.arc(cx, cy, radius - 0.5, 0, Math.PI * 2);
+        ctx.clip();
+
+        const bg = ctx.createRadialGradient(cx * 0.35, cy * 0.35, radius * 0.2, cx, cy, radius);
+        bg.addColorStop(0, lightMode ? 'rgba(255,255,255,0.48)' : 'rgba(255,255,255,0.15)');
+        bg.addColorStop(0.35, lightMode ? 'rgba(6,182,212,0.2)' : 'rgba(6,182,212,0.16)');
+        bg.addColorStop(1, lightMode ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.globalCompositeOperation = 'lighter';
+        const strands = 8;
+        for (let i = 0; i < strands; i++) {
+            const phase = i * 0.9;
+            const yBase = cy + Math.sin(t * props.speed + phase) * (radius * 0.12);
+            const amplitude = radius * 0.12 * props.amplitude;
+            const color = props.colors[i % props.colors.length];
+            ctx.beginPath();
+            for (let x = 0; x <= w; x += 2) {
+                const nx = x / w;
+                const wave =
+                    Math.sin(nx * Math.PI * 4 + t * (props.speed * 2.2) + phase) * 0.55 +
+                    Math.sin(nx * Math.PI * 7 - t * (props.speed * 1.3) + phase * 1.7) * 0.35;
+                const y = yBase + wave * amplitude;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.2 + props.amplitude * 0.25;
+            ctx.shadowBlur = props.glow * 2.4;
+            ctx.shadowColor = color;
+            ctx.globalAlpha = 0.28 + (i / strands) * 0.08;
+            ctx.stroke();
         }
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.2 + props.amplitude * 0.25;
-        ctx.shadowBlur = props.glow * 2.4;
-        ctx.shadowColor = color;
-        ctx.globalAlpha = 0.28 + (i / strands) * 0.08;
-        ctx.stroke();
-    }
 
-    const core = ctx.createRadialGradient(cx, cy, radius * 0.05, cx, cy, radius * 0.42);
-    core.addColorStop(0, lightMode ? 'rgba(255,255,255,0.98)' : 'rgba(255,255,255,0.95)');
-    core.addColorStop(0.22, lightMode ? 'rgba(255,255,255,0.42)' : 'rgba(255,255,255,0.25)');
-    core.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.globalAlpha = 1;
-    ctx.shadowBlur = props.glow * 4;
-    ctx.shadowColor = props.colors[0];
-    ctx.fillStyle = core;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius * 0.18 + Math.sin(t * props.speed * 1.8) * radius * 0.03, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
+        const core = ctx.createRadialGradient(cx, cy, radius * 0.05, cx, cy, radius * 0.42);
+        core.addColorStop(0, lightMode ? 'rgba(255,255,255,0.98)' : 'rgba(255,255,255,0.95)');
+        core.addColorStop(0.22, lightMode ? 'rgba(255,255,255,0.42)' : 'rgba(255,255,255,0.25)');
+        core.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = props.glow * 4;
+        ctx.shadowColor = props.colors[0];
+        ctx.fillStyle = core;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 0.18 + Math.sin(t * props.speed * 1.8) * radius * 0.03, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    });
     voiceAssistantVisual.raf = requestAnimationFrame(drawVoiceAssistantVisual);
 }
 
 function initVoiceAssistantVisual() {
-    const canvas = document.getElementById('voiceAssistantCanvas');
-    if (!canvas || voiceAssistantVisual.canvas) return;
-    voiceAssistantVisual.canvas = canvas;
-    voiceAssistantVisual.ctx = canvas.getContext('2d');
-    if (!voiceAssistantVisual.ctx) return;
+    if (voiceAssistantVisual.canvases.length) return;
+    voiceAssistantVisual.canvases = [
+        document.getElementById('voiceAssistantCanvasFab'),
+        document.getElementById('voiceAssistantCanvasModal')
+    ].filter(Boolean);
+    if (!voiceAssistantVisual.canvases.length) return;
     resizeVoiceCanvas();
     window.addEventListener('resize', resizeVoiceCanvas);
     if (!voiceAssistantVisual.raf) voiceAssistantVisual.raf = requestAnimationFrame(drawVoiceAssistantVisual);
@@ -2246,26 +2305,24 @@ function initVoiceAssistantVisual() {
 
 function setAssistantState(state, message) {
     const status = document.getElementById('voiceAssistantStatus');
-    const canvas = document.getElementById('voiceAssistantCanvas');
     if (status) {
         status.classList.add('active');
         status.dataset.state = state;
         status.textContent = message || '';
     }
     voiceAssistantVisual.state = state || 'idle';
-    if (canvas) canvas.dataset.state = state;
+    voiceAssistantVisual.canvases.forEach(canvas => canvas.dataset.state = state || 'idle');
 }
 
 function clearAssistantState() {
     const status = document.getElementById('voiceAssistantStatus');
-    const canvas = document.getElementById('voiceAssistantCanvas');
     if (status) {
         status.classList.remove('active');
         status.dataset.state = 'idle';
         status.textContent = '';
     }
     voiceAssistantVisual.state = 'idle';
-    if (canvas) canvas.dataset.state = 'idle';
+    voiceAssistantVisual.canvases.forEach(canvas => canvas.dataset.state = 'idle');
 }
 
 function showAssistantMessage(message) {
@@ -2550,6 +2607,10 @@ function initVoiceRecognition() {
 }
 
 function toggleVoiceAssistant() {
+    openVoiceAssistantModal();
+}
+
+function startVoiceAssistantListening() {
     if (!voiceRecognition) {
         voiceRecognition = initVoiceRecognition();
     }
@@ -2601,6 +2662,37 @@ function handleAssistantTextKeydown(event) {
         event.preventDefault();
         submitAssistantText();
     }
+}
+
+function openVoiceAssistantModal() {
+    const overlay = document.getElementById('voiceAssistantOverlay');
+    const input = document.getElementById('assistantTextInput');
+    if (overlay) overlay.classList.add('active');
+    initVoiceAssistantVisual();
+    setAssistantState('idle', '');
+    showAssistantMessage('');
+    setTimeout(() => {
+        if (input) {
+            input.focus({ preventScroll: true });
+            if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                input.setAttribute('inputmode', 'text');
+            }
+        }
+    }, 60);
+}
+
+function closeVoiceAssistantModal(event) {
+    if (event && event.target && event.currentTarget && event.target !== event.currentTarget) return;
+    const overlay = document.getElementById('voiceAssistantOverlay');
+    if (overlay) overlay.classList.remove('active');
+    if (voiceActive && voiceRecognition) {
+        voiceRecognition.stop();
+        voiceActive = false;
+    }
+    clearAssistantState();
+    showAssistantMessage('');
+    const input = document.getElementById('assistantTextInput');
+    if (input) input.value = '';
 }
 
 function saveProfile(name, phone, email) {
