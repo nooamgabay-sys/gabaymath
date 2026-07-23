@@ -879,8 +879,48 @@ input.field-locked {
   box-shadow: 0 0 22px rgba(201,168,76,0.12);
   animation: slideDown 1s 0.2s ease forwards; opacity: 0; font-size: 1.15rem;
 }
+/* Google Sign-In Button */
+.google-login-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-gold) !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 1rem 2rem !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+  width: 100%;
+}
+.google-login-btn:hover {
+  background: rgba(201, 168, 76, 0.12) !important;
+  border-color: var(--gold) !important;
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow: 0 8px 25px rgba(201,168,76,0.18), 0 0 15px var(--glow) !important;
+}
+.google-login-btn svg {
+  background: #ffffff;
+  border-radius: 50%;
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+body.light-mode .google-login-btn {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(201, 168, 76, 0.4) !important;
+}
+body.light-mode .google-login-btn:hover {
+  background: rgba(201, 168, 76, 0.08) !important;
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -892,7 +932,6 @@ input.field-locked {
     <div class="nav-auth" id="navAuth">
         <div id="navAuthButtons" style="display:flex; gap:0.6rem;">
             <button class="btn btn-outline nav-auth-btn" onclick="navShowLogin()">התחברות</button>
-            <button class="btn nav-auth-btn" onclick="navShowRegister()">הרשמה</button>
         </div>
         <div id="navUserChip" onclick="closeMenuAndOpenStudentArea()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -900,7 +939,7 @@ input.field-locked {
         </div>
     </div>
     </div>
-    <div id="mobileUserIcon" class="mobile-user-icon" onclick="closeMenu(); navShowRegister();" title="הרשמה">
+    <div id="mobileUserIcon" class="mobile-user-icon" onclick="closeMenu(); navShowLogin();" title="התחברות">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="currentColor"/></svg>
     </div>
     <div class="hamburger" id="hamburgerBtn" onclick="toggleMenu()">
@@ -953,22 +992,36 @@ input.field-locked {
                 </div>
                 <span class="unlock-link" onclick="switchUser()">החלף משתמש</span>
             </div>
-            <!-- Identity fields: hidden when logged in -->
-            <div id="step1IdentityFields">
-                <div class="input-group">
-                    <label>שם מלא</label>
-                    <input type="text" id="fname" placeholder="ישראל ישראלי">
-                </div>
+            
+            <!-- Hidden identity inputs for database submission -->
+            <input type="hidden" id="fname">
+            <input type="hidden" id="fphone">
+            <input type="hidden" id="femail">
+
+            <!-- Google Login Prompt: shown when logged out -->
+            <div id="bookingLoginPrompt" style="display: none; text-align: center; margin-bottom: 2rem;">
+                <p style="margin-bottom: 1.5rem; opacity: 0.8; font-size: 1.1rem;">כדי לקבוע שיעור, אנא התחבר עם Google:</p>
+                <button class="google-login-btn" onclick="signInWithGoogle()" style="width: 100%; max-width: 320px; margin: 0 auto;">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    <span>התחבר עם Google</span>
+                </button>
+            </div>
+            
+            <!-- Phone Completion: shown when logged in via Google but missing phone -->
+            <div id="bookingPhoneCompletion" style="display: none; margin-bottom: 2rem;">
+                <p style="margin-bottom: 1rem; opacity: 0.8; text-align: center;">אנא הזן מספר טלפון להשלמת ההרשמה:</p>
                 <div class="input-group">
                     <label>מספר טלפון</label>
-                    <input type="tel" id="fphone" placeholder="050-0000000">
+                    <input type="tel" id="bookingPhoneInput" placeholder="050-0000000" onkeydown="if(event.key==='Enter') submitPhoneCompletion(this.value)">
                 </div>
-                <div class="input-group">
-                    <label>כתובת אימייל (מומלץ)</label>
-                    <input type="email" id="femail" placeholder="example@email.com">
-                    <p style="font-size: 0.85rem; opacity: 0.7; margin-top: 5px; color: var(--text);">* המייל אינו חובה, אך מומלץ לקבלת תזכורות.</p>
-                </div>
+                <button class="btn btn-sm" onclick="submitPhoneCompletion(document.getElementById('bookingPhoneInput').value)" style="width:100%;">שמור והמשך</button>
             </div>
+
             <div class="input-group">
                 <label>צורת שיעור</label>
                 <select id="flessontype">
@@ -977,7 +1030,7 @@ input.field-locked {
                 </select>
             </div>
             <div class="actions" style="justify-content: center; gap: 20px;">
-                <button class="btn btn-sm" onclick="nextStep(2)">המשך לשלב הבא</button>
+                <button class="btn btn-sm" id="bookingStep1NextBtn" onclick="nextStep(2)">המשך לשלב הבא</button>
             </div>
         </div>
 
@@ -1083,41 +1136,27 @@ input.field-locked {
                     </div>
                     <button class="btn btn-outline" onclick="logoutProfile()" style="padding: 0.5rem 1rem; font-size: 0.82rem; white-space: nowrap;">התנתק / החלף משתמש</button>
                 </div>
-                <!-- Auth buttons: entry point when no profile -->
-                <div id="authButtons">
-                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">כדי לצפות בשיעורים שלך, התחבר או הירשם:</p>
-                    <div class="auth-btn-row">
-                        <button class="btn" onclick="showLoginForm()">התחברות</button>
-                        <button class="btn btn-outline" onclick="showRegisterForm()">הרשמה</button>
-                    </div>
+                <!-- Google Sign-in area -->
+                <div id="studentGoogleLoginArea">
+                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">כדי לצפות בשיעורים שלך, אנא התחבר:</p>
+                    <button class="google-login-btn" onclick="signInWithGoogle()" style="width: 100%; max-width: 320px; margin: 0 auto;">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        <span>התחבר עם Google</span>
+                    </button>
                 </div>
-                <!-- Login form: phone only -->
-                <div id="loginForm" style="display:none;">
-                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הזן את מספר הטלפון שלך:</p>
+                <!-- Phone completion area -->
+                <div id="studentPhoneCompletionArea" style="display:none;">
+                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">השלמת הרשמה — אנא הזן מספר טלפון:</p>
                     <div class="input-group">
                         <label>מספר טלפון</label>
-                        <input type="tel" id="loginPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') submitLogin()">
+                        <input type="tel" id="studentCompletePhoneInput" placeholder="050-0000000" onkeydown="if(event.key==='Enter') submitPhoneCompletion(this.value)">
                     </div>
-                    <button class="btn" onclick="submitLogin()" style="width:100%; margin-top:1rem;">כניסה</button>
-                    <button class="btn btn-outline auth-back-btn" onclick="showAuthButtons()">חזרה</button>
-                </div>
-                <!-- Register form: name + phone -->
-                <div id="registerForm" style="display:none;">
-                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הרשמה ראשונה — מלא את הפרטים:</p>
-                    <div class="input-group">
-                        <label>שם מלא</label>
-                        <input type="text" id="regName" placeholder="ישראל ישראלי" onkeydown="if(event.key==='Enter') document.getElementById('regPhone').focus()">
-                    </div>
-                    <div class="input-group" style="margin-top:1rem;">
-                        <label>מספר טלפון</label>
-                        <input type="tel" id="regPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') document.getElementById('regEmail').focus()">
-                    </div>
-                    <div class="input-group" style="margin-top:1rem;">
-                        <label>כתובת אימייל (לתזכורות)</label>
-                        <input type="email" id="regEmail" placeholder="example@email.com" onkeydown="if(event.key==='Enter') submitRegister()">
-                    </div>
-                    <button class="btn" onclick="submitRegister()" style="width:100%; margin-top:1rem;">הרשמה והתחברות</button>
-                    <button class="btn btn-outline auth-back-btn" onclick="showAuthButtons()">חזרה</button>
+                    <button class="btn" onclick="submitPhoneCompletion(document.getElementById('studentCompletePhoneInput').value)" style="width:100%; margin-top:1rem;">סיום והתחברות</button>
                 </div>
             </div>
             <div id="lessonsResult" style="display: none; margin-top: 1rem;">
@@ -1258,33 +1297,30 @@ input.field-locked {
     <div class="confirm-box" style="max-width:440px; width:92%; text-align:right; padding:2rem 2.2rem;">
         <!-- Login panel -->
         <div id="modal-login-panel">
-            <h3 style="color:var(--gold); margin-bottom:1.8rem; font-size:1.6rem;">התחברות</h3>
-            <div class="input-group">
-                <label>מספר טלפון</label>
-                <input type="tel" id="modalLoginPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') modalSubmitLogin()">
-            </div>
-            <button class="btn" onclick="modalSubmitLogin()" style="width:100%; margin-top:0.5rem;">כניסה</button>
-            <p style="text-align:center; margin-top:1.2rem; font-size:0.9rem; opacity:0.7;">אין לך חשבון? <span onclick="showModalRegister()" style="color:var(--gold); cursor:pointer; text-decoration:underline;">הירשם כאן</span></p>
+            <h3 style="color:var(--gold); margin-bottom:1.2rem; font-size:1.6rem; text-align:center;">התחברות תלמידים</h3>
+            <p style="text-align:center; margin-bottom:1.8rem; font-size:0.95rem; opacity:0.8;">כדי לקבוע שיעור או לצפות בשיעורים שלך, אנא התחבר באמצעות חשבון Google:</p>
+            
+            <button class="google-login-btn" onclick="signInWithGoogle()" style="width:100%; margin-bottom:0.5rem;">
+                <svg viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                <span>התחבר עם Google</span>
+            </button>
             <button class="btn btn-outline" onclick="closeStudentAuthModal()" style="width:100%; margin-top:0.8rem; font-size:0.85rem; opacity:0.65;">סגור</button>
         </div>
-        <!-- Register panel -->
-        <div id="modal-register-panel" style="display:none;">
-            <h3 style="color:var(--gold); margin-bottom:1.8rem; font-size:1.6rem;">הרשמה</h3>
-            <div class="input-group">
-                <label>שם מלא</label>
-                <input type="text" id="modalRegName" placeholder="ישראל ישראלי" onkeydown="if(event.key==='Enter') document.getElementById('modalRegPhone').focus()">
-            </div>
+        
+        <!-- Phone number completion panel -->
+        <div id="modal-phone-completion-panel" style="display:none;">
+            <h3 style="color:var(--gold); margin-bottom:1.2rem; font-size:1.6rem; text-align:center;">השלמת הרשמה</h3>
+            <p style="text-align:center; margin-bottom:1.8rem; font-size:0.95rem; opacity:0.8;">נא להזין מספר טלפון ליצירת קשר וקבלת תזכורות בוואטסאפ:</p>
             <div class="input-group">
                 <label>מספר טלפון</label>
-                <input type="tel" id="modalRegPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') document.getElementById('modalRegEmail').focus()">
+                <input type="tel" id="modalPhoneCompletionInput" placeholder="050-0000000" onkeydown="if(event.key==='Enter') submitPhoneCompletion(this.value)">
             </div>
-            <div class="input-group">
-                <label>כתובת אימייל לתזכורות</label>
-                <input type="email" id="modalRegEmail" placeholder="example@email.com" onkeydown="if(event.key==='Enter') modalSubmitRegister()">
-            </div>
-            <button class="btn" onclick="modalSubmitRegister()" style="width:100%; margin-top:0.5rem;">הרשמה</button>
-            <p style="text-align:center; margin-top:1.2rem; font-size:0.9rem; opacity:0.7;">כבר רשום? <span onclick="showModalLogin()" style="color:var(--gold); cursor:pointer; text-decoration:underline;">התחבר כאן</span></p>
-            <button class="btn btn-outline" onclick="closeStudentAuthModal()" style="width:100%; margin-top:0.8rem; font-size:0.85rem; opacity:0.65;">סגור</button>
+            <button class="btn" onclick="submitPhoneCompletion(document.getElementById('modalPhoneCompletionInput').value)" style="width:100%; margin-top:0.5rem;">סיום והתחברות</button>
         </div>
     </div>
 </div>
@@ -1314,6 +1350,24 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
+// Initialize Firebase Auth persistence and setup state listener
+firebase.auth().setPersistence(firebase.auth.Persistence.LOCAL)
+  .then(() => {
+      firebase.auth().onAuthStateChanged((user) => {
+          if (user) {
+              checkAndCompleteLogin(user.displayName, user.email, user.uid);
+          } else {
+              clearProfile();
+              updateNavAuth();
+              applyProfileToBookingForm();
+              backToLogin();
+          }
+      });
+  })
+  .catch((error) => {
+      console.error("Firebase persistence error:", error);
+  });
 
 const CLIENT_ID = '214964095575-gyhepg783bst139k1kcrolrp7qjpam9f.apps.googleusercontent.com';
 
@@ -1376,16 +1430,7 @@ window.onload = function() {
         }
     });
 
-    // Enter-key chain: Name → Phone → Email → Next
-    document.getElementById('fname').addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('fphone').focus(); }
-    });
-    document.getElementById('fphone').addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('femail').focus(); }
-    });
-    document.getElementById('femail').addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); nextStep(2); }
-    });
+
 
     // Nav active state on scroll
     const sections = document.querySelectorAll('section[id]');
@@ -1938,129 +1983,31 @@ function sidebarShowRegister() {
     navShowRegister();
 }
 
+// Google Sign-In Provider
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 function navShowLogin() {
     if (getProfile()) { openStudentArea(); return; }
     document.getElementById('modal-login-panel').style.display = 'block';
-    document.getElementById('modal-register-panel').style.display = 'none';
+    document.getElementById('modal-phone-completion-panel').style.display = 'none';
     document.getElementById('student-auth-modal').style.display = 'flex';
-    setTimeout(() => { const el = document.getElementById('modalLoginPhone'); if(el) el.focus(); }, 80);
 }
 
 function navShowRegister() {
-    if (getProfile()) { openStudentArea(); return; }
-    document.getElementById('modal-login-panel').style.display = 'none';
-    document.getElementById('modal-register-panel').style.display = 'block';
-    document.getElementById('student-auth-modal').style.display = 'flex';
-    setTimeout(() => { const el = document.getElementById('modalRegName'); if(el) el.focus(); }, 80);
+    navShowLogin();
 }
 
-// Sanitize phone number: remove spaces, dashes, and convert +972 to 0
 function sanitizePhoneNumber(phone) {
     if (!phone) return '';
-    // Remove spaces and dashes
     let cleaned = phone.replace(/[\s-]/g, '');
-    // Convert +972 country code to 0
     if (cleaned.startsWith('+972')) {
         cleaned = '0' + cleaned.slice(4);
     }
     return cleaned;
 }
 
-function showModalLogin() {
-    document.getElementById('modal-login-panel').style.display = 'block';
-    document.getElementById('modal-register-panel').style.display = 'none';
-    setTimeout(() => document.getElementById('modalLoginPhone').focus(), 80);
-}
-
-function showModalRegister() {
-    document.getElementById('modal-login-panel').style.display = 'none';
-    document.getElementById('modal-register-panel').style.display = 'block';
-    setTimeout(() => document.getElementById('modalRegName').focus(), 80);
-}
-
 function closeStudentAuthModal() {
     document.getElementById('student-auth-modal').style.display = 'none';
-}
-
-function modalSubmitLogin() {
-    const phoneInput = document.getElementById('modalLoginPhone').value.trim();
-    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
-    
-    const phone = sanitizePhoneNumber(phoneInput);
-    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
-
-    // Try to find user in users collection first (registered users)
-    db.collection('users').doc(phone).get().then(doc => {
-        if (doc.exists) {
-            const userData = doc.data();
-            const name = userData.name || '';
-            const email = userData.email || '';
-            saveProfile(name, phone, email);
-            sessionPhone = phone;
-            closeStudentAuthModal();
-            showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-            document.getElementById('modalLoginPhone').value = '';
-            return;
-        }
-        
-        // If not in users collection, search bookings collection
-        db.collection('bookings').get().then(snap => {
-            let foundLesson = null;
-            snap.forEach(docSnap => {
-                const data = docSnap.data();
-                if (data.phone && sanitizePhoneNumber(data.phone) === phone) {
-                    if (!foundLesson || new Date(data.date + 'T' + data.time) > new Date(foundLesson.date + 'T' + foundLesson.time)) {
-                        foundLesson = data;
-                    }
-                }
-            });
-            
-            if (foundLesson) {
-                const name = foundLesson.name || '';
-                const email = foundLesson.email || '';
-                saveProfile(name, phone, email);
-                sessionPhone = phone;
-                closeStudentAuthModal();
-                showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-                document.getElementById('modalLoginPhone').value = '';
-            } else {
-                showToast('מספר לא נמצא — עבור להרשמה');
-                showModalRegister();
-            }
-        }).catch(err => {
-            console.error('Error searching bookings:', err);
-            showToast('שגיאה בכניסה, נסה שוב');
-        });
-    }).catch(err => {
-        console.error('Error fetching user:', err);
-        showToast('שגיאה בכניסה, נסה שוב');
-    });
-}
-
-function modalSubmitRegister() {
-    const name = document.getElementById('modalRegName').value.trim();
-    const phoneInput = document.getElementById('modalRegPhone').value.trim();
-    const email = document.getElementById('modalRegEmail').value.trim();
-    
-    if (!name) { showToast('נא להזין שם'); return; }
-    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
-    if (!email) { showToast('נא להזין כתובת אימייל'); return; }
-    
-    const phone = sanitizePhoneNumber(phoneInput);
-    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
-    
-    // Save to Firebase first, then localStorage
-    saveUserToFirebase(name, phone, email)
-        .then(() => {
-            saveProfile(name, phone, email);
-            sessionPhone = phone;
-            closeStudentAuthModal();
-            showToast('שלום ' + name + '! נרשמת בהצלחה');
-            document.getElementById('modalRegName').value = '';
-            document.getElementById('modalRegPhone').value = '';
-            document.getElementById('modalRegEmail').value = '';
-        })
-        .catch(() => showToast('שגיאה בהרשמה, נסה שוב'));
 }
 
 function sidebarLogout() {
@@ -2068,133 +2015,210 @@ function sidebarLogout() {
     logoutProfile();
 }
 
-/* ── Auth screen navigation ── */
 function showAuthButtons() {
-    document.getElementById('authButtons').style.display = 'block';
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'none';
-    document.getElementById('loggedInChip').style.display = 'none';
+    const googleArea = document.getElementById('studentGoogleLoginArea');
+    if (googleArea) googleArea.style.display = 'block';
+    
+    const loggedInChip = document.getElementById('loggedInChip');
+    if (loggedInChip) loggedInChip.style.display = 'none';
+    
     updateNavAuth();
 }
 
-function showLoginForm() {
-    document.getElementById('authButtons').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('registerForm').style.display = 'none';
-    setTimeout(() => { const el = document.getElementById('loginPhone'); if (el) el.focus(); }, 80);
-}
-
-function showRegisterForm() {
-    document.getElementById('authButtons').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'block';
-    setTimeout(() => { const el = document.getElementById('regName'); if (el) el.focus(); }, 80);
-}
-
 function showLoggedInChip(name, phone) {
-    document.getElementById('authButtons').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'none';
+    const googleArea = document.getElementById('studentGoogleLoginArea');
+    if (googleArea) googleArea.style.display = 'none';
+    
     const chip = document.getElementById('loggedInChip');
-    chip.style.display = 'flex';
+    if (chip) chip.style.display = 'flex';
+    
     document.getElementById('loggedInName').textContent = name;
     document.getElementById('loggedInPhone').textContent = phone;
     updateNavAuth();
 }
 
-/* ── Auth actions ── */
-function submitLogin() {
-    const phoneInput = document.getElementById('loginPhone').value.trim();
-    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
-    
-    const phone = sanitizePhoneNumber(phoneInput);
-    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
-
-    // Try to find user in users collection first (registered users)
-    db.collection('users').doc(phone).get().then(doc => {
-        if (doc.exists) {
-            const userData = doc.data();
-            const name = userData.name || '';
-            const email = userData.email || '';
-            saveProfile(name, phone, email);
-            sessionPhone = phone;
-            showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-            showLoggedInChip(name, phone);
-            fetchMyLessons();
-            return;
-        }
-        
-        // If not in users collection, search bookings collection
-        db.collection('bookings').get().then(snap => {
-            let foundLesson = null;
-            snap.forEach(docSnap => {
-                const data = docSnap.data();
-                if (data.phone && sanitizePhoneNumber(data.phone) === phone) {
-                    if (!foundLesson || new Date(data.date + 'T' + data.time) > new Date(foundLesson.date + 'T' + foundLesson.time)) {
-                        foundLesson = data;
-                    }
-                }
-            });
-            
-            if (foundLesson) {
-                const name = foundLesson.name || '';
-                const email = foundLesson.email || '';
-                saveProfile(name, phone, email);
-                sessionPhone = phone;
-                showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-                showLoggedInChip(name, phone);
-                fetchMyLessons();
-            } else {
-                showToast('מספר לא נמצא, אנא הירשם קודם');
-            }
-        }).catch(err => {
-            console.error('Error searching bookings:', err);
-            showToast('שגיאה בכניסה, נסה שוב');
+// Google Sign-In Function
+function signInWithGoogle() {
+    firebase.auth().signInWithPopup(googleProvider)
+        .then((result) => {
+            const user = result.user;
+            showToast('התחברת בהצלחה עם Google');
+        })
+        .catch((error) => {
+            console.error("Google Sign-In Error:", error);
+            showToast('שגיאה בהתחברות עם Google: ' + error.message);
         });
+}
+
+// Check if user exists in Firestore, auto-link past bookings, or trigger phone completion
+function checkAndCompleteLogin(name, email, uid) {
+    db.collection('users').where('email', '==', email).get().then(snap => {
+        if (!snap.empty) {
+            // User exists in Firestore
+            const userData = snap.docs[0].data();
+            const phone = userData.phone;
+            db.collection('users').doc(phone).update({
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(e => console.error("Error updating last login:", e));
+            
+            saveProfile(userData.name || name, phone, email);
+            sessionPhone = phone;
+            
+            if (document.getElementById('my-lessons').style.display === 'flex') {
+                showLoggedInChip(userData.name || name, phone);
+                fetchMyLessons();
+            }
+        } else {
+            // Check if there are bookings under this email to auto-link
+            db.collection('bookings').where('email', '==', email).get().then(bookingSnap => {
+                let foundPhone = '';
+                let foundName = name;
+                bookingSnap.forEach(doc => {
+                    const data = doc.data();
+                    if (data.phone) {
+                        foundPhone = data.phone;
+                        if (data.name) foundName = data.name;
+                    }
+                });
+                
+                if (foundPhone) {
+                    // Auto-register this existing customer!
+                    saveUserToFirebase(foundName, foundPhone, email)
+                        .then(() => {
+                            saveProfile(foundName, foundPhone, email);
+                            sessionPhone = foundPhone;
+                            showToast('שלום ' + foundName + '! כניסה בוצעה בהצלחה');
+                            if (document.getElementById('my-lessons').style.display === 'flex') {
+                                showLoggedInChip(foundName, foundPhone);
+                                fetchMyLessons();
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error auto-registering student:', err);
+                        });
+                } else {
+                    // New user -> prompt for phone completion
+                    showPhoneCompletionUI(name, email);
+                }
+            }).catch(err => {
+                console.error("Error searching bookings by email:", err);
+                showPhoneCompletionUI(name, email);
+            });
+        }
     }).catch(err => {
-        console.error('Error fetching user:', err);
-        showToast('שגיאה בכניסה, נסה שוב');
+        console.error("Error searching user in db:", err);
+        showToast("שגיאה בהתחברות");
     });
 }
 
-function submitRegister() {
-    const name = document.getElementById('regName').value.trim();
-    const phoneInput = document.getElementById('regPhone').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    
-    if (!name) { showToast('נא להזין שם'); return; }
-    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
-    
-    const phone = sanitizePhoneNumber(phoneInput);
-    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
-    
-    // Save to Firebase first, then localStorage
-    saveUserToFirebase(name, phone, email || '')
-        .then(() => {
-            saveProfile(name, phone, email || '');
-            sessionPhone = phone;
-            showToast('שלום ' + name + '! נרשמת בהצלחה');
-            showLoggedInChip(name, phone);
-            fetchMyLessons();
-        })
-        .catch(() => showToast('שגיאה בהרשמה, נסה שוב'));
-}
+// Global variable to keep Google details during phone registration step
+let tempGoogleUser = null;
 
-function logoutProfile() {
-    clearProfile();
-    sessionPhone = '';
-    document.getElementById('lessonsResult').style.display = 'none';
-    document.getElementById('loginArea').style.display = 'block';
-    const refreshBtn = document.getElementById('refreshStudentBtn');
-    if (refreshBtn) refreshBtn.style.display = 'none';
-    const wb = document.getElementById('welcomeBanner');
-    if (wb) wb.style.display = 'none';
-    showAuthButtons();
+function showPhoneCompletionUI(name, email) {
+    tempGoogleUser = { name, email };
+    
+    // Auth Modal completion panel
+    const modalLoginPanel = document.getElementById('modal-login-panel');
+    const modalPhonePanel = document.getElementById('modal-phone-completion-panel');
+    if (modalLoginPanel) modalLoginPanel.style.display = 'none';
+    if (modalPhonePanel) modalPhonePanel.style.display = 'block';
+    
+    // My Lessons completion panel
+    const googleLoginArea = document.getElementById('studentGoogleLoginArea');
+    const phoneCompletionArea = document.getElementById('studentPhoneCompletionArea');
+    if (googleLoginArea) googleLoginArea.style.display = 'none';
+    if (phoneCompletionArea) phoneCompletionArea.style.display = 'block';
+    
+    // Booking Form completion panel
+    const bookingLoginPrompt = document.getElementById('bookingLoginPrompt');
+    const bookingPhoneCompletion = document.getElementById('bookingPhoneCompletion');
+    if (bookingLoginPrompt) bookingLoginPrompt.style.display = 'none';
+    if (bookingPhoneCompletion) bookingPhoneCompletion.style.display = 'block';
+    
+    // Update forms
     applyProfileToBookingForm();
 }
 
+function submitPhoneCompletion(phoneVal) {
+    if (!phoneVal) {
+        showToast('נא להזין מספר טלפון');
+        return;
+    }
+    const phone = sanitizePhoneNumber(phoneVal);
+    if (!phone) {
+        showToast('מספר טלפון לא תקין');
+        return;
+    }
+    if (!tempGoogleUser) {
+        showToast('שגיאה בתהליך ההתחברות, אנא נסה שוב');
+        return;
+    }
+    
+    const { name, email } = tempGoogleUser;
+    
+    saveUserToFirebase(name, phone, email)
+        .then(() => {
+            saveProfile(name, phone, email);
+            sessionPhone = phone;
+            showToast('שלום ' + name + '! נרשמת בהצלחה');
+            closeStudentAuthModal();
+            
+            // Clean up completion panels
+            const modalPhonePanel = document.getElementById('modal-phone-completion-panel');
+            if (modalPhonePanel) modalPhonePanel.style.display = 'none';
+            
+            const phoneCompletionArea = document.getElementById('studentPhoneCompletionArea');
+            if (phoneCompletionArea) phoneCompletionArea.style.display = 'none';
+            
+            const bookingPhoneCompletion = document.getElementById('bookingPhoneCompletion');
+            if (bookingPhoneCompletion) bookingPhoneCompletion.style.display = 'none';
+            
+            tempGoogleUser = null;
+            
+            if (document.getElementById('my-lessons').style.display === 'flex') {
+                showLoggedInChip(name, phone);
+                fetchMyLessons();
+            }
+        })
+        .catch(err => {
+            console.error('Error completing registration:', err);
+            showToast('שגיאה בשמירת הנתונים, נסה שוב');
+        });
+}
+
+function logoutProfile() {
+    firebase.auth().signOut().then(() => {
+        clearProfile();
+        sessionPhone = '';
+        document.getElementById('lessonsResult').style.display = 'none';
+        document.getElementById('loginArea').style.display = 'block';
+        const refreshBtn = document.getElementById('refreshStudentBtn');
+        if (refreshBtn) refreshBtn.style.display = 'none';
+        const wb = document.getElementById('welcomeBanner');
+        if (wb) wb.style.display = 'none';
+        
+        // Reset phone completion panels
+        const modalPhonePanel = document.getElementById('modal-phone-completion-panel');
+        if (modalPhonePanel) modalPhonePanel.style.display = 'none';
+        
+        const phoneCompletionArea = document.getElementById('studentPhoneCompletionArea');
+        if (phoneCompletionArea) phoneCompletionArea.style.display = 'none';
+        
+        const bookingPhoneCompletion = document.getElementById('bookingPhoneCompletion');
+        if (bookingPhoneCompletion) bookingPhoneCompletion.style.display = 'none';
+        
+        tempGoogleUser = null;
+        
+        showAuthButtons();
+        applyProfileToBookingForm();
+    }).catch(err => {
+        console.error("Logout error:", err);
+        showToast("שגיאה בהתנתקות");
+    });
+}
+
 function switchUser() {
-    showConfirm('לנתק את הפרופיל הנוכחי ולהתחבר עם מספר אחר?', logoutProfile);
+    showConfirm('לנתק את הפרופיל הנוכחי ולהתחבר עם חשבון אחר?', logoutProfile);
 }
 
 function applyProfileToBookingForm() {
@@ -2202,29 +2226,42 @@ function applyProfileToBookingForm() {
     const nameInput = document.getElementById('fname');
     const phoneInput = document.getElementById('fphone');
     const emailInput = document.getElementById('femail');
-    const identityFields = document.getElementById('step1IdentityFields');
     const summaryBar = document.getElementById('profileSummaryBar');
-    if (!nameInput || !phoneInput) return;
+    
+    const loginPrompt = document.getElementById('bookingLoginPrompt');
+    const phoneCompletion = document.getElementById('bookingPhoneCompletion');
+    const nextBtn = document.getElementById('bookingStep1NextBtn');
 
     if (profile) {
-        // Fill hidden inputs so confirmBooking() can read them
-        nameInput.value = profile.name;
-        phoneInput.value = profile.phone;
+        if (nameInput) nameInput.value = profile.name;
+        if (phoneInput) phoneInput.value = profile.phone;
         if (emailInput && profile.email) emailInput.value = profile.email;
 
-        // Hide the full identity fields, show compact summary
-        if (identityFields) identityFields.style.display = 'none';
+        if (loginPrompt) loginPrompt.style.display = 'none';
+        if (phoneCompletion) phoneCompletion.style.display = 'none';
         if (summaryBar) {
             summaryBar.style.display = 'flex';
             document.getElementById('psbName').textContent = profile.name;
             document.getElementById('psbPhone').textContent = profile.phone + (profile.email ? ' · ' + profile.email : '');
         }
+        if (nextBtn) nextBtn.style.display = 'inline-block';
     } else {
-        nameInput.value = '';
-        phoneInput.value = '';
+        if (nameInput) nameInput.value = '';
+        if (phoneInput) phoneInput.value = '';
         if (emailInput) emailInput.value = '';
-        if (identityFields) identityFields.style.display = 'block';
+        
         if (summaryBar) summaryBar.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+        
+        // Show Google sign in or phone completion depending on auth state
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser) {
+            if (loginPrompt) loginPrompt.style.display = 'none';
+            if (phoneCompletion) phoneCompletion.style.display = 'block';
+        } else {
+            if (loginPrompt) loginPrompt.style.display = 'block';
+            if (phoneCompletion) phoneCompletion.style.display = 'none';
+        }
     }
 }
 
