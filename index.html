@@ -1761,30 +1761,23 @@ function confirmBooking() {
 }
 
 function showAuth() {
-    // Check if there's a logged-in user and if they match admin credentials
-    const profile = getProfile();
-    if (profile && 
-        profile.name === ADMIN_CREDENTIALS.name && 
-        profile.phone === ADMIN_CREDENTIALS.phone && 
-        profile.email === ADMIN_CREDENTIALS.email) {
-        // Auto-bypass: logged-in user matches admin credentials
-        loginAdminAutomatically();
+    const currentUser = firebase.auth().currentUser;
+    if (currentUser && currentUser.email === 'nooam.gabay@gmail.com') {
+        openAdminPanel();
         return;
     }
-    
-    // Otherwise, show the password modal
+
     document.getElementById('auth-modal').style.display = 'flex';
     setTimeout(() => {
         document.getElementById('adminPass').focus();
     }, 100);
 }
 
-function loginAdminAutomatically() {
-    // Automatically log in the admin user without requiring password
+function openAdminPanel() {
     document.getElementById('auth-modal').style.display = 'none';
     document.getElementById('book').classList.add('admin-hidden');
     document.getElementById('hero').classList.add('admin-hidden');
-    
+
     document.querySelectorAll('.sym').forEach(s => s.style.animationPlayState = 'paused');
     document.querySelectorAll('.math-bg').forEach(b => b.style.display = 'none');
 
@@ -1793,6 +1786,10 @@ function loginAdminAutomatically() {
     renderAvailGrid();
     showToast('התחברת בהצלחה כמנהל');
     document.getElementById('adminPass').value = '';
+}
+
+function loginAdminAutomatically() {
+    openAdminPanel();
 }
 
 function loginAdmin() {
@@ -2960,7 +2957,12 @@ document.getElementById('adminTrigger').addEventListener('click', () => {
     logoClicks++;
     if (logoClicks === 3) {
         logoClicks = 0;
-        showAuth();
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser && currentUser.email === 'nooam.gabay@gmail.com') {
+            openAdminPanel();
+        } else {
+            showAuth();
+        }
     }
     setTimeout(() => { logoClicks = 0; }, 2000);
 });
