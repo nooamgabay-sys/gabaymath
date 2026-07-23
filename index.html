@@ -37,6 +37,7 @@
   --voice-widget-status-text: #F9FAFB;
   --voice-widget-orb-glow: rgba(6,182,212,0.18);
   --voice-widget-orb-outline: rgba(255,255,255,0.08);
+  --voice-widget-typing: #fde68a;
 }
 body.light-mode {
   --bg: #f2f2f2;
@@ -58,6 +59,7 @@ body.light-mode {
   --voice-widget-status-text: #111827;
   --voice-widget-orb-glow: rgba(6,182,212,0.12);
   --voice-widget-orb-outline: rgba(0,0,0,0.06);
+  --voice-widget-typing: #92400e;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Heebo', sans-serif; }
 html { scroll-behavior: smooth; }
@@ -817,6 +819,13 @@ body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
   user-select: none;
 }
 .voice-assistant-fab:hover { transform: translateY(-2px); }
+.voice-assistant-panel {
+  width: min(320px, 92vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+}
 .voice-assistant-meta {
   display: flex;
   flex-direction: column;
@@ -848,6 +857,7 @@ body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
 .voice-assistant-status[data-state="listening"] { color: #7dd3fc; }
 .voice-assistant-status[data-state="processing"] { color: #fbbf24; }
 .voice-assistant-status[data-state="busy"] { color: #f87171; }
+.voice-assistant-status[data-state="typing"] { color: var(--voice-widget-typing); }
 .voice-assistant-visual {
   width: 46px;
   height: 46px;
@@ -857,6 +867,42 @@ body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
   background: radial-gradient(circle at 30% 30%, var(--voice-widget-orb-glow), rgba(124,58,237,0.14), rgba(0,0,0,0.08));
   box-shadow: inset 0 0 16px rgba(255,255,255,0.08), 0 0 18px var(--voice-widget-orb-glow);
 }
+
+/* ── TASKS ───────────────────────────────────────── */
+#taskModal {
+  position: fixed; inset: 0; z-index: 10020; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.78);
+}
+#taskModal .task-box {
+  width: min(560px, 92vw);
+  background: var(--card-bg);
+  border: 1px solid var(--border-gold);
+  border-radius: 22px;
+  padding: 1.6rem;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+}
+#taskModal .task-box h3 { color: var(--gold); margin-bottom: 1rem; }
+#taskModal .task-box .input-group { margin-bottom: 1rem; }
+#taskModal .task-box textarea { min-height: 120px; }
+#taskModal .task-actions { display:flex; gap:0.8rem; justify-content:flex-start; flex-wrap:wrap; }
+#taskModal .task-hint { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem; }
+#taskModal .task-file-name { font-size: 0.82rem; color: var(--gold); margin-top: 0.35rem; word-break: break-word; }
+.task-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  display:flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.task-card strong { color: var(--gold); font-size: 1.05rem; }
+.task-card .task-meta { color: var(--text-muted); font-size: 0.85rem; }
+.task-card .task-desc { color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+.task-card .task-actions-row { display:flex; gap:0.7rem; flex-wrap:wrap; }
+.task-card.completed { opacity: 0.72; border-color: rgba(74,222,128,0.28); }
 .voice-assistant-visual::before {
   content: '';
   position: absolute;
@@ -877,17 +923,79 @@ body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
 body.light-mode .voice-assistant-fab {
   border-color: var(--voice-widget-border);
 }
+body.light-mode .voice-assistant-fab {
+  background: var(--voice-widget-bg);
+}
 body.light-mode .voice-assistant-visual {
   box-shadow: inset 0 0 16px rgba(255,255,255,0.55), 0 0 20px rgba(6,182,212,0.14);
 }
 body.light-mode .voice-assistant-canvas {
   filter: saturate(1.08) brightness(1.02);
 }
+.voice-assistant-message {
+  display: none;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-gold);
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  text-align: right;
+}
+.voice-assistant-message.active { display: block; }
+.voice-assistant-entry {
+  width: 100%;
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+}
+.voice-assistant-entry input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.8rem 0.95rem;
+  font-size: 0.95rem;
+  border-radius: 14px;
+}
+.voice-assistant-entry .btn {
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 14px;
+  white-space: nowrap;
+}
+.voice-assistant-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+.voice-assistant-separator::before,
+.voice-assistant-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+.voice-assistant-separator span { padding: 0 0.6rem; }
+body.light-mode .voice-assistant-message {
+  background: rgba(255,255,255,0.7);
+  color: #111827;
+}
+body.light-mode .voice-assistant-separator::before,
+body.light-mode .voice-assistant-separator::after {
+  background: rgba(0,0,0,0.08);
+}
 @media (max-width: 600px) {
-  .voice-assistant-fab { right: 0.75rem; bottom: 5.8rem; width: 114px; padding: 10px 12px 12px; }
+  .voice-assistant-fab { right: 0.75rem; bottom: 5.8rem; width: 92vw; max-width: 300px; padding: 10px 12px 12px; }
   .voice-assistant-visual { width: 40px; height: 40px; }
   .voice-assistant-meta strong { font-size: 0.76rem; }
   .voice-assistant-status { font-size: 0.58rem; padding: 0.18rem 0.4rem; }
+  .voice-assistant-entry { flex-direction: column; align-items: stretch; }
 }
 
 /* Mobile user icon (visible on small screens only) */
@@ -1024,6 +1132,7 @@ input.field-locked {
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -1232,6 +1341,12 @@ input.field-locked {
                 <div id="lessonsList" style="max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem;">
                     <!-- Lessons will appear here -->
                 </div>
+                <div style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; color: var(--gold);">משימות לביצוע</h3>
+                    <div id="studentTasksList" style="display:flex; flex-direction:column; gap:0.9rem;">
+                        <p style="color:var(--text-muted); text-align:center;">טוען משימות...</p>
+                    </div>
+                </div>
                 <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1.5rem;">
                     <a href="https://wa.me/972586458414?text=%D7%94%D7%99%D7%99%20%D7%92%D7%91%D7%90%D7%99%2C%20%D7%90%D7%A0%D7%99%20%D7%A4%D7%95%D7%A0%D7%94%20%D7%90%D7%9C%D7%99%D7%9A%20%D7%9E%D7%94%D7%90%D7%AA%D7%A8%20%D7%9C%D7%92%D7%91%D7%99%20%D7%94%D7%A9%D7%99%D7%A2%D7%95%D7%A8%20%D7%A9%D7%9C%D7%99..." target="_blank" class="btn btn-whatsapp" style="width:100%; text-decoration:none; font-size:1rem; padding: 0.9rem;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -1338,6 +1453,42 @@ input.field-locked {
     </div>
 </section>
 
+<div id="taskModal" onclick="if(event.target===this) closeTaskModal()">
+  <div class="task-box">
+    <h3>הוסף משימה</h3>
+    <div class="input-group">
+      <label>שם התלמיד</label>
+      <input type="text" id="taskStudentName" readonly>
+    </div>
+    <div class="input-group">
+      <label>פרטי השיעור / תאריך</label>
+      <input type="text" id="taskLessonDetails" readonly>
+    </div>
+    <div class="input-group">
+      <label>כותרת המשימה</label>
+      <input type="text" id="taskTitle" placeholder="תרגול משוואות...">
+    </div>
+    <div class="input-group">
+      <label>תיאור המשימה</label>
+      <textarea id="taskDescription" placeholder="הסבר קצר מה צריך לעשות..."></textarea>
+    </div>
+<div class="input-group">
+      <label>קובץ מצורף</label>
+      <input type="file" id="taskFile" accept=".pdf,image/*,.doc,.docx" onchange="handleTaskFileName()">
+      <div class="task-hint">PDF, תמונה או מסמך Word.</div>
+      <div id="taskFileName" class="task-file-name"></div>
+    </div>
+    <div class="input-group">
+      <label>תאריך יעד (לא חובה)</label>
+      <input type="date" id="taskDueDate">
+    </div>
+    <div class="task-actions">
+      <button class="btn" onclick="saveAndSendTask()">שמור ושלח לתלמיד</button>
+      <button class="btn btn-outline" onclick="closeTaskModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
 <div id="auth-modal">
     <div class="glass">
         <h3 style="margin-bottom: 1.5rem; font-size: 2rem;">כניסת מנהל</h3>
@@ -1401,15 +1552,23 @@ input.field-locked {
 
 <div id="toast-container"></div>
 
-<button id="voiceAssistantFab" class="voice-assistant-fab" type="button" onclick="toggleVoiceAssistant()">
-    <div class="voice-assistant-meta">
-        <strong>עוזרת קולית</strong>
-        <div id="voiceAssistantStatus" class="voice-assistant-status" data-state="idle" aria-live="polite"></div>
+<div id="voiceAssistantFab" class="voice-assistant-fab">
+    <div class="voice-assistant-panel">
+        <div class="voice-assistant-meta">
+            <strong>עוזרת קולית</strong>
+            <div id="voiceAssistantStatus" class="voice-assistant-status" data-state="idle" aria-live="polite"></div>
+        </div>
+        <button type="button" class="voice-assistant-visual" aria-label="הפעלת הקלטה קולית" onclick="toggleVoiceAssistant()">
+            <canvas id="voiceAssistantCanvas" class="voice-assistant-canvas"></canvas>
+        </button>
+        <div class="voice-assistant-separator"><span>או</span></div>
+        <div class="voice-assistant-entry">
+            <input type="text" id="assistantTextInput" placeholder="שאל שאלה במתמטיקה..." oninput="handleAssistantTyping()" onkeydown="handleAssistantTextKeydown(event)">
+            <button class="btn" type="button" onclick="submitAssistantText()">שלח</button>
+        </div>
+        <div id="voiceAssistantMessage" class="voice-assistant-message" aria-live="polite"></div>
     </div>
-    <div class="voice-assistant-visual" aria-hidden="true">
-        <canvas id="voiceAssistantCanvas" class="voice-assistant-canvas"></canvas>
-    </div>
-</button>
+</div>
 
 <script>
 const firebaseConfig = {
@@ -1424,6 +1583,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const storage = firebase.storage();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
@@ -1495,6 +1655,7 @@ window.onload = function() {
 auth.onAuthStateChanged((user) => {
     currentFirebaseUser = user || null;
     syncStudentAuthState(user);
+    fetchStudentTasks();
 });
 
 function formatTimeSlot(timeStr) {
@@ -1819,6 +1980,8 @@ function confirmBooking() {
         name: fname,
         phone: fphone,
         email: femail,
+        studentId: firebase.auth().currentUser ? firebase.auth().currentUser.uid : '',
+        studentEmail: firebase.auth().currentUser ? firebase.auth().currentUser.email || femail : femail,
         topic: subject,
         subject: subject,
         grade: gradeText,
@@ -1980,7 +2143,8 @@ const voiceAssistantVisual = {
     idle: { speed: 0.4, amplitude: 1.0, glow: 2.0, colors: ['#06B6D4', '#7C3AED', '#FF4242'] },
     listening: { speed: 1.2, amplitude: 2.2, glow: 3.4, colors: ['#06B6D4', '#7C3AED', '#10B981'] },
     processing: { speed: 0.8, amplitude: 1.5, glow: 2.8, colors: ['#06B6D4', '#7C3AED', '#FF4242'] },
-    busy: { speed: 0.65, amplitude: 1.1, glow: 2.2, colors: ['#FF4242', '#7C3AED', '#06B6D4'] }
+    busy: { speed: 0.65, amplitude: 1.1, glow: 2.2, colors: ['#FF4242', '#7C3AED', '#06B6D4'] },
+    typing: { speed: 0.55, amplitude: 1.05, glow: 2.1, colors: ['#06B6D4', '#FF4242', '#7C3AED'] }
 };
 
 function getVoiceVisualProps(state) {
@@ -2102,6 +2266,13 @@ function clearAssistantState() {
     }
     voiceAssistantVisual.state = 'idle';
     if (canvas) canvas.dataset.state = 'idle';
+}
+
+function showAssistantMessage(message) {
+    const box = document.getElementById('voiceAssistantMessage');
+    if (!box) return;
+    box.textContent = message || '';
+    box.classList.toggle('active', !!message);
 }
 
 function speakText(text) {
@@ -2289,6 +2460,7 @@ function scrollToBookingStep(stepNumber) {
 
 async function handleVoiceTranscript(transcript) {
     setAssistantState('processing', 'מעבד...');
+    showAssistantMessage(`את/ה אמרת:\n${transcript}`);
 
     const date = parseSpokenDate(transcript);
     const time = parseSpokenTime(transcript);
@@ -2307,9 +2479,11 @@ async function handleVoiceTranscript(transcript) {
 
     if (!date || !time) {
         setAssistantState('busy', 'תפוס - עובר ללוח השעות');
-        speakText('לא הצלחתי להבין את התאריך או השעה. מעביר אותך לבחירת שעה פנויה');
+        const response = 'לא הצלחתי להבין את התאריך או השעה. מעביר אותך לבחירת שעה פנויה.';
+        showAssistantMessage(response);
+        speakText(response);
         scrollToBookingStep(3);
-        return;
+        return response;
     }
 
     const available = await checkVoiceAvailability(date, time);
@@ -2318,18 +2492,24 @@ async function handleVoiceTranscript(transcript) {
         setBookingTime(time);
         if (!topicText && commentsEl) commentsEl.value = '';
         setAssistantState('processing', 'מעדכן הזמנה...');
-        speakText(`מצוין, קבעתי לך שיעור ל${date} בשעה ${time}`);
-        showToast(`מצוין, קבעתי לך שיעור ל${date} בשעה ${time}`);
+        const response = `מצוין, קבעתי לך שיעור ל${date} בשעה ${time}.`;
+        showAssistantMessage(response);
+        speakText(response);
+        showToast(response);
         scrollToBookingStep(3);
         setTimeout(() => {
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 350);
+        return response;
     } else {
         setAssistantState('busy', 'תפוס - עובר ללוח השעות');
-        speakText('מצטער, השעה הזו תפוסה. מעביר אותך לבחירת שעה פנויה');
+        const response = 'מצטער, השעה הזו תפוסה. מעביר אותך לבחירת שעה פנויה.';
+        showAssistantMessage(response);
+        speakText(response);
         setBookingDate(date);
         scrollToBookingStep(3);
+        return response;
     }
 }
 
@@ -2386,6 +2566,41 @@ function toggleVoiceAssistant() {
     voiceActive = true;
     setAssistantState('listening', 'מקשיב...');
     voiceRecognition.start();
+}
+
+function handleAssistantTyping() {
+    const input = document.getElementById('assistantTextInput');
+    if (!input) return;
+    if (input.value.trim()) {
+        setAssistantState('typing', 'מקליד...');
+    } else if (voiceAssistantVisual.state === 'typing') {
+        clearAssistantState();
+    }
+}
+
+async function submitAssistantText() {
+    const input = document.getElementById('assistantTextInput');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    setAssistantState('processing', 'מעבד...');
+    showAssistantMessage(`שאלה כתובה:\n${text}`);
+    try {
+        const response = await handleVoiceTranscript(text);
+        if (response) showAssistantMessage(response);
+    } catch (err) {
+        console.error(err);
+        const response = 'אירעה שגיאה בעיבוד השאלה.';
+        showAssistantMessage(response);
+        speakText(response);
+    }
+}
+
+function handleAssistantTextKeydown(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        submitAssistantText();
+    }
 }
 
 function saveProfile(name, phone, email) {
@@ -2617,12 +2832,13 @@ function applyProfileToBookingForm() {
 
 function fetchMyLessons() {
     const profile = getProfile();
-    const phone = (profile ? profile.phone : '') || sessionPhone;
-    if (!phone) {
+    const user = firebase.auth().currentUser;
+    const phone = (profile && profile.phone) || sessionPhone;
+    if (!user && !phone) {
         showToast('נא להתחבר תחילה');
         return;
     }
-    sessionPhone = phone;
+    sessionPhone = phone || sessionPhone;
 
     const list = document.getElementById('lessonsList');
     const resultArea = document.getElementById('lessonsResult');
@@ -2634,11 +2850,21 @@ function fetchMyLessons() {
     resultArea.style.display = 'block';
     if (refreshBtn) refreshBtn.style.display = 'flex';
 
-    db.collection("bookings").where("phone", "==", phone).get().then(snap => {
-        const wb = document.getElementById('welcomeBanner');
-        if (snap.empty) {
-            list.innerHTML = '<div style="text-align:center; padding: 2rem; opacity:0.7">לא נמצאו שיעורים עתידיים למספר זה.</div>';
+    const wb = document.getElementById('welcomeBanner');
+    const query = user
+        ? db.collection("bookings").where("studentId", "==", user.uid).get()
+        : db.collection("bookings").where("phone", "==", phone).get();
+
+    query.then(snap => {
+        if (snap.empty && user && user.email) {
+            return db.collection("bookings").where("studentEmail", "==", user.email).get();
+        }
+        return snap;
+    }).then(snap => {
+        if (!snap || snap.empty) {
+            list.innerHTML = '<div style="text-align:center; padding: 2rem; opacity:0.7">לא נמצאו שיעורים עתידיים.</div>';
             if (wb) wb.style.display = 'none';
+            fetchStudentTasks();
             return;
         }
 
@@ -2652,8 +2878,9 @@ function fetchMyLessons() {
             lessons = lessons.filter(l => l.name && l.name.trim() === profile.name.trim());
         }
         if (lessons.length === 0) {
-            list.innerHTML = '<div style="text-align:center; padding: 2rem; opacity:0.7">לא נמצאו שיעורים עתידיים למספר זה.</div>';
+            list.innerHTML = '<div style="text-align:center; padding: 2rem; opacity:0.7">לא נמצאו שיעורים עתידיים.</div>';
             if (wb) wb.style.display = 'none';
+            fetchStudentTasks();
             return;
         }
 
@@ -2705,6 +2932,7 @@ function fetchMyLessons() {
             `;
         });
         list.innerHTML = html;
+        fetchStudentTasks();
     }).catch(err => {
         console.error(err);
         showToast('שגיאה בטעינת השיעורים');
@@ -2774,6 +3002,7 @@ function openStudentArea() {
         showLoggedInChip(profile.name, profile.phone);
         sessionPhone = profile.phone;
         fetchMyLessons();
+        fetchStudentTasks();
     } else {
         showAuthButtons();
     }
@@ -2832,6 +3061,169 @@ function logoutAdmin() {
 }
 
 let unsubBookings = null;
+let selectedTaskLesson = null;
+
+function getLessonEndDateTime(lesson) {
+  const endTime = lesson.endTime || (() => {
+    if (!lesson.time) return '';
+    const parts = lesson.time.split(':');
+    const endHour = String(parseInt(parts[0], 10) + (lesson.durationHours || 1)).padStart(2, '0');
+    return `${endHour}:${parts[1] || '00'}`;
+  })();
+  return lesson.date && endTime ? new Date(`${lesson.date}T${endTime}:00`) : null;
+}
+
+function isLessonPast(lesson) {
+  const endDate = getLessonEndDateTime(lesson);
+  if (!endDate) return false;
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jerusalem" }));
+  return now > endDate;
+}
+
+function openTaskModal(lesson) {
+  selectedTaskLesson = lesson;
+  document.getElementById('taskStudentName').value = lesson.name || '';
+  document.getElementById('taskLessonDetails').value = `${lesson.date || ''} ${lesson.time || ''} | ${lesson.subject || lesson.topic || ''}`;
+  document.getElementById('taskTitle').value = '';
+  document.getElementById('taskDescription').value = '';
+  document.getElementById('taskDueDate').value = '';
+  document.getElementById('taskFile').value = '';
+  document.getElementById('taskFileName').textContent = '';
+  document.getElementById('taskModal').style.display = 'flex';
+}
+
+function closeTaskModal() {
+  selectedTaskLesson = null;
+  document.getElementById('taskModal').style.display = 'none';
+}
+
+function handleTaskFileName() {
+  const input = document.getElementById('taskFile');
+  const fileNameEl = document.getElementById('taskFileName');
+  if (fileNameEl) fileNameEl.textContent = input && input.files && input.files[0] ? input.files[0].name : '';
+}
+
+async function uploadTaskAttachment(file, lesson) {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `task_attachments/${lesson.studentId || lesson.phone || 'unknown'}/${Date.now()}_${safeName}`;
+  const ref = storage.ref().child(path);
+  await ref.put(file);
+  return { fileUrl: await ref.getDownloadURL(), fileName: file.name };
+}
+
+async function saveAndSendTask() {
+  if (!selectedTaskLesson) return;
+  const title = document.getElementById('taskTitle').value.trim();
+  const description = document.getElementById('taskDescription').value.trim();
+  const dueDate = document.getElementById('taskDueDate').value || '';
+  const fileInput = document.getElementById('taskFile');
+  const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+  if (!title || !description) {
+    showToast('נא למלא כותרת ותיאור למשימה');
+    return;
+  }
+  try {
+    const currentUser = firebase.auth().currentUser;
+    const studentId = selectedTaskLesson.studentId || selectedTaskLesson.uid || selectedTaskLesson.phone || selectedTaskLesson.email || selectedTaskLesson.name;
+    const studentEmail = selectedTaskLesson.email || '';
+    let attachment = {};
+    if (file) attachment = await uploadTaskAttachment(file, { ...selectedTaskLesson, studentId });
+    const taskData = {
+      studentId,
+      studentEmail,
+      studentName: selectedTaskLesson.name || '',
+      lessonId: selectedTaskLesson.id || '',
+      lessonDate: selectedTaskLesson.date || '',
+      lessonTime: selectedTaskLesson.time || '',
+      taskTitle: title,
+      taskDescription: description,
+      fileUrl: attachment.fileUrl || '',
+      fileName: attachment.fileName || '',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'pending',
+      dueDate: dueDate || '',
+      createdBy: currentUser ? currentUser.uid : 'admin'
+    };
+    const docRef = await db.collection('tasks').add(taskData);
+    await db.collection('bookings').doc(selectedTaskLesson.id).set({ taskId: docRef.id }, { merge: true });
+    const emailBody = [
+      `היי ${selectedTaskLesson.name || ''},`,
+      'נוספה לך משימה חדשה בעקבות השיעור האחרון שלנו.',
+      attachment.fileUrl ? `צורף קובץ לצפייה: ${attachment.fileUrl}` : '',
+      'כנס לאזור האישי שלך באתר כדי לצפות במשימה ולהשלים אותה.'
+    ].filter(Boolean).join('\n\n');
+    emailjs.send("service_uiiqhnd", "template_e6swvbo", {
+      to_email: studentEmail,
+      student_name: selectedTaskLesson.name || '',
+      subject: 'מחכה לך משימה חדשה במתמטיקה! 📝',
+      message: emailBody,
+      task_title: title,
+      task_description: description,
+      file_url: attachment.fileUrl || ''
+    }, "JI7HdPnpg063aq0Pl").catch(err => console.error('Task email error:', err));
+    showToast('המשימה נשמרה ונשלחה לתלמיד');
+    closeTaskModal();
+    renderAdminBookings();
+    fetchStudentTasks();
+  } catch (err) {
+    console.error(err);
+    showToast('שגיאה בשמירת המשימה');
+  }
+}
+
+function markTaskCompleted(taskId) {
+  db.collection('tasks').doc(taskId).update({ status: 'completed', completedAt: firebase.firestore.FieldValue.serverTimestamp() })
+    .then(() => {
+      showToast('המשימה סומנה כהושלמה');
+      fetchStudentTasks();
+    })
+    .catch(() => showToast('שגיאה בעדכון המשימה'));
+}
+
+function fetchStudentTasks() {
+  const list = document.getElementById('studentTasksList');
+  const user = firebase.auth().currentUser;
+  if (!list) return;
+  if (!user) {
+    list.innerHTML = '<p style="color:var(--text-muted); text-align:center;">נא להתחבר כדי לצפות במשימות.</p>';
+    return;
+  }
+  list.innerHTML = '<p style="color:var(--text-muted); text-align:center;">טוען משימות...</p>';
+  db.collection('tasks').where('studentId', '==', user.uid).where('status', '==', 'pending').get()
+    .then(snapshot => {
+      const tasks = [];
+      snapshot.forEach(doc => tasks.push({ id: doc.id, ...doc.data() }));
+      tasks.sort((a, b) => {
+        const at = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+        const bt = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+        return bt - at;
+      });
+      if (!tasks.length) {
+        list.innerHTML = '<p style="color:var(--text-muted); text-align:center;">אין משימות פתוחות כרגע.</p>';
+        return;
+      }
+      list.innerHTML = '';
+      tasks.forEach(task => {
+        const card = document.createElement('div');
+        card.className = 'task-card';
+        card.innerHTML = `
+          <strong>${task.taskTitle || ''}</strong>
+          <div class="task-meta">${task.lessonDate || ''} ${task.lessonTime || ''}</div>
+          <div class="task-desc">${task.taskDescription || ''}</div>
+          ${task.fileUrl ? `<a class="btn btn-sm btn-outline" href="${task.fileUrl}" target="_blank" rel="noopener noreferrer">📄 לצפייה בקובץ המצורף</a>` : ''}
+          <div class="task-actions-row">
+            <button class="btn btn-sm" onclick="markTaskCompleted('${task.id}')">סימנתי כהושלם</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      list.innerHTML = '<p style="color:var(--text-muted); text-align:center;">שגיאה בטעינת המשימות.</p>';
+    });
+}
+
 function renderAdminBookings() {
   if (unsubBookings) unsubBookings();
   const list = document.getElementById('adminBookingsList');
@@ -2864,7 +3256,11 @@ function renderAdminBookings() {
               actionBtns = `<button class="btn btn-mini btn-outline" onclick="approveBookingDB('${doc.id}', this)">אשר שיעור</button>` + actionBtns;
           }
       }
-      div.innerHTML = `<div class="schedule-info"><strong>${b.name || ''} - ${b.phone || ''}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.lessonFormat || ''} | ${b.date || ''}, ${b.time || ''}</span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">${statusBadge}${actionBtns}</div>`;
+      const lessonPast = isLessonPast(b);
+      const taskBtn = lessonPast && b.status !== 'בוטל'
+        ? `<button class="btn btn-mini btn-outline" onclick='openTaskModal(${JSON.stringify(b).replace(/'/g, "&#39;")})'>הוסף משימה</button>`
+        : '';
+      div.innerHTML = `<div class="schedule-info"><strong>${b.name || ''} - ${b.phone || ''}</strong><span>${b.grade || ''} | ${b.subject || b.topic || ''} | ${b.lessonFormat || ''} | ${b.date || ''}, ${b.time || ''}</span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">${statusBadge}${taskBtn}${actionBtns}</div>`;
       list.appendChild(div);
     });
     if (snapshot.empty) list.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center">אין שיעורים עדיין</p>';
