@@ -742,8 +742,36 @@ body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
 /* ── NAV AUTH BUTTONS ────────────────────────────── */
 .nav-auth { display: flex; align-items: center; gap: 0.6rem; }
 .nav-auth .btn { padding: 0.45rem 1rem; font-size: 0.82rem; border-radius: 10px; }
-#navUserChip { display: none; align-items: center; gap: 0.5rem; color: var(--gold); font-weight: 700; font-size: 0.9rem; cursor: pointer; padding: 0.35rem 0.8rem; border: 1px solid var(--border-gold); border-radius: 20px; transition: background 0.2s; }
+#navUserChip {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--border-gold);
+  border-radius: 20px;
+  transition: background 0.2s;
+}
 #navUserChip:hover { background: rgba(201,168,76,0.08); }
+.student-auth-shell { display: flex; flex-direction: column; gap: 1rem; }
+.student-auth-status {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-gold);
+  background: rgba(201,168,76,0.08);
+}
+.student-auth-status .meta { display: flex; flex-direction: column; gap: 0.2rem; }
+.student-auth-status .meta span { color: var(--text-muted); font-size: 0.9rem; }
+.student-auth-status .meta strong { color: var(--gold); font-size: 1.05rem; }
+.google-auth-btn { display:flex; align-items:center; justify-content:center; gap:0.7rem; width:100%; }
+.google-auth-btn svg { width:18px; height:18px; }
 @media (max-width: 900px) { .nav-auth { display: none; } }
 
 /* Mobile user icon (visible on small screens only) */
@@ -802,9 +830,6 @@ body.light-mode #floatingContact .fc-copy svg { fill: #1a6b35; }
 #authButtons { text-align: center; }
 .auth-btn-row { display: flex; gap: 1rem; margin-top: 0.5rem; }
 .auth-btn-row .btn { flex: 1; }
-#loginForm, #registerForm {
-  animation: fadeSlide 0.3s ease;
-}
 .auth-back-btn {
   width: 100%; margin-top: 0.6rem;
   font-size: 0.85rem; opacity: 0.65;
@@ -881,6 +906,7 @@ input.field-locked {
 }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -891,8 +917,7 @@ input.field-locked {
     <div class="logo" id="adminTrigger">גבאי מתמטיקה</div>
     <div class="nav-auth" id="navAuth">
         <div id="navAuthButtons" style="display:flex; gap:0.6rem;">
-            <button class="btn btn-outline nav-auth-btn" onclick="navShowLogin()">התחברות</button>
-            <button class="btn nav-auth-btn" onclick="navShowRegister()">הרשמה</button>
+            <button class="btn btn-outline nav-auth-btn" onclick="navShowStudentAuth()">התחברות עם Google</button>
         </div>
         <div id="navUserChip" onclick="closeMenuAndOpenStudentArea()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -900,7 +925,7 @@ input.field-locked {
         </div>
     </div>
     </div>
-    <div id="mobileUserIcon" class="mobile-user-icon" onclick="closeMenu(); navShowRegister();" title="הרשמה">
+    <div id="mobileUserIcon" class="mobile-user-icon" onclick="closeMenu(); navShowStudentAuth();" title="התחברות">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="currentColor"/></svg>
     </div>
     <div class="hamburger" id="hamburgerBtn" onclick="toggleMenu()">
@@ -913,7 +938,7 @@ input.field-locked {
         <a href="javascript:void(0)" onclick="closeMenuAndOpenStudentArea()" id="navLessons">השיעורים שלי</a>
         <a href="javascript:void(0)" onclick="sidebarLogout()" id="navLogout" style="display:none; color:#f87171;">התנתק</a>
         <div class="sidebar-auth" id="sidebarAuthButtons">
-          <!-- Auth buttons removed from mobile sidebar per UI decision; mobile registration available via the top user icon -->
+          <button class="btn btn-outline" onclick="navShowStudentAuth()">התחברות עם Google</button>
         </div>
     </div>
     <motion class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></motion>
@@ -1075,7 +1100,6 @@ input.field-locked {
         <div class="glass form-container" style="max-width: 600px; margin: 0 auto;">
             <div id="welcomeBanner"></div>
             <div id="loginArea">
-                <!-- Logged-in chip: shown when profile exists in localStorage -->
                 <div id="loggedInChip">
                     <div>
                         <div class="profile-chip-name" id="loggedInName"></div>
@@ -1083,41 +1107,9 @@ input.field-locked {
                     </div>
                     <button class="btn btn-outline" onclick="logoutProfile()" style="padding: 0.5rem 1rem; font-size: 0.82rem; white-space: nowrap;">התנתק / החלף משתמש</button>
                 </div>
-                <!-- Auth buttons: entry point when no profile -->
                 <div id="authButtons">
-                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">כדי לצפות בשיעורים שלך, התחבר או הירשם:</p>
-                    <div class="auth-btn-row">
-                        <button class="btn" onclick="showLoginForm()">התחברות</button>
-                        <button class="btn btn-outline" onclick="showRegisterForm()">הרשמה</button>
-                    </div>
-                </div>
-                <!-- Login form: phone only -->
-                <div id="loginForm" style="display:none;">
-                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הזן את מספר הטלפון שלך:</p>
-                    <div class="input-group">
-                        <label>מספר טלפון</label>
-                        <input type="tel" id="loginPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') submitLogin()">
-                    </div>
-                    <button class="btn" onclick="submitLogin()" style="width:100%; margin-top:1rem;">כניסה</button>
-                    <button class="btn btn-outline auth-back-btn" onclick="showAuthButtons()">חזרה</button>
-                </div>
-                <!-- Register form: name + phone -->
-                <div id="registerForm" style="display:none;">
-                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">הרשמה ראשונה — מלא את הפרטים:</p>
-                    <div class="input-group">
-                        <label>שם מלא</label>
-                        <input type="text" id="regName" placeholder="ישראל ישראלי" onkeydown="if(event.key==='Enter') document.getElementById('regPhone').focus()">
-                    </div>
-                    <div class="input-group" style="margin-top:1rem;">
-                        <label>מספר טלפון</label>
-                        <input type="tel" id="regPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') document.getElementById('regEmail').focus()">
-                    </div>
-                    <div class="input-group" style="margin-top:1rem;">
-                        <label>כתובת אימייל (לתזכורות)</label>
-                        <input type="email" id="regEmail" placeholder="example@email.com" onkeydown="if(event.key==='Enter') submitRegister()">
-                    </div>
-                    <button class="btn" onclick="submitRegister()" style="width:100%; margin-top:1rem;">הרשמה והתחברות</button>
-                    <button class="btn btn-outline auth-back-btn" onclick="showAuthButtons()">חזרה</button>
+                    <p style="margin-bottom: 1.5rem; text-align: center; opacity: 0.8;">כדי לצפות בשיעורים שלך, התחבר באמצעות Google:</p>
+                    <button class="btn google-auth-btn" onclick="navShowStudentAuth()">Sign in with Google</button>
                 </div>
             </div>
             <div id="lessonsResult" style="display: none; margin-top: 1rem;">
@@ -1256,35 +1248,26 @@ input.field-locked {
 
 <div id="student-auth-modal" onclick="if(event.target===this) closeStudentAuthModal()">
     <div class="confirm-box" style="max-width:440px; width:92%; text-align:right; padding:2rem 2.2rem;">
-        <!-- Login panel -->
-        <div id="modal-login-panel">
-            <h3 style="color:var(--gold); margin-bottom:1.8rem; font-size:1.6rem;">התחברות</h3>
-            <div class="input-group">
-                <label>מספר טלפון</label>
-                <input type="tel" id="modalLoginPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') modalSubmitLogin()">
+        <div class="student-auth-shell">
+            <h3 style="color:var(--gold); margin-bottom:0.4rem; font-size:1.6rem;">התחברות תלמידים</h3>
+            <p style="color:var(--text-muted); line-height:1.7;">התחברות מתבצעת רק באמצעות Google Sign-In דרך Firebase Authentication.</p>
+            <div id="studentAuthStatus" class="student-auth-status">
+                <div class="meta">
+                    <strong id="studentAuthName">-</strong>
+                    <span id="studentAuthEmail">-</span>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="logoutProfile()">Logout</button>
             </div>
-            <button class="btn" onclick="modalSubmitLogin()" style="width:100%; margin-top:0.5rem;">כניסה</button>
-            <p style="text-align:center; margin-top:1.2rem; font-size:0.9rem; opacity:0.7;">אין לך חשבון? <span onclick="showModalRegister()" style="color:var(--gold); cursor:pointer; text-decoration:underline;">הירשם כאן</span></p>
-            <button class="btn btn-outline" onclick="closeStudentAuthModal()" style="width:100%; margin-top:0.8rem; font-size:0.85rem; opacity:0.65;">סגור</button>
-        </div>
-        <!-- Register panel -->
-        <div id="modal-register-panel" style="display:none;">
-            <h3 style="color:var(--gold); margin-bottom:1.8rem; font-size:1.6rem;">הרשמה</h3>
-            <div class="input-group">
-                <label>שם מלא</label>
-                <input type="text" id="modalRegName" placeholder="ישראל ישראלי" onkeydown="if(event.key==='Enter') document.getElementById('modalRegPhone').focus()">
-            </div>
-            <div class="input-group">
-                <label>מספר טלפון</label>
-                <input type="tel" id="modalRegPhone" placeholder="050-0000000" onkeydown="if(event.key==='Enter') document.getElementById('modalRegEmail').focus()">
-            </div>
-            <div class="input-group">
-                <label>כתובת אימייל לתזכורות</label>
-                <input type="email" id="modalRegEmail" placeholder="example@email.com" onkeydown="if(event.key==='Enter') modalSubmitRegister()">
-            </div>
-            <button class="btn" onclick="modalSubmitRegister()" style="width:100%; margin-top:0.5rem;">הרשמה</button>
-            <p style="text-align:center; margin-top:1.2rem; font-size:0.9rem; opacity:0.7;">כבר רשום? <span onclick="showModalLogin()" style="color:var(--gold); cursor:pointer; text-decoration:underline;">התחבר כאן</span></p>
-            <button class="btn btn-outline" onclick="closeStudentAuthModal()" style="width:100%; margin-top:0.8rem; font-size:0.85rem; opacity:0.65;">סגור</button>
+            <button class="btn google-auth-btn" onclick="signInWithGoogle()">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                    <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.652 32.657 29.266 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.008 6.053 29.319 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.651-.389-3.917z"/>
+                    <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.008 6.053 29.319 4 24 4c-7.682 0-14.308 4.337-17.694 10.691z"/>
+                    <path fill="#4CAF50" d="M24 44c5.226 0 9.915-1.993 13.478-5.237l-6.218-5.243C29.19 35.091 26.751 36 24 36c-5.245 0-9.618-3.327-11.303-7.946l-6.521 5.025C9.526 39.556 16.227 44 24 44z"/>
+                    <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-1.015 2.793-2.992 5.102-5.543 6.52l.004-.003 6.218 5.243C35.536 39.78 44 34 44 24c0-1.341-.138-2.651-.389-3.917z"/>
+                </svg>
+                Sign in with Google
+            </button>
+            <button class="btn btn-outline" onclick="closeStudentAuthModal()" style="width:100%; margin-top:0.2rem; font-size:0.85rem; opacity:0.65;">סגור</button>
         </div>
     </div>
 </div>
@@ -1313,9 +1296,11 @@ const firebaseConfig = {
   measurementId: "G-QJC05YG855"
 };
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.firestore();
-
-const CLIENT_ID = '214964095575-gyhepg783bst139k1kcrolrp7qjpam9f.apps.googleusercontent.com';
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 // Admin credentials for auto-bypass
 const ADMIN_CREDENTIALS = {
@@ -1330,6 +1315,7 @@ window.scrollTo(0, 0);
 let weeklyChartInstance = null;
 let topicChartInstance = null;
 let currentWeekOffset = 0;
+let currentFirebaseUser = null;
 function changeWeek(offset) {
     if (offset === 0) currentWeekOffset = 0;
     else currentWeekOffset += offset;
@@ -1339,7 +1325,6 @@ function changeWeek(offset) {
 const MOON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
 const SUN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
 
-let tokenClient;
 window.onload = function() {
     updateTopics('');
     const btn = document.getElementById('themeToggle');
@@ -1349,17 +1334,6 @@ window.onload = function() {
     } else {
         btn.innerHTML = MOON_SVG;
     }
-    if (window.google) {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/calendar.events',
-            callback: (tokenResponse) => {
-                console.log('OAuth Token Response:', tokenResponse);
-            },
-        });
-    }
-
-    // Pre-fill and lock booking form if profile exists
     applyProfileToBookingForm();
     updateNavAuth();
 
@@ -1376,17 +1350,6 @@ window.onload = function() {
         }
     });
 
-    // Enter-key chain: Name → Phone → Email → Next
-    document.getElementById('fname').addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('fphone').focus(); }
-    });
-    document.getElementById('fphone').addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('femail').focus(); }
-    });
-    document.getElementById('femail').addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); nextStep(2); }
-    });
-
     // Nav active state on scroll
     const sections = document.querySelectorAll('section[id]');
     const navLinks = { 'hero': 'navHome', 'book': 'navBook' };
@@ -1401,6 +1364,11 @@ window.onload = function() {
     }, { threshold: 0.4 });
     sections.forEach(s => scrollObserver.observe(s));
 };
+
+auth.onAuthStateChanged((user) => {
+    currentFirebaseUser = user || null;
+    syncStudentAuthState(user);
+});
 
 function formatTimeSlot(timeStr) {
     const [hour, minute] = timeStr.split(':').map(Number);
@@ -1855,10 +1823,12 @@ function buildGCalLink(b) {
 }
 
 function getProfile() {
-    const name = localStorage.getItem('gabay_name');
-    const phone = localStorage.getItem('gabay_phone');
-    const email = localStorage.getItem('gabay_email') || '';
-    return (name && phone) ? { name, phone, email } : null;
+    if (!currentFirebaseUser) return null;
+    return {
+        name: currentFirebaseUser.displayName || 'תלמיד',
+        email: currentFirebaseUser.email || '',
+        uid: currentFirebaseUser.uid
+    };
 }
 
 function getBookingIdentity() {
@@ -1867,46 +1837,40 @@ function getBookingIdentity() {
     const phoneEl = document.getElementById('fphone');
     const emailEl = document.getElementById('femail');
     return {
-        name: (nameEl && nameEl.value.trim()) || (profile && profile.name) || '',
-        phone: (phoneEl && phoneEl.value.trim()) || (profile && profile.phone) || '',
-        email: (emailEl && emailEl.value.trim()) || (profile && profile.email) || ''
+        name: (profile && profile.name) || (nameEl && nameEl.value.trim()) || '',
+        phone: (phoneEl && phoneEl.value.trim()) || '',
+        email: (profile && profile.email) || (emailEl && emailEl.value.trim()) || ''
     };
 }
 
 function saveProfile(name, phone, email) {
-    // Sanitize phone for storage
-    const sanitizedPhone = sanitizePhoneNumber(phone);
-    localStorage.setItem('gabay_name', name);
-    localStorage.setItem('gabay_phone', sanitizedPhone);
-    if (email) localStorage.setItem('gabay_email', email);
+    if (currentFirebaseUser) {
+        db.collection('users').doc(currentFirebaseUser.uid).set({
+            name: name || currentFirebaseUser.displayName || '',
+            email: email || currentFirebaseUser.email || '',
+            role: 'student',
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(err => console.error('Error saving user profile:', err));
+    }
     applyProfileToBookingForm();
     updateNavAuth();
 }
 
 // Save user registration to Firebase
 function saveUserToFirebase(name, phone, email) {
-    const sanitizedPhone = sanitizePhoneNumber(phone);
-    
+    if (!currentFirebaseUser) return Promise.resolve();
     const userData = {
-        name: name,
-        phone: sanitizedPhone,
-        email: email || '',
+        name: name || currentFirebaseUser.displayName || '',
+        email: email || currentFirebaseUser.email || '',
         role: 'student',
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         lastLogin: firebase.firestore.FieldValue.serverTimestamp()
     };
-    
-    return db.collection('users').doc(sanitizedPhone).set(userData, { merge: true })
-        .catch(err => {
-            console.error('Error saving user to Firebase:', err);
-            throw err;
-        });
+    return db.collection('users').doc(currentFirebaseUser.uid).set(userData, { merge: true });
 }
 
 function clearProfile() {
-    localStorage.removeItem('gabay_name');
-    localStorage.removeItem('gabay_phone');
-    localStorage.removeItem('gabay_email');
+    return auth.signOut();
 }
 
 function updateNavAuth() {
@@ -1928,30 +1892,61 @@ function updateNavAuth() {
     }
 }
 
+function syncStudentAuthState(user) {
+    const status = document.getElementById('studentAuthStatus');
+    const nameEl = document.getElementById('studentAuthName');
+    const emailEl = document.getElementById('studentAuthEmail');
+    const loginArea = document.getElementById('loginArea');
+    const authButtons = document.getElementById('authButtons');
+    const loggedInChip = document.getElementById('loggedInChip');
+    const profile = user ? {
+        name: user.displayName || 'תלמיד',
+        email: user.email || ''
+    } : null;
+
+    if (profile) {
+        if (status) status.style.display = 'flex';
+        if (nameEl) nameEl.textContent = profile.name;
+        if (emailEl) emailEl.textContent = profile.email;
+        if (authButtons) authButtons.style.display = 'none';
+        if (loggedInChip) loggedInChip.style.display = 'flex';
+        updateNavAuth();
+        applyProfileToBookingForm();
+        return;
+    }
+
+    if (status) status.style.display = 'none';
+    if (nameEl) nameEl.textContent = '-';
+    if (emailEl) emailEl.textContent = '-';
+    if (authButtons) authButtons.style.display = 'block';
+    if (loggedInChip) loggedInChip.style.display = 'none';
+    if (loginArea) loginArea.style.display = 'block';
+    updateNavAuth();
+    applyProfileToBookingForm();
+}
+
 function sidebarShowLogin() {
     closeMenu();
-    navShowLogin();
+    navShowStudentAuth();
 }
 
 function sidebarShowRegister() {
     closeMenu();
-    navShowRegister();
+    navShowStudentAuth();
 }
 
 function navShowLogin() {
-    if (getProfile()) { openStudentArea(); return; }
-    document.getElementById('modal-login-panel').style.display = 'block';
-    document.getElementById('modal-register-panel').style.display = 'none';
-    document.getElementById('student-auth-modal').style.display = 'flex';
-    setTimeout(() => { const el = document.getElementById('modalLoginPhone'); if(el) el.focus(); }, 80);
+    navShowStudentAuth();
 }
 
 function navShowRegister() {
+    navShowStudentAuth();
+}
+
+function navShowStudentAuth() {
     if (getProfile()) { openStudentArea(); return; }
-    document.getElementById('modal-login-panel').style.display = 'none';
-    document.getElementById('modal-register-panel').style.display = 'block';
     document.getElementById('student-auth-modal').style.display = 'flex';
-    setTimeout(() => { const el = document.getElementById('modalRegName'); if(el) el.focus(); }, 80);
+    syncStudentAuthState(currentFirebaseUser);
 }
 
 // Sanitize phone number: remove spaces, dashes, and convert +972 to 0
@@ -1967,100 +1962,30 @@ function sanitizePhoneNumber(phone) {
 }
 
 function showModalLogin() {
-    document.getElementById('modal-login-panel').style.display = 'block';
-    document.getElementById('modal-register-panel').style.display = 'none';
-    setTimeout(() => document.getElementById('modalLoginPhone').focus(), 80);
+    navShowStudentAuth();
 }
 
 function showModalRegister() {
-    document.getElementById('modal-login-panel').style.display = 'none';
-    document.getElementById('modal-register-panel').style.display = 'block';
-    setTimeout(() => document.getElementById('modalRegName').focus(), 80);
+    navShowStudentAuth();
 }
 
 function closeStudentAuthModal() {
     document.getElementById('student-auth-modal').style.display = 'none';
 }
 
-function modalSubmitLogin() {
-    const phoneInput = document.getElementById('modalLoginPhone').value.trim();
-    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
-    
-    const phone = sanitizePhoneNumber(phoneInput);
-    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
-
-    // Try to find user in users collection first (registered users)
-    db.collection('users').doc(phone).get().then(doc => {
-        if (doc.exists) {
-            const userData = doc.data();
-            const name = userData.name || '';
-            const email = userData.email || '';
-            saveProfile(name, phone, email);
-            sessionPhone = phone;
+function signInWithGoogle() {
+    auth.signInWithPopup(googleProvider)
+        .then((result) => {
+            currentFirebaseUser = result.user;
+            syncStudentAuthState(result.user);
+            saveUserToFirebase(result.user.displayName || '', '', result.user.email || '');
             closeStudentAuthModal();
-            showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-            document.getElementById('modalLoginPhone').value = '';
-            return;
-        }
-        
-        // If not in users collection, search bookings collection
-        db.collection('bookings').get().then(snap => {
-            let foundLesson = null;
-            snap.forEach(docSnap => {
-                const data = docSnap.data();
-                if (data.phone && sanitizePhoneNumber(data.phone) === phone) {
-                    if (!foundLesson || new Date(data.date + 'T' + data.time) > new Date(foundLesson.date + 'T' + foundLesson.time)) {
-                        foundLesson = data;
-                    }
-                }
-            });
-            
-            if (foundLesson) {
-                const name = foundLesson.name || '';
-                const email = foundLesson.email || '';
-                saveProfile(name, phone, email);
-                sessionPhone = phone;
-                closeStudentAuthModal();
-                showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-                document.getElementById('modalLoginPhone').value = '';
-            } else {
-                showToast('מספר לא נמצא — עבור להרשמה');
-                showModalRegister();
-            }
-        }).catch(err => {
-            console.error('Error searching bookings:', err);
-            showToast('שגיאה בכניסה, נסה שוב');
-        });
-    }).catch(err => {
-        console.error('Error fetching user:', err);
-        showToast('שגיאה בכניסה, נסה שוב');
-    });
-}
-
-function modalSubmitRegister() {
-    const name = document.getElementById('modalRegName').value.trim();
-    const phoneInput = document.getElementById('modalRegPhone').value.trim();
-    const email = document.getElementById('modalRegEmail').value.trim();
-    
-    if (!name) { showToast('נא להזין שם'); return; }
-    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
-    if (!email) { showToast('נא להזין כתובת אימייל'); return; }
-    
-    const phone = sanitizePhoneNumber(phoneInput);
-    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
-    
-    // Save to Firebase first, then localStorage
-    saveUserToFirebase(name, phone, email)
-        .then(() => {
-            saveProfile(name, phone, email);
-            sessionPhone = phone;
-            closeStudentAuthModal();
-            showToast('שלום ' + name + '! נרשמת בהצלחה');
-            document.getElementById('modalRegName').value = '';
-            document.getElementById('modalRegPhone').value = '';
-            document.getElementById('modalRegEmail').value = '';
+            showToast('שלום ' + (result.user.displayName || 'תלמיד') + '!');
         })
-        .catch(() => showToast('שגיאה בהרשמה, נסה שוב'));
+        .catch((err) => {
+            console.error('Google sign-in failed:', err);
+            showToast('התחברות עם Google נכשלה, נסה שוב');
+        });
 }
 
 function sidebarLogout() {
@@ -2071,113 +1996,34 @@ function sidebarLogout() {
 /* ── Auth screen navigation ── */
 function showAuthButtons() {
     document.getElementById('authButtons').style.display = 'block';
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'none';
     document.getElementById('loggedInChip').style.display = 'none';
     updateNavAuth();
 }
 
 function showLoginForm() {
-    document.getElementById('authButtons').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('registerForm').style.display = 'none';
-    setTimeout(() => { const el = document.getElementById('loginPhone'); if (el) el.focus(); }, 80);
+    navShowStudentAuth();
 }
 
 function showRegisterForm() {
-    document.getElementById('authButtons').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'block';
-    setTimeout(() => { const el = document.getElementById('regName'); if (el) el.focus(); }, 80);
+    navShowStudentAuth();
 }
 
 function showLoggedInChip(name, phone) {
     document.getElementById('authButtons').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'none';
     const chip = document.getElementById('loggedInChip');
     chip.style.display = 'flex';
     document.getElementById('loggedInName').textContent = name;
-    document.getElementById('loggedInPhone').textContent = phone;
+    document.getElementById('loggedInPhone').textContent = phone || '';
     updateNavAuth();
 }
 
 /* ── Auth actions ── */
 function submitLogin() {
-    const phoneInput = document.getElementById('loginPhone').value.trim();
-    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
-    
-    const phone = sanitizePhoneNumber(phoneInput);
-    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
-
-    // Try to find user in users collection first (registered users)
-    db.collection('users').doc(phone).get().then(doc => {
-        if (doc.exists) {
-            const userData = doc.data();
-            const name = userData.name || '';
-            const email = userData.email || '';
-            saveProfile(name, phone, email);
-            sessionPhone = phone;
-            showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-            showLoggedInChip(name, phone);
-            fetchMyLessons();
-            return;
-        }
-        
-        // If not in users collection, search bookings collection
-        db.collection('bookings').get().then(snap => {
-            let foundLesson = null;
-            snap.forEach(docSnap => {
-                const data = docSnap.data();
-                if (data.phone && sanitizePhoneNumber(data.phone) === phone) {
-                    if (!foundLesson || new Date(data.date + 'T' + data.time) > new Date(foundLesson.date + 'T' + foundLesson.time)) {
-                        foundLesson = data;
-                    }
-                }
-            });
-            
-            if (foundLesson) {
-                const name = foundLesson.name || '';
-                const email = foundLesson.email || '';
-                saveProfile(name, phone, email);
-                sessionPhone = phone;
-                showToast('שלום ' + name + '! כניסה בוצעה בהצלחה');
-                showLoggedInChip(name, phone);
-                fetchMyLessons();
-            } else {
-                showToast('מספר לא נמצא, אנא הירשם קודם');
-            }
-        }).catch(err => {
-            console.error('Error searching bookings:', err);
-            showToast('שגיאה בכניסה, נסה שוב');
-        });
-    }).catch(err => {
-        console.error('Error fetching user:', err);
-        showToast('שגיאה בכניסה, נסה שוב');
-    });
+    navShowStudentAuth();
 }
 
 function submitRegister() {
-    const name = document.getElementById('regName').value.trim();
-    const phoneInput = document.getElementById('regPhone').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    
-    if (!name) { showToast('נא להזין שם'); return; }
-    if (!phoneInput) { showToast('נא להזין מספר טלפון'); return; }
-    
-    const phone = sanitizePhoneNumber(phoneInput);
-    if (!phone) { showToast('מספר טלפון לא תקין'); return; }
-    
-    // Save to Firebase first, then localStorage
-    saveUserToFirebase(name, phone, email || '')
-        .then(() => {
-            saveProfile(name, phone, email || '');
-            sessionPhone = phone;
-            showToast('שלום ' + name + '! נרשמת בהצלחה');
-            showLoggedInChip(name, phone);
-            fetchMyLessons();
-        })
-        .catch(() => showToast('שגיאה בהרשמה, נסה שוב'));
+    navShowStudentAuth();
 }
 
 function logoutProfile() {
@@ -2207,21 +2053,17 @@ function applyProfileToBookingForm() {
     if (!nameInput || !phoneInput) return;
 
     if (profile) {
-        // Fill hidden inputs so confirmBooking() can read them
         nameInput.value = profile.name;
-        phoneInput.value = profile.phone;
-        if (emailInput && profile.email) emailInput.value = profile.email;
+        if (profile.email && emailInput) emailInput.value = profile.email;
 
-        // Hide the full identity fields, show compact summary
         if (identityFields) identityFields.style.display = 'none';
         if (summaryBar) {
             summaryBar.style.display = 'flex';
             document.getElementById('psbName').textContent = profile.name;
-            document.getElementById('psbPhone').textContent = profile.phone + (profile.email ? ' · ' + profile.email : '');
+            document.getElementById('psbPhone').textContent = profile.email || '';
         }
     } else {
         nameInput.value = '';
-        phoneInput.value = '';
         if (emailInput) emailInput.value = '';
         if (identityFields) identityFields.style.display = 'block';
         if (summaryBar) summaryBar.style.display = 'none';
